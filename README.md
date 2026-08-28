@@ -50,6 +50,10 @@ Then `DATABASE_URL="mongodb://localhost:27018/freewill?replicaSet=rs0&directConn
 
 Atlas clusters are replica sets already. Use the `mongodb+srv://` connection string.
 
+## Databases per environment
+
+`.env` holds two connection strings: `DATABASE_URL_DEV` (used by `next dev`) and `DATABASE_URL_PROD` (used by `next build` / `next start`). The app chooses by `NODE_ENV` in [src/lib/db.ts](src/lib/db.ts). The Prisma CLI reads plain `DATABASE_URL`, which you keep pointed at dev; `npm run db:push:prod` and `npm run db:studio:prod` run the CLI against the prod URL. There is deliberately no `db:seed:prod`: the seed is demo data.
+
 ## Scripts
 
 | Script | What |
@@ -57,7 +61,7 @@ Atlas clusters are replica sets already. Use the `mongodb+srv://` connection str
 | `npm run dev` | Dev server |
 | `npm run build` / `start` | Production |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run db:push` | Sync schema to MongoDB |
+| `npm run db:push` / `db:push:prod` | Sync schema to the dev / prod MongoDB |
 | `npm run db:seed` | Seed data |
 | `npm run db:studio` | Prisma Studio |
 | `npm run db:local` / `db:rs-init` | Project-local mongod replica set on :27018, then initiate it once |

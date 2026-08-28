@@ -2,8 +2,8 @@
 // Needed once for a fresh `mongod --replSet rs0` (docker compose does this via its healthcheck).
 import { PrismaClient } from "@prisma/client";
 
-const raw = process.env.DATABASE_URL;
-if (!raw) throw new Error("DATABASE_URL is not set");
+const raw = process.env.DATABASE_URL_DEV || process.env.DATABASE_URL;
+if (!raw) throw new Error("DATABASE_URL_DEV is not set");
 const u = new URL(raw);
 u.searchParams.delete("replicaSet"); // cannot use replicaSet discovery before the set exists
 u.searchParams.set("directConnection", "true");

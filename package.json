@@ -17,7 +17,9 @@
     "demurrage": "tsx --env-file=.env scripts/demurrage.ts",
     "smoke": "tsx --env-file=.env scripts/ledger-smoke.ts",
     "smoke:rcv": "tsx --env-file=.env scripts/rcv-check.ts",
-    "smoke:theme": "tsx scripts/theme-check.ts"
+    "smoke:theme": "tsx scripts/theme-check.ts",
+    "db:push:prod": "node scripts/prisma-prod.mjs db push",
+    "db:studio:prod": "node scripts/prisma-prod.mjs studio"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

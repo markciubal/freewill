@@ -1,9 +1,7 @@
 // Seed a small valley so the skeleton has something to show.
 // Everyone's password is "freewill123". Run: npm run db:seed
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-
-const db = new PrismaClient();
+import { db } from "../src/lib/db";
 const PASSWORD = "freewill123";
 
 async function main() {
