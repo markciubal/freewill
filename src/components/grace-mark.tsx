@@ -15,7 +15,7 @@ export const GRACE_PATHS = {
   ],
   olives: [
     { cx: 9.4, cy: 19.3, r: 2.3 },
-    { cx: 14.7, cy: 17.6, r: 1.9 },
+    { cx: 13.4, cy: 12.5, r: 1.9 },
   ],
   gap: 1,
 };
@@ -41,7 +41,7 @@ export function GraceMark({ size = "1em", title = "Grace", className = "", ...pr
       <title>{title}</title>
       <defs>
         <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-          <rect width="24" height="24" fill="white" />
+          <rect width="24" height="24" fill="white" stroke="none" />
           {olives.map((o, i) => <circle key={i} cx={o.cx} cy={o.cy} r={o.r + gap} fill="black" stroke="none" />)}
         </mask>
       </defs>

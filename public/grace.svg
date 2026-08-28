@@ -2,9 +2,9 @@
   <title>Grace</title>
   <defs>
     <mask id="grace-gap" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-      <rect width="24" height="24" fill="white"/>
+      <rect width="24" height="24" fill="white" stroke="none"/>
       <circle cx="9.4" cy="19.3" r="3.3" fill="black" stroke="none"/>
-      <circle cx="14.7" cy="17.6" r="2.9" fill="black" stroke="none"/>
+      <circle cx="13.4" cy="12.5" r="2.9" fill="black" stroke="none"/>
     </mask>
   </defs>
   <g mask="url(#grace-gap)">
@@ -14,5 +14,5 @@
     <path d="M12 8.4 C 9.1 8.4, 7.1 6.2, 7.5 3.4 C 10.3 3.7, 12.2 5.8, 12 8.4 Z" fill="currentColor" stroke="none"/>
   </g>
   <circle cx="9.4" cy="19.3" r="2.3"/>
-  <circle cx="14.7" cy="17.6" r="1.9"/>
+  <circle cx="13.4" cy="12.5" r="1.9"/>
 </svg>
