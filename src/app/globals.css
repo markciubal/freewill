@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/* Defaults. A person's saved theme (see /theme) overrides these custom
+   properties with an inline <style> in the root layout. */
+:root {
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-size: 16px;
+  --radius: 8px;
+  --content-width: 64rem;
+
+  --background: #f7f5ef;
+  --foreground: #1c1a17;
+  --muted: #6b665c;
+  --card: #ffffff;
+  --border: #e3ded2;
+  --accent: #3f6b3a;
+  --accent-foreground: #ffffff;
+  --danger: #a33a2a;
+  --warn: #b7791f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #14130f;
+    --foreground: #ebe7dc;
+    --muted: #a39d8f;
+    --card: #1e1c17;
+    --border: #2f2c25;
+    --accent: #7fb377;
+    --accent-foreground: #0f1a0e;
+    --danger: #e0715f;
+    --warn: #e2b04a;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #14130f;
+  --foreground: #ebe7dc;
+  --muted: #a39d8f;
+  --card: #1e1c17;
+  --border: #2f2c25;
+  --accent: #7fb377;
+  --accent-foreground: #0f1a0e;
+  --danger: #e0715f;
+  --warn: #e2b04a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+code, pre, kbd, .font-mono {
+  font-family: var(--font-mono);
+}

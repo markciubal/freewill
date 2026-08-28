@@ -1,0 +1,323 @@
+// Freewill -- data model for a stateless, covenant-bound society.
+// MongoDB via Prisma. Every collection is owned by people, not an authority.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// --- People -----------------------------------------------------------------
+
+model User {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  username           String   @unique
+  passwordHash       String
+  displayName        String?
+  bio                String?
+  locality           String // set once at join, never changed: neighborhood, valley, block, mesh node...
+  // A pin chosen on a map at join, rounded to ~100 m. Never shown to others as
+  // a point, only as a distance. No address, no GPS unless the person asks.
+  lat                Float
+  lng                Float
+  skills             String[] @default([])
+  covenantAcceptedAt DateTime
+  // Mutual-credit balances. Sum across all users is always 0 for each ledger.
+  graceBalance       Int      @default(0) // Grace (GRC), whole units
+  hoursBalance       Int      @default(0) // Hours, stored in minutes
+  // Personal look: CSS custom properties, validated in src/lib/theme.ts. Nobody sets it for anyone else.
+  theme              Json?
+  createdAt          DateTime @default(now())
+
+  vouchesGiven    Vouch[]            @relation("VouchFrom")
+  vouchesReceived Vouch[]            @relation("VouchTo")
+  listings        Listing[]
+  pledges         Pledge[]
+  transfersOut    Transfer[]         @relation("TransferFrom")
+  transfersIn     Transfer[]         @relation("TransferTo")
+  stewardships    Commons[]
+  circlesRaised   Circle[]           @relation("CircleRaisedBy")
+  circlesAbout    Circle[]           @relation("CircleAbout")
+  bulletins       Bulletin[]
+  adjustments     LedgerAdjustment[]
+  proposals       Proposal[]
+  ballots         Ballot[]
+}
+
+// A vouch is the atom of trust. Standing is derived from the web of vouches,
+// never granted by an office.
+model Vouch {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  fromId    String   @db.ObjectId
+  toId      String   @db.ObjectId
+  note      String?
+  createdAt DateTime @default(now())
+
+  from User @relation("VouchFrom", fields: [fromId], references: [id])
+  to   User @relation("VouchTo", fields: [toId], references: [id])
+
+  @@unique([fromId, toId])
+  @@index([toId])
+  @@index([fromId])
+}
+
+// --- Exchange: barter board -------------------------------------------------
+
+enum ListingKind {
+  OFFER
+  NEED
+}
+
+enum Category {
+  FOOD
+  WATER
+  SHELTER
+  MEDICAL
+  SAFETY
+  ENERGY
+  TOOLS
+  TRANSPORT
+  SKILLS
+  CARE
+  KNOWLEDGE
+  OTHER
+}
+
+enum ListingStatus {
+  OPEN
+  MATCHED
+  FULFILLED
+  WITHDRAWN
+}
+
+model Listing {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  kind          ListingKind
+  category      Category
+  title         String
+  description   String
+  quantity      String? // "3 jars", "2 hrs/week", "one room"
+  wantsInReturn String? // pure barter: what would you accept?
+  priceGrace    Int? // optional Grace ask
+  priceHours    Int? // optional Hours ask, in minutes
+  locality      String?
+  lat           Float? // copied from the owner at creation
+  lng           Float?
+  status        ListingStatus @default(OPEN)
+  ownerId       String        @db.ObjectId
+  createdAt     DateTime      @default(now())
+  fulfilledAt   DateTime?
+
+  owner     User       @relation(fields: [ownerId], references: [id])
+  pledges   Pledge[]
+  transfers Transfer[]
+
+  @@index([kind, status, createdAt])
+  @@index([ownerId])
+}
+
+enum PledgeStatus {
+  OFFERED
+  ACCEPTED
+  COMPLETED
+  DECLINED
+}
+
+// A pledge is "I will meet this need / take this offer". Kept pledges raise standing.
+model Pledge {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  listingId String       @db.ObjectId
+  userId    String       @db.ObjectId
+  message   String?
+  status    PledgeStatus @default(OFFERED)
+  createdAt DateTime     @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([listingId])
+  @@index([userId])
+}
+
+// --- Exchange: ledgers ------------------------------------------------------
+
+enum Ledger {
+  GRACE // mutual credit, value-priced
+  HOURS // time bank: one hour == one hour, for everyone
+}
+
+model Transfer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  ledger    Ledger
+  fromId    String   @db.ObjectId
+  toId      String   @db.ObjectId
+  amount    Int // GRC units, or minutes for HOURS
+  memo      String?
+  listingId String?  @db.ObjectId
+  createdAt DateTime @default(now())
+
+  from    User     @relation("TransferFrom", fields: [fromId], references: [id])
+  to      User     @relation("TransferTo", fields: [toId], references: [id])
+  listing Listing? @relation(fields: [listingId], references: [id])
+
+  @@index([fromId, createdAt])
+  @@index([toId, createdAt])
+}
+
+// --- Commons ----------------------------------------------------------------
+
+// Shared things with a steward, not an owner: a well, a tool library, a seed bank.
+model Commons {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  category    Category
+  rules       String? // how to use it well, agreed by those who use it
+  locality    String?
+  lat         Float?
+  lng         Float?
+  available   Boolean  @default(true)
+  stewardId   String   @db.ObjectId
+  createdAt   DateTime @default(now())
+
+  steward User @relation(fields: [stewardId], references: [id])
+
+  @@index([category])
+}
+
+// --- Circles: restorative process ------------------------------------------
+
+enum CircleStatus {
+  OPEN // raised, seeking keepers
+  GATHERING // keepers present, hearing accounts
+  RESOLVED
+  DISMISSED
+}
+
+// A circle is how harm is addressed when morality is the only law:
+// account, listening, restitution, and a public record. Never a cage.
+enum CircleOutcome {
+  HARM_FOUND // the person the circle is about caused harm; lowers their standing
+  NO_HARM // a misunderstanding or no fault; nobody loses standing
+  UNFOUNDED // the accusation was false or malicious; lowers the raiser's standing
+}
+
+model Circle {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  title             String
+  account           String // what happened, in the raiser's words
+  status            CircleStatus   @default(OPEN)
+  outcome           CircleOutcome?
+  locality          String
+  lat               Float?
+  lng               Float?
+  keepersNeeded     Int            @default(3)
+  declinedKeeperIds String[]       @default([])
+  resolution        String? // what was agreed
+  keeperIds         String[]       @default([]) // users holding the circle (not the parties)
+  raisedById        String         @db.ObjectId
+  aboutId           String?        @db.ObjectId
+  createdAt         DateTime       @default(now())
+  resolvedAt        DateTime?
+
+  raisedBy User  @relation("CircleRaisedBy", fields: [raisedById], references: [id])
+  about    User? @relation("CircleAbout", fields: [aboutId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([aboutId])
+  @@index([raisedById])
+}
+
+// --- Bulletins --------------------------------------------------------------
+
+enum BulletinLevel {
+  INFO
+  HAZARD
+  URGENT
+}
+
+model Bulletin {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  body      String
+  level     BulletinLevel @default(INFO)
+  locality  String? // null: everywhere
+  lat       Float? // null when posted everywhere
+  lng       Float?
+  authorId  String        @db.ObjectId
+  createdAt DateTime      @default(now())
+  expiresAt DateTime?
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([level, createdAt])
+}
+
+// --- Demurrage --------------------------------------------------------------
+
+// Positive Grace decays slowly so it keeps moving. What decays is paid out as an
+// equal dividend to every verified member; the rounding remainder is carried
+// into the next run. Invariant: sum(user.graceBalance) + latest.remainder == 0.
+model DemurrageRun {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  ranAt        DateTime @default(now())
+  days         Int // elapsed days the decay covered
+  rateMonthly  Float
+  totalDecayed Int
+  members      Int // verified members who received the dividend
+  dividend     Int // per member
+  remainder    Int // carried forward
+}
+
+enum AdjustmentReason {
+  DEMURRAGE
+  DIVIDEND
+}
+
+model LedgerAdjustment {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @db.ObjectId
+  ledger    Ledger
+  amount    Int // signed
+  reason    AdjustmentReason
+  runId     String           @db.ObjectId
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+// --- Assemblies: ranked-choice decisions ----------------------------------
+
+model Proposal {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  body      String
+  options   String[] // at least two
+  locality  String
+  authorId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+  closesAt  DateTime
+
+  author  User     @relation(fields: [authorId], references: [id])
+  ballots Ballot[]
+
+  @@index([locality, closesAt])
+}
+
+model Ballot {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  proposalId String   @db.ObjectId
+  userId     String   @db.ObjectId
+  ranking    Int[] // option indices, most preferred first; may omit options
+  createdAt  DateTime @default(now())
+
+  proposal Proposal @relation(fields: [proposalId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([proposalId, userId])
+}
