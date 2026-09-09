@@ -42,3 +42,4 @@ next-env.d.ts
 
 # project-local mongod data (npm run db:local)
 .mongo/
+!.env.example
