@@ -52,5 +52,9 @@
   "engines": {
     "node": "24.x",
     "npm": "11.x"
+  },
+  "optionalDependencies": {
+    "@emnapi/core": "1.11.3",
+    "@emnapi/runtime": "1.11.3"
   }
 }
