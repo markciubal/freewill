@@ -30,15 +30,15 @@ export default async function CirclesPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-8">
       <PageTitle
-        title="Circles"
-        subtitle="When someone is harmed, they raise a circle. Keepers are drawn by lot from people of standing nearby. Everyone is heard. What is agreed is written down and kept public. Restitution, not punishment. No cages."
+        title="Disputes"
+        subtitle="When someone has been wronged, they open a dispute. Mediators are drawn at random from trusted people nearby, everyone is heard, and what is agreed is written down publicly. The goal is repairing the harm, not punishing anyone."
         action={<ScopeToggle scope={scope} base="/circles" locality={me.locality} />}
       />
       <Notice error={sp.error} />
       <div className="grid gap-8 md:grid-cols-[1fr_340px]">
         <section>
           {circles.length === 0 ? (
-            <Empty>No circles. May it stay that way.</Empty>
+            <Empty>No disputes.</Empty>
           ) : (
             <ul className="space-y-2">
               {circles.map((c) => (
@@ -50,7 +50,7 @@ export default async function CirclesPage({ searchParams }: { searchParams: Prom
                       <span className="font-medium">{c.title}</span>
                     </div>
                     <div className="mt-1 text-xs text-muted">
-                      Raised by @{c.raisedBy.username}{c.about ? ` about @${c.about.username}` : ""} / {c.locality}{c.distanceKm !== null ? ` / ${fmtDistance(c.distanceKm)} away` : ""} / {fmtDate(c.createdAt)} / {c.keeperIds.length} of {c.keepersNeeded} keepers
+                      Opened by @{c.raisedBy.username}{c.about ? ` about @${c.about.username}` : ""} / {c.locality}{c.distanceKm !== null ? ` / ${fmtDistance(c.distanceKm)} away` : ""} / {fmtDate(c.createdAt)} / {c.keeperIds.length} of {c.keepersNeeded} mediators
                     </div>
                   </Link>
                 </li>
@@ -60,23 +60,23 @@ export default async function CirclesPage({ searchParams }: { searchParams: Prom
         </section>
         <div className="space-y-4">
           <Card>
-            <SectionTitle>Your accusation credit</SectionTitle>
+            <SectionTitle>Disputes you can open</SectionTitle>
             <p className="text-sm">
               <span className="text-2xl font-semibold tabular-nums">{Math.max(0, standing.circleAllowance - openRaised)}</span>
               <span className="text-muted"> of {standing.circleAllowance} available</span>
             </p>
             <p className="mt-1 text-xs text-muted">
-              Raising a circle spends one until it closes. A circle found unfounded costs you standing and one credit for good. Standing earns more.
-              Keeper pool here: about {keeperPoolSize(standing.localityPopulation)} of {standing.localityPopulation} people.
+              Each open dispute you raise uses one slot until it closes. A dispute found to be unfounded costs you standing and a slot for good; higher standing earns more slots.
+              Mediators here are drawn from a pool of about {keeperPoolSize(standing.localityPopulation)} of {standing.localityPopulation} people.
             </p>
           </Card>
           <Card>
-            <SectionTitle>Raise a circle</SectionTitle>
+            <SectionTitle>Open a dispute</SectionTitle>
             <form action={raiseCircle} className="space-y-3">
               <Field label="What this is about"><Input name="title" required minLength={3} maxLength={120} /></Field>
-              <Field label="About whom (optional)" hint="Username. Leave blank if the harm has no single author."><Input name="about" placeholder="@someone" /></Field>
-              <Field label="Your account" hint="What happened, in your own words. This will be public."><Textarea name="account" required minLength={10} maxLength={5000} rows={6} /></Field>
-              <SubmitButton pendingText="Raising...">Raise it</SubmitButton>
+              <Field label="About whom (optional)" hint="Username. Leave blank if no single person is responsible."><Input name="about" placeholder="@someone" /></Field>
+              <Field label="What happened" hint="In your own words. This will be public."><Textarea name="account" required minLength={10} maxLength={5000} rows={6} /></Field>
+              <SubmitButton pendingText="Opening...">Open dispute</SubmitButton>
             </form>
           </Card>
         </div>

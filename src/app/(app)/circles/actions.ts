@@ -15,10 +15,10 @@ const raiseSchema = z.object({
   about: z.string().trim().toLowerCase().max(24).optional(),
 });
 
-// Accusations are a currency. Each person may hold only so many circles open
-// at once (their allowance, from standing), and an accusation found UNFOUNDED
-// costs standing and shrinks the allowance. That is what restrains a bad actor
-// who would use circles as a weapon.
+// Disputes are rate-limited. Each person may have only so many open at once
+// (their allowance, from standing), and a dispute found UNFOUNDED costs
+// standing and shrinks the allowance. That is what restrains someone who
+// would use disputes as a weapon.
 export async function raiseCircle(formData: FormData) {
   const me = await requireUser();
   const parsed = raiseSchema.safeParse({
@@ -34,14 +34,14 @@ export async function raiseCircle(formData: FormData) {
     db.circle.count({ where: { raisedById: me.id, status: { in: ["OPEN", "GATHERING"] } } }),
   ]);
   if (openRaised >= standing.circleAllowance) {
-    fail("/circles", `You already have ${openRaised} circle${openRaised === 1 ? "" : "s"} open, which is all your standing allows. See them through first.`);
+    fail("/circles", `You already have ${openRaised} open dispute${openRaised === 1 ? "" : "s"}, which is all your standing allows. Close them before opening another.`);
   }
 
   let aboutId: string | undefined;
   if (d.about) {
     const u = await db.user.findUnique({ where: { username: d.about }, select: { id: true } });
     if (!u) fail("/circles", `No one here is called @${d.about}.`);
-    if (u.id === me.id) fail("/circles", "A circle is about harm between people, not yourself.");
+    if (u.id === me.id) fail("/circles", "You cannot open a dispute about yourself.");
     aboutId = u.id;
   }
   const c = await db.circle.create({
@@ -52,13 +52,13 @@ export async function raiseCircle(formData: FormData) {
   redirect(`/circles/${c.id}`);
 }
 
-// Keepers are drawn by lot. A drawn keeper may decline; the seat is redrawn.
+// Mediators are drawn at random. A drawn mediator may step down; the seat is redrawn.
 export async function declineKeeping(id: string) {
   const me = await requireUser();
   if (!isObjectId(id)) redirect("/circles");
   const path = `/circles/${id}`;
   const c = await db.circle.findUnique({ where: { id } });
-  if (!c || !c.keeperIds.includes(me.id)) fail(path, "You are not keeping this circle.");
+  if (!c || !c.keeperIds.includes(me.id)) fail(path, "You are not a mediator on this dispute.");
   await db.circle.update({
     where: { id },
     data: { keeperIds: { set: c.keeperIds.filter((k) => k !== me.id) }, declinedKeeperIds: { push: me.id } },
@@ -83,11 +83,11 @@ export async function resolveCircle(id: string, formData: FormData) {
   const path = `/circles/${id}`;
   const c = await db.circle.findUnique({ where: { id } });
   if (!c) redirect("/circles");
-  if (c.status === "RESOLVED" || c.status === "DISMISSED") fail(path, "This circle is closed.");
-  if (!c.keeperIds.includes(me.id)) fail(path, "Only a keeper may record the resolution.");
+  if (c.status === "RESOLVED" || c.status === "DISMISSED") fail(path, "This dispute is closed.");
+  if (!c.keeperIds.includes(me.id)) fail(path, "Only a mediator can record the resolution.");
   const outcome = str(formData, "outcome");
   if (outcome !== "HARM_FOUND" && outcome !== "NO_HARM" && outcome !== "UNFOUNDED") fail(path, "Choose an outcome.");
-  if (outcome === "HARM_FOUND" && !c.aboutId) fail(path, "This circle names nobody, so harm cannot be found against anyone. Choose No harm or Unfounded.");
+  if (outcome === "HARM_FOUND" && !c.aboutId) fail(path, "This dispute names nobody, so harm cannot be recorded against anyone. Choose No harm or Unfounded.");
   const resolution = str(formData, "resolution");
   if (!resolution || resolution.length < 10) fail(path, "Write out what was agreed, in full.");
   await db.circle.update({ where: { id }, data: { status: "RESOLVED", outcome, resolution, resolvedAt: new Date() } });
@@ -101,7 +101,7 @@ export async function dismissCircle(id: string) {
   const path = `/circles/${id}`;
   const c = await db.circle.findUnique({ where: { id }, select: { raisedById: true, status: true } });
   if (!c) redirect("/circles");
-  if (c.raisedById !== me.id) fail(path, "Only the person who raised it can withdraw it.");
+  if (c.raisedById !== me.id) fail(path, "Only the person who opened it can withdraw it.");
   if (c.status === "RESOLVED") fail(path, "Already resolved.");
   await db.circle.update({ where: { id }, data: { status: "DISMISSED", resolvedAt: new Date() } });
   revalidatePath(path);

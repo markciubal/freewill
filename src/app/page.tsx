@@ -11,21 +11,20 @@ export default async function Landing() {
       <header className="mb-12">
         <div className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted">Freewill</div>
         <h1 className="text-4xl font-semibold tracking-tight">
-          A commons for a society without a state, where morality is the only law.
+          Tools for a community that runs itself.
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted">
-          No offices, no police, no treasury. Just people, their word, what they need, what they can give, and a
-          way to repair harm when it happens. Built to keep neighbors civil when the government is gone or has
-          turned on them.
+          Mutual aid, fair exchange, shared resources, and dispute resolution, with no central authority.
+          Built for neighbors who need to organize when institutions are gone or cannot be relied on.
         </p>
         <div className="mt-6 flex gap-3">
           {user ? (
-            <LinkButton href="/home">Enter as @{user.username}</LinkButton>
+            <LinkButton href="/home">Open the app (@{user.username})</LinkButton>
           ) : (
             <>
-              <LinkButton href="/join">Affirm the covenant and join</LinkButton>
+              <LinkButton href="/join">Create an account</LinkButton>
               <LinkButton href="/login" variant="ghost">
-                Return
+                Log in
               </LinkButton>
             </>
           )}
@@ -33,7 +32,7 @@ export default async function Landing() {
       </header>
 
       <section className="mb-12">
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted">The Covenant</h2>
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted">The ground rules</h2>
         <ol className="space-y-3">
           {COVENANT.map((c, i) => (
             <li key={c.title} className="rounded-lg border border-border bg-card p-4">
@@ -76,7 +75,7 @@ export default async function Landing() {
         </p>
       </section>
 
-      <footer className="border-t border-border pt-6 text-xs text-muted">No masters. No cages. Keep your word.</footer>
+      <footer className="border-t border-border pt-6 text-xs text-muted">Run by its members, owned by no one.</footer>
     </div>
   );
 }

@@ -9,8 +9,8 @@ export default async function ThemePage({ searchParams }: { searchParams: Promis
   return (
     <div className="space-y-6">
       <PageTitle
-        title="Your look"
-        subtitle="Colors, type, and shape. Yours alone: nobody can set it for you, and you set it for nobody. Change a control or edit the CSS; the page follows as you type. Save to keep it."
+        title="Theme"
+        subtitle="Colors, type, and shape, saved to your account. Change a control or edit the CSS; the page updates as you type. Save to keep it."
       />
       <Notice error={sp.error} ok={sp.ok} />
       <ThemeEditor initial={sanitizeTheme(me.theme)} />

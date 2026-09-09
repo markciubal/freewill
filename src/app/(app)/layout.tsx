@@ -10,7 +10,7 @@ const NAV = [
   ["/ledger", "Ledger"],
   ["/people", "People"],
   ["/commons", "Commons"],
-  ["/circles", "Circles"],
+  ["/circles", "Disputes"],
   ["/assemblies", "Assemblies"],
   ["/bulletins", "Bulletins"],
   ["/programs", "Programs"],
@@ -37,17 +37,17 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               @{user.username}
             </Link>
             <Link href="/theme" className="text-muted hover:text-foreground" title="Colors, type, shape">
-              Look
+              Theme
             </Link>
             <form action={logout}>
-              <button className="text-muted hover:text-foreground">Leave</button>
+              <button className="text-muted hover:text-foreground">Log out</button>
             </form>
           </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-(--content-width) flex-1 px-4 py-8">{children}</main>
       <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted">
-        No masters. No cages. Keep your word.
+        Run by its members, owned by no one.
       </footer>
     </div>
   );

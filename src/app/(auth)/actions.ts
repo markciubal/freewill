@@ -30,7 +30,7 @@ export async function join(_prev: AuthState, formData: FormData): Promise<AuthSt
       locality: z.string().trim().min(2, "Locality: say where you are").max(80),
       lat: z.coerce.number({ error: "Place your pin on the map" }).min(-90).max(90),
       lng: z.coerce.number({ error: "Place your pin on the map" }).min(-180).max(180),
-      covenant: z.literal("on", { error: "You must affirm the covenant to join." }),
+      covenant: z.literal("on", { error: "You must agree to the ground rules to join." }),
     })
     .safeParse({
       username: formData.get("username"),
@@ -84,7 +84,7 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
   });
   // Always run the comparison so timing does not reveal whether the name exists.
   const valid = await verifyPassword(parsed.data.password, user?.passwordHash ?? DUMMY_HASH);
-  if (!user || !valid) return { error: "No such person, or wrong password. There are no resets: your password is yours alone." };
+  if (!user || !valid) return { error: "Wrong username or password. Passwords cannot be reset, so check it carefully." };
 
   await createSession(user.id);
   redirect("/home");

@@ -47,12 +47,12 @@ export default async function HomePage() {
 
       {standing.verified ? (
         <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
-          You are a verified person of {user.locality}: {standing.vouchesReceived} of {standing.requiredVouches} needed vouch{standing.requiredVouches === 1 ? "" : "es"}. You can use credit, vouch for others, keep circles, and vote.
+          You are verified in {user.locality} ({standing.vouchesReceived} of {standing.requiredVouches} needed vouch{standing.requiredVouches === 1 ? "" : "es"}). You can use credit, vouch for others, mediate disputes, and vote.
         </p>
       ) : (
         <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
-          Not yet verified. You need {standing.requiredVouches} vouch{standing.requiredVouches === 1 ? "" : "es"} from people in {user.locality} ({standing.vouchesReceived} so far). Until then you can post, pledge and earn, but not go below zero, vouch, keep circles, or vote.
-          Meet people: <Link href="/people" className="text-accent hover:underline">People</Link>.
+          Not verified yet. You need {standing.requiredVouches} vouch{standing.requiredVouches === 1 ? "" : "es"} from people in {user.locality} ({standing.vouchesReceived} so far). Until then you can post, pledge, and earn, but not use credit, vouch, mediate, or vote.
+          Start in the <Link href="/people" className="text-accent hover:underline">People</Link> directory.
         </p>
       )}
 
@@ -94,9 +94,9 @@ export default async function HomePage() {
 
       <div className="grid gap-8 md:grid-cols-2">
         <section>
-          <SectionTitle>Survival needs, open</SectionTitle>
+          <SectionTitle>Urgent needs</SectionTitle>
           {urgentNeeds.length === 0 ? (
-            <Empty>No open survival needs. Good.</Empty>
+            <Empty>No urgent needs right now.</Empty>
           ) : (
             <ul className="space-y-2">
               {urgentNeeds.map((l) => (
@@ -123,7 +123,7 @@ export default async function HomePage() {
           <div>
             <SectionTitle>Pledges waiting on you</SectionTitle>
             {awaitingMe.length === 0 ? (
-              <Empty>Nobody is waiting on you.</Empty>
+              <Empty>Nothing waiting on you.</Empty>
             ) : (
               <ul className="space-y-2">
                 {awaitingMe.map((p) => (
@@ -138,7 +138,7 @@ export default async function HomePage() {
             )}
           </div>
           <div>
-            <SectionTitle>Your word, outstanding</SectionTitle>
+            <SectionTitle>Your open pledges</SectionTitle>
             {myPledges.length === 0 ? (
               <Empty>No open pledges.</Empty>
             ) : (

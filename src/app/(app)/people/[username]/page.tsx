@@ -34,7 +34,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
     <div className="mx-auto max-w-2xl space-y-6">
       <PageTitle
         title={p.displayName ?? `@${p.username}`}
-        subtitle={`@${p.username} / ${p.locality}${p.id !== me.id ? ` / ${fmtDistance(haversineKm(me, p))} from you` : ""} / here since ${fmtDate(p.createdAt)}`}
+        subtitle={`@${p.username} / ${p.locality}${p.id !== me.id ? ` / ${fmtDistance(haversineKm(me, p))} from you` : ""} / member since ${fmtDate(p.createdAt)}`}
         action={self ? <Link href="/profile" className="text-sm text-accent hover:underline">Edit profile</Link> : undefined}
       />
       <Notice error={sp.error} />
@@ -45,7 +45,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
         <Card><Stat label="Balances" value={<Grace n={p.graceBalance} />} sub={fmtHours(p.hoursBalance)} /></Card>
       </div>
       {standing.harms > 0 && (
-        <p className="text-sm text-danger">{standing.harms} resolved circle{standing.harms === 1 ? "" : "s"} found harm by this person. Read them before you trust.</p>
+        <p className="text-sm text-danger">{standing.harms} resolved dispute{standing.harms === 1 ? "" : "s"} found this person caused harm. Read them before relying on this person.</p>
       )}
 
       {(p.bio || p.skills.length > 0) && (
@@ -62,7 +62,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
         <Card>
           <SectionTitle>{myVouch ? "You vouch for this person" : "Vouch for this person"}</SectionTitle>
           <p className="mb-3 text-sm text-muted">
-            A vouch says: I know them, and I would answer for them. It raises their standing and their credit. Do not give it lightly; a circle may ask you why.
+            A vouch says you know this person and trust them. It raises their standing and credit limit, so only vouch for people you actually know.
           </p>
           <form action={vouch.bind(null, p.username)} className="flex flex-wrap items-end gap-2">
             <div className="min-w-60 flex-1">
@@ -98,7 +98,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
 
       {p.stewardships.length > 0 && (
         <section>
-          <SectionTitle>Stewards</SectionTitle>
+          <SectionTitle>Steward of</SectionTitle>
           <ul className="text-sm">{p.stewardships.map((c) => <li key={c.id}><Link href="/commons" className="hover:underline">{c.name}</Link></li>)}</ul>
         </section>
       )}

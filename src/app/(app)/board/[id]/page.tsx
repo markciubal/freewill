@@ -66,12 +66,12 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
 
       {!mine && open && !myPledge && (
         <Card>
-          <SectionTitle>{l.kind === "NEED" ? "Pledge to meet this need" : "Pledge to take this offer"}</SectionTitle>
+          <SectionTitle>{l.kind === "NEED" ? "Offer to help with this" : "Ask to take this offer"}</SectionTitle>
           <form action={pledge.bind(null, l.id)} className="space-y-3">
-            <Field label="A word to go with it (optional)">
+            <Field label="Add a note (optional)">
               <Textarea name="message" rows={2} maxLength={500} placeholder="When, how much, any conditions." />
             </Field>
-            <SubmitButton pendingText="Pledging...">Give my word</SubmitButton>
+            <SubmitButton pendingText="Pledging...">Pledge</SubmitButton>
           </form>
         </Card>
       )}

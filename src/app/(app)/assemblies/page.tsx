@@ -33,7 +33,7 @@ export default async function AssembliesPage({ searchParams }: { searchParams: P
       <div className="grid gap-8 md:grid-cols-[1fr_340px]">
         <section>
           {proposals.length === 0 ? (
-            <Empty>No questions before the assembly.</Empty>
+            <Empty>No open questions.</Empty>
           ) : (
             <ul className="space-y-2">
               {proposals.map((p) => {

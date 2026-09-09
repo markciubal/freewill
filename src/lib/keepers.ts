@@ -1,11 +1,11 @@
 import { db } from "./db";
 import { getStandingAll } from "./standing.all";
 
-// Keepers are chosen by lot, not by volunteering. The pool is the highest
-// standing verified people in the circle's locality. It starts at about five
-// per hundred and grows with the square root of the population, so keeping
-// circles slowly becomes a craft held by fewer people per head, the way it does
-// in any society that lasts.
+// Mediators (code name: keepers) are chosen at random, not by volunteering.
+// The pool is the highest-standing verified people in the dispute's locality.
+// It starts at about five per hundred and grows with the square root of the
+// population, so mediating slowly becomes a practiced role held by fewer
+// people per head.
 
 export function keeperPoolSize(population: number) {
   return Math.max(3, Math.ceil(5 * Math.sqrt(Math.max(population, 1) / 100)));

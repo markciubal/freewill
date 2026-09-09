@@ -20,7 +20,7 @@ Read BUILD_PROMPT.md first. It is the constitution and the task list.
 - **Server actions.** One `actions.ts` per area under `src/app/(app)/<area>/`. Validate with zod. Errors redirect back with `?error=` via `fail()` from `src/lib/form.ts`; success with `ok()`. Guard ObjectIds with `isObjectId()` before `findUnique`.
 - **Next 16.** `params` and `searchParams` are Promises. `cookies()` is async. Use `LayoutProps`/explicit prop types.
 - **Prisma 6 + MongoDB.** Enums and `String[]` are fine. `$transaction` requires a replica set. IDs are ObjectId strings.
-- **UI.** Use the primitives in `src/components/ui.tsx`. Copy addresses a tired, frightened person: short, plain, tells them what to do next. Survival categories (`SURVIVAL` in covenant.ts) sort first.
+- **UI.** Use the primitives in `src/components/ui.tsx`. Copy addresses a tired, frightened person: short, plain, civic, tells them what to do next. Never vow-like or in-group ("affirm", "give my word", mottoes). Code names differ from UI labels: covenant = "ground rules", Circle = "dispute", keeper = "mediator" — keep code identifiers, translate in UI strings. Survival categories (`SURVIVAL` in covenant.ts) sort first.
 - **After any feature work,** update `src/lib/covenant.programs.ts` (live/planned) and BUILD_PROMPT.md section 5.
 - **Verification and locality.** `locality` is required and immutable. Use `getStanding` from `src/lib/standing.all.ts` (bulk, locality-aware); `standing.verified` gates credit, vouching, keeping, proposing, voting. Scope lists with `readScope`/`scopeWhere` from `src/lib/form.ts`.
 - **Demurrage.** `maybeRunDemurrage()` is idempotent per 30 days; the zero-sum check must include `latestRun().remainder`.

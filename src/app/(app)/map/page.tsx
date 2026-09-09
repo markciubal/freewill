@@ -33,7 +33,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
       radiusM: HAZARD_RADIUS_M[b.level] || undefined,
     })),
     ...applyNear(circles, me, scope).map((c) => ({
-      id: c.id, lat: c.lat!, lng: c.lng!, kind: "circle" as const, label: `Circle: ${c.title}`, detail: `${c.status} / ${fmtDistance(c.distanceKm)} away`, href: `/circles/${c.id}`,
+      id: c.id, lat: c.lat!, lng: c.lng!, kind: "circle" as const, label: `Dispute: ${c.title}`, detail: `${c.status} / ${fmtDistance(c.distanceKm)} away`, href: `/circles/${c.id}`,
     })),
   ];
 
@@ -41,7 +41,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
     <div className="space-y-4">
       <PageTitle
         title="Map"
-        subtitle="Needs, offers, commons, hazards and open circles around you. People are never drawn on this map; the dashed ring is roughly where you are. Pins are rounded to about a hundred meters."
+        subtitle="Needs, offers, shared resources, hazards, and open disputes around you. People are never drawn on this map; the dashed ring is roughly where you are. Pins are rounded to about a hundred meters."
         action={<ScopeToggle scope={scope} base="/map" locality={me.locality} />}
       />
       <div className="flex flex-wrap gap-3 text-xs text-muted">
@@ -49,7 +49,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
         <span><span className="inline-block h-3 w-3 rounded-full bg-[#7fb377] align-middle" /> offer</span>
         <span><span className="inline-block h-3 w-3 rounded-full bg-[#6fa3d6] align-middle" /> commons</span>
         <span><span className="inline-block h-3 w-3 rounded-full bg-[#e2b04a] align-middle" /> hazard</span>
-        <span><span className="inline-block h-3 w-3 rounded-full bg-[#a78bd6] align-middle" /> circle</span>
+        <span><span className="inline-block h-3 w-3 rounded-full bg-[#a78bd6] align-middle" /> dispute</span>
         <span>{points.length} things shown</span>
       </div>
       <MapView center={{ lat: me.lat, lng: me.lng }} points={points} zoom={scope === "all" ? 6 : 12} />

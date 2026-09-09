@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "Freewill",
-  description: "A commons for a society without a state, where morality is the only law.",
+  description: "Community tools for mutual aid, fair exchange, shared resources, and dispute resolution.",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

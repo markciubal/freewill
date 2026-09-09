@@ -36,7 +36,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-8">
-      <PageTitle title="Ledger" subtitle="Two coins nobody issues. Grace is value-priced mutual credit. Hours are equal for everyone. Both are created by giving and destroyed by giving back." />
+      <PageTitle title="Ledger" subtitle="Community credit with no bank behind it. Grace prices things by value; Hours count everyone's time equally. Both are created by giving and settled by giving back." />
       <Notice error={sp.error} ok={sp.ok} />
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -64,12 +64,12 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
         <Card>
           <SectionTitle>How this works</SectionTitle>
           <ul className="space-y-2 text-sm text-muted">
-            <li><GraceMark size="1.6em" className="text-accent" /> is the mark of Grace, the way $ marks a dollar: an olive sprig, because it grows when tended and means peace. In plain text write GRC.</li>
+            <li><GraceMark size="1.6em" className="text-accent" /> is the symbol for Grace, the way $ marks a dollar: an olive sprig. In plain text write GRC.</li>
             <li>Paying someone lowers your balance and raises theirs by the same amount. There is no mint and no bank.</li>
-            <li>A negative balance is not debt to anyone in particular. It is a promise to the whole. Your standing sets how deep that promise may go; unverified people may not go below zero.</li>
-            <li>Demurrage: positive Grace loses {Math.round(DEMURRAGE_RATE_MONTHLY * 100)}% every {DEMURRAGE_INTERVAL_DAYS} days, and what is lost is paid out equally to every verified member. Hoarding funds everyone. {run && run.days > 0 ? `Last run ${fmtDate(run.ranAt)}: ${run.totalDecayed} GRC shared among ${run.members}.` : ""} {nextRun ? `Next: ${fmtDate(nextRun)}.` : ""}</li>
+            <li>A negative balance is not debt to any one person; it just means the community has given you more than you have given back so far. Standing sets how far below zero you can go; unverified accounts cannot go below zero.</li>
+            <li>Positive Grace shrinks {Math.round(DEMURRAGE_RATE_MONTHLY * 100)}% every {DEMURRAGE_INTERVAL_DAYS} days, and the amount is paid out equally to every verified member. This keeps credit circulating instead of piling up. {run && run.days > 0 ? `Last run ${fmtDate(run.ranAt)}: ${run.totalDecayed} GRC shared among ${run.members}.` : ""} {nextRun ? `Next: ${fmtDate(nextRun)}.` : ""}</li>
             <li>Across all {totals._count} people, Grace sums to {(totals._sum.graceBalance ?? 0) + (run?.remainder ?? 0)} (including {run?.remainder ?? 0} carried) and Hours to {totals._sum.hoursBalance ?? 0}. Always zero, or something is wrong.</li>
-            <li>Hours are for what should not be priced: care, watch, teaching. One hour is one hour, whoever gives it.</li>
+            <li>Hours are for work that should not be haggled over: care, watch shifts, teaching. One hour counts the same for everyone.</li>
           </ul>
         </Card>
       </div>

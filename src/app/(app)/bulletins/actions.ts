@@ -29,5 +29,5 @@ export async function postBulletin(formData: FormData) {
   await db.bulletin.create({ data: { title: d.title, body: d.body, level: d.level, locality: d.everywhere ? null : me.locality, lat: d.everywhere ? null : me.lat, lng: d.everywhere ? null : me.lng, expiresAt, authorId: me.id } });
   revalidatePath("/bulletins");
   revalidatePath("/home");
-  ok("/bulletins", "Posted under your name.");
+  ok("/bulletins", "Posted.");
 }

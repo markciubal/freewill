@@ -30,7 +30,7 @@ export default async function BulletinsPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-8">
-      <PageTitle title="Bulletins" subtitle="Notices and hazards, each under a real name. Rumor kills; this is the antidote. Set an expiry so stale alerts do not linger."
+      <PageTitle title="Bulletins" subtitle="Notices and hazard alerts, each posted under a real username. Set an expiry so stale alerts do not linger."
         action={<ScopeToggle scope={scope} base="/bulletins" locality={me.locality} />}
       />
       <Notice error={sp.error} ok={sp.ok} />
@@ -73,7 +73,7 @@ export default async function BulletinsPage({ searchParams }: { searchParams: Pr
             <Field label="Details"><Textarea name="body" required minLength={3} maxLength={3000} rows={4} /></Field>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="everywhere" /> Show everywhere, not just {me.locality}</label>
             <Field label="Expires in (days)" hint="0 or blank: never."><Input name="expiresInDays" type="number" min={0} max={365} defaultValue={7} /></Field>
-            <SubmitButton pendingText="Posting...">Post under my name</SubmitButton>
+            <SubmitButton pendingText="Posting...">Post</SubmitButton>
           </form>
         </Card>
       </div>

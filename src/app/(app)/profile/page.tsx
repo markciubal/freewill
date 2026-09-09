@@ -33,7 +33,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <SubmitButton pendingText="Saving...">Save</SubmitButton>
         </form>
       </Card>
-      <p className="mt-4 text-xs text-muted">There is no password change and no reset. Your password is yours alone.</p>
+      <p className="mt-4 text-xs text-muted">Passwords cannot be changed or reset, so keep yours somewhere safe.</p>
     </div>
   );
 }

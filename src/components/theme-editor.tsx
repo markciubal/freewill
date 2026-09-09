@@ -81,7 +81,7 @@ export function ThemeEditor({ initial }: { initial: Theme }) {
           <h3 className="text-xl font-semibold">Insulin, two weeks</h3>
           <p className="text-sm text-muted">Type 1, eleven years old. We have four days left. Any brand.</p>
           <div className="flex flex-wrap gap-2"><Badge tone="danger">NEED</Badge><Badge tone="warn">MATCHED</Badge><Badge tone="accent">OFFER</Badge><Badge>Medical</Badge></div>
-          <div className="flex flex-wrap gap-2"><Button type="button">Give my word</Button><Button type="button" variant="ghost">Decline</Button><Button type="button" variant="danger">Withdraw</Button></div>
+          <div className="flex flex-wrap gap-2"><Button type="button">Pledge</Button><Button type="button" variant="ghost">Decline</Button><Button type="button" variant="danger">Withdraw</Button></div>
           <Input placeholder="@neighbor" readOnly />
           <table className="w-full text-sm"><tbody>
             <tr className="border-t border-border"><td className="p-2 text-muted">Aug 24</td><td className="p-2">@ada</td><td className="p-2 text-right font-mono text-accent">+<Grace n={20} /></td></tr>

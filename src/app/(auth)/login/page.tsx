@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [state, action, pending] = useActionState<AuthState, FormData>(login, {});
   return (
     <form action={action} className="space-y-4">
-      <h1 className="text-xl font-semibold">Return</h1>
+      <h1 className="text-xl font-semibold">Log in</h1>
       <Notice error={state.error} />
       <Field label="Username">
         <Input name="username" autoComplete="username" required autoFocus />
@@ -18,12 +18,12 @@ export default function LoginPage() {
         <Input name="password" type="password" autoComplete="current-password" required />
       </Field>
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Checking..." : "Enter"}
+        {pending ? "Checking..." : "Log in"}
       </Button>
       <p className="text-center text-sm text-muted">
         New here?{" "}
         <Link href="/join" className="text-accent hover:underline">
-          Affirm the covenant and join
+          Create an account
         </Link>
       </p>
     </form>

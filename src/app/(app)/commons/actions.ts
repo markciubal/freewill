@@ -26,7 +26,7 @@ export async function createCommons(formData: FormData) {
   if (!parsed.success) fail("/commons", firstIssue(parsed.error));
   await db.commons.create({ data: { ...parsed.data, stewardId: me.id, locality: me.locality, lat: me.lat, lng: me.lng } });
   revalidatePath("/commons");
-  ok("/commons", `${parsed.data.name} is now held in common, with you as steward.`);
+  ok("/commons", `${parsed.data.name} added, with you as steward.`);
 }
 
 export async function toggleCommons(id: string) {

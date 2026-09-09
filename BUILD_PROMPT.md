@@ -30,8 +30,8 @@ Operate by these rules:
    locality.
 7. Build in tiers. Ship Tier 0 (Survive) before Tier 1 (Stabilize) before Tier 2
    (Flourish). A polished Tier 0 feature is worth more than a half-built Tier 2.
-8. The UI speaks to a frightened, tired person. Short sentences. Plain words.
-   Names, not IDs. Always say what to do next.
+8. The UI speaks to a frightened, tired person. Short sentences. Plain, civic
+   words, never liturgical ones. Names, not IDs. Always say what to do next.
 9. Threat-model every change against: fake identities, strongman capture,
    seizure, panic and rumor, scarcity conflict, credit abuse.
 10. When you finish a piece of work, update the Program Catalog
