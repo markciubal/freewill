@@ -128,7 +128,7 @@ export function MainNav({ username }: { username: string }) {
           <div key={g.id} className="relative">
             {trigger(g.id, g.label, groupActive(g))}
             {open === g.id && (
-              <div role="menu" className="absolute left-0 top-full z-30 mt-1 min-w-60 rounded-md border border-border bg-card p-1 shadow-lg">
+              <div role="menu" className="absolute left-0 top-full z-30 mt-1 min-w-60 rounded-lg border border-border/70 bg-card/95 p-1 shadow-menu backdrop-blur-md">
                 {g.items.map(itemLink)}
               </div>
             )}
@@ -139,7 +139,7 @@ export function MainNav({ username }: { username: string }) {
       <div className="relative ml-auto hidden md:block">
         {trigger("account", `@${username}`, accountActive)}
         {open === "account" && (
-          <div role="menu" className="absolute right-0 top-full z-30 mt-1 min-w-56 rounded-md border border-border bg-card p-1 shadow-lg">
+          <div role="menu" className="absolute right-0 top-full z-30 mt-1 min-w-56 rounded-lg border border-border/70 bg-card/95 p-1 shadow-menu backdrop-blur-md">
             {ACCOUNT.map(itemLink)}
             <div className="my-1 border-t border-border" />
             <form action={logout}>
@@ -167,7 +167,7 @@ export function MainNav({ username }: { username: string }) {
         </button>
       </div>
       {open === "mobile" && (
-        <div role="menu" className="absolute inset-x-0 top-full z-30 mt-px border-t border-border bg-card p-2 shadow-lg md:hidden">
+        <div role="menu" className="absolute inset-x-0 top-full z-30 mt-px border-t border-border/70 bg-card/95 p-2 shadow-menu backdrop-blur-md md:hidden">
           {GROUPS.map((g) => (
             <div key={g.id} className="py-1">
               <div className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted">{g.label}</div>

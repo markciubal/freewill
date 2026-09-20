@@ -6,8 +6,11 @@
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-size: 16px;
-  --radius: 8px;
+  --radius: 10px;
   --content-width: 64rem;
+  /* How far surfaces lift off the page. 0px is flat. */
+  --elevation: 10px;
+  --map-glow: 6px;
 
   --background: #f7f5ef;
   --foreground: #1c1a17;
@@ -18,6 +21,12 @@
   --accent-foreground: #ffffff;
   --danger: #a33a2a;
   --warn: #b7791f;
+
+  --map-land: #07090d;
+  --map-water: #0b1c2c;
+  --map-road: #22d3ee;
+  --map-label: #d6f3fa;
+  --map-filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(1.15) saturate(1.6);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,6 +55,18 @@
   --warn: #e2b04a;
 }
 
+/* Derived from the tokens above; never set directly by a theme. Shadows are
+   tinted with the text color so they sit naturally on any page color, and
+   they scale with --elevation, so 0px makes everything flat again. */
+:root {
+  --shadow-tint: color-mix(in oklab, var(--foreground) 10%, transparent);
+  --shadow-tint-strong: color-mix(in oklab, var(--foreground) 22%, transparent);
+  --shadow-card: 0 1px 2px var(--shadow-tint), 0 var(--elevation) calc(var(--elevation) * 2.4) calc(var(--elevation) * -0.9) var(--shadow-tint-strong);
+  --shadow-raised: 0 1px 1px var(--shadow-tint), 0 calc(var(--elevation) * 0.4) calc(var(--elevation) * 1.2) calc(var(--elevation) * -0.4) color-mix(in oklab, var(--accent) 45%, transparent);
+  --shadow-menu: 0 2px 4px var(--shadow-tint), 0 calc(var(--elevation) * 1.6) calc(var(--elevation) * 3.2) calc(var(--elevation) * -1) var(--shadow-tint-strong);
+  --shadow-inset: inset 0 1px 2px var(--shadow-tint);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -60,6 +81,10 @@
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) * 1.5);
   --radius-xl: calc(var(--radius) * 2);
+  --shadow-card: var(--shadow-card);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-menu: var(--shadow-menu);
+  --shadow-inset: var(--shadow-inset);
 }
 
 html {
@@ -67,11 +92,32 @@ html {
 }
 
 body {
-  background: var(--background);
+  /* A faint wash of the accent at the top of the page gives it depth without
+     a picture. It is the accent at 7%, so it follows any theme. */
+  background:
+    radial-gradient(90rem 40rem at 50% -12rem, color-mix(in oklab, var(--accent) 7%, transparent), transparent 70%),
+    var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
 }
 
 code, pre, kbd, .font-mono {
   font-family: var(--font-mono);
+}
+
+/* Leaflet draws its own popups; keep them in the page's colors. */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow-menu);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius);
+}
+.leaflet-popup-content a {
+  color: var(--accent);
+}
+.leaflet-container {
+  font-family: var(--font-sans);
 }

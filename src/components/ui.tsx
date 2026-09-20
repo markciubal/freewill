@@ -15,7 +15,7 @@ export function PageTitle({ title, subtitle, action }: { title: string; subtitle
 }
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-lg border border-border bg-card p-4 ${className}`}>{children}</div>;
+  return <div className={`rounded-lg border border-border/70 bg-card p-4 shadow-card ${className}`}>{children}</div>;
 }
 
 export function SectionTitle({ children }: { children: ReactNode }) {
@@ -24,10 +24,10 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 
 type Tone = "neutral" | "accent" | "danger" | "warn";
 const badgeTones: Record<Tone, string> = {
-  neutral: "border-border text-muted",
-  accent: "border-accent text-accent",
-  danger: "border-danger text-danger",
-  warn: "border-warn text-warn",
+  neutral: "border-border bg-border/30 text-muted",
+  accent: "border-accent/40 bg-accent/10 text-accent",
+  danger: "border-danger/40 bg-danger/10 text-danger",
+  warn: "border-warn/40 bg-warn/10 text-warn",
 };
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: Tone }) {
@@ -39,16 +39,18 @@ export function Badge({ children, tone = "neutral" }: { children: ReactNode; ton
 }
 
 type Variant = "primary" | "ghost" | "danger";
+// Primary buttons get a faint top-to-bottom gradient and a tinted shadow so
+// they read as something you can press; everything follows --elevation.
 const buttonVariants: Record<Variant, string> = {
-  primary: "bg-accent text-accent-foreground hover:opacity-90",
-  ghost: "border border-border hover:bg-border/40",
-  danger: "border border-danger text-danger hover:bg-danger/10",
+  primary: "bg-linear-to-b from-accent to-accent/85 text-accent-foreground shadow-raised hover:brightness-110 active:translate-y-px active:shadow-none",
+  ghost: "border border-border bg-card/70 hover:bg-border/40 active:translate-y-px",
+  danger: "border border-danger/60 bg-danger/5 text-danger hover:bg-danger/10 active:translate-y-px",
 };
 
 export function Button({ variant = "primary", className = "", ...props }: ComponentProps<"button"> & { variant?: Variant }) {
   return (
     <button
-      className={`rounded-md px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 ${buttonVariants[variant]} ${className}`}
+      className={`rounded-md px-3 py-1.5 text-sm font-medium transition duration-150 outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 disabled:active:translate-y-0 ${buttonVariants[variant]} ${className}`}
       {...props}
     />
   );
@@ -56,7 +58,7 @@ export function Button({ variant = "primary", className = "", ...props }: Compon
 
 export function LinkButton({ href, children, variant = "primary", className = "" }: { href: string; children: ReactNode; variant?: Variant; className?: string }) {
   return (
-    <Link href={href} className={`inline-block rounded-md px-3 py-1.5 text-sm font-medium transition ${buttonVariants[variant]} ${className}`}>
+    <Link href={href} className={`inline-block rounded-md px-3 py-1.5 text-sm font-medium transition duration-150 outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${buttonVariants[variant]} ${className}`}>
       {children}
     </Link>
   );
@@ -72,7 +74,7 @@ export function Field({ label, children, hint }: { label: string; children: Reac
   );
 }
 
-const inputCls = "w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
+const inputCls = "w-full rounded-md border border-border bg-background px-3 py-2 text-sm shadow-inset outline-none transition duration-150 focus:border-accent focus:ring-2 focus:ring-accent/25";
 
 export function Input({ className = "", ...props }: ComponentProps<"input">) {
   return <input className={`${inputCls} ${className}`} {...props} />;
@@ -85,13 +87,13 @@ export function Select(props: ComponentProps<"select">) {
 }
 
 export function Notice({ error, ok }: { error?: string; ok?: string }) {
-  if (error) return <p className="mb-4 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>;
-  if (ok) return <p className="mb-4 rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm text-accent">{ok}</p>;
+  if (error) return <p className="mb-4 rounded-md border border-danger/30 border-l-4 border-l-danger bg-danger/10 px-3 py-2 text-sm text-danger shadow-card">{error}</p>;
+  if (ok) return <p className="mb-4 rounded-md border border-accent/30 border-l-4 border-l-accent bg-accent/10 px-3 py-2 text-sm text-accent shadow-card">{ok}</p>;
   return null;
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted">{children}</p>;
+  return <p className="rounded-lg border border-dashed border-border bg-card/40 p-6 text-center text-sm text-muted">{children}</p>;
 }
 
 export function Stat({ label, value, sub }: { label: ReactNode; value: ReactNode; sub?: ReactNode }) {

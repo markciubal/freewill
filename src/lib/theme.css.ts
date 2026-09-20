@@ -1,4 +1,4 @@
-import { COLOR_TOKENS, SHARED_TOKENS, TOKENS, isValidValue, sanitizeTheme, type Theme } from "./theme";
+import { SCHEME_TOKENS, SHARED_TOKENS, TOKENS, isValidValue, sanitizeTheme, type Theme } from "./theme";
 
 // Serialize a theme to CSS and parse it back. The CSS shown in the editor is
 // exactly the CSS that is applied, so what you see is what you edit. Sections
@@ -18,12 +18,14 @@ function decls(rec: Record<string, string>, names: string[], comments: boolean, 
 
 export function themeToCss(theme: Theme, comments = true): string {
   const shared = SHARED_TOKENS.map((t) => t.name);
-  const colors = COLOR_TOKENS.map((t) => t.name);
+  const colors = SCHEME_TOKENS.map((t) => t.name);
   const head = comments
     ? `/* Freewill theme. This is yours alone; nobody can set it for you.
    Edit anything below and the page changes as you type. Save keeps it.
    Colors: hex, rgb(), hsl(), oklch(), or a CSS color name.
    Lengths: px, rem, em, %. Fonts: a comma-separated stack.
+   Map picture filter: invert(), hue-rotate(), brightness(), contrast(),
+   saturate(), grayscale(), sepia(), or none.
    Only "--name: value;" lines inside the marked sections are read.
    Scheme (system / light / dark) is chosen with the buttons above. */
 

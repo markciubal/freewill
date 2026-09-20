@@ -58,8 +58,8 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
         {mapSource.kind === "self-hosted"
           ? "This map is drawn on your device from data hosted here, in your own theme colors. It works with no internet beyond this server. Change the map colors under Theme."
           : mapSource.isOsmPublic
-            ? "Map pictures come from OpenStreetMap over the internet. For a map that works offline and follows your theme, the community can host its own map data (docs/maps.md)."
-            : "Map pictures come from this community's tile server. For a map drawn in your own theme colors, see docs/maps.md."}
+            ? "Map pictures come from OpenStreetMap over the internet, recolored by the map filter in your theme. For a map drawn line by line in your colors that works offline, the community can host its own map data (docs/maps.md)."
+            : "Map pictures come from this community's tile server, recolored by the map filter in your theme. For a map drawn line by line in your colors, see docs/maps.md."}
       </p>
     </div>
   );

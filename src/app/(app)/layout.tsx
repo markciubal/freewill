@@ -7,7 +7,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-card/85 shadow-card backdrop-blur-md">
         <div className="relative mx-auto flex max-w-(--content-width) items-center gap-x-4 px-4 py-3">
           <Link href="/home" className="font-semibold tracking-tight">
             Freewill

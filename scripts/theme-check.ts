@@ -1,5 +1,5 @@
 // Theme serialization round-trips, and bad input is rejected. Run: npm run smoke:theme
-import { DEFAULT_THEME, isValidValue, sanitizeTheme } from "../src/lib/theme";
+import { DEFAULT_MAP_PRESET, DEFAULT_THEME, MAP_PRESETS, applyMapPreset, isValidValue, matchingMapPreset, sanitizeTheme } from "../src/lib/theme";
 import { cssToTheme, themeToCss } from "../src/lib/theme.css";
 
 function assert(cond: unknown, msg: string) {
@@ -29,3 +29,20 @@ assert(isValidValue("length", "1.25rem") && !isValidValue("length", "calc(1px + 
 const s = sanitizeTheme({ scheme: "dark", shared: { radius: "12px", bogus: "1" }, light: { accent: "not a color!" } });
 assert(s.scheme === "dark" && s.shared.radius === "12px" && s.light.accent === DEFAULT_THEME.light.accent && !("bogus" in s.shared), "sanitizeTheme keeps valid, drops unknown, defaults invalid");
 assert(sanitizeTheme(null).scheme === "system", "null input yields defaults");
+
+// Map presets and the filter kind.
+{
+  assert(DEFAULT_MAP_PRESET.key === "cypherpunk" && DEFAULT_THEME.light["map-road"] === DEFAULT_MAP_PRESET.light["map-road"] && DEFAULT_THEME.shared["map-glow"] === DEFAULT_MAP_PRESET.glow, "the default map look is Cypherpunk");
+  assert(matchingMapPreset(DEFAULT_THEME)?.key === "cypherpunk", "a fresh theme is recognized as the Cypherpunk preset");
+  for (const preset of MAP_PRESETS) {
+    const applied = applyMapPreset(DEFAULT_THEME, preset);
+    assert(JSON.stringify(sanitizeTheme(applied)) === JSON.stringify(applied) && matchingMapPreset(applied)?.key === preset.key, `preset "${preset.label}" is entirely valid and round-trips`);
+  }
+  const tweaked = { ...DEFAULT_THEME, light: { ...DEFAULT_THEME.light, "map-road": "#ff00aa" } };
+  assert(matchingMapPreset(tweaked) === null, "changing one map color makes the map custom");
+  assert(isValidValue("filter", "none") && isValidValue("filter", "invert(1) hue-rotate(180deg) brightness(0.8)") && isValidValue("filter", "grayscale(100%)"), "filter validation accepts the allowed functions");
+  assert(!isValidValue("filter", "url(#x)") && !isValidValue("filter", "drop-shadow(0 0 2px red)") && !isValidValue("filter", "invert(1); background: url(x)"), "filter validation rejects url(), drop-shadow, and injection");
+  assert(sanitizeTheme({ light: { "map-filter": "url(#evil)" } }).light["map-filter"] === DEFAULT_THEME.light["map-filter"], "a hostile filter falls back to the default");
+  assert(cssToTheme(themeToCss(DEFAULT_THEME), DEFAULT_THEME).light["map-filter"] === DEFAULT_THEME.light["map-filter"], "the filter round-trips through the CSS editor");
+  assert(isValidValue("length", "0px") && sanitizeTheme({ shared: { elevation: "0px" } }).shared.elevation === "0px", "depth can be turned off with 0px");
+}

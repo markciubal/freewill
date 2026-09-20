@@ -3,7 +3,7 @@
 // public demo planet, when reachable) really carries those layers.
 // Run: npm run smoke:map
 import { PMTiles } from "pmtiles";
-import { PLACE_CLASSES, ROAD_CLASSES, concreteFontStack, paletteFromTokens } from "../src/lib/map-theme";
+import { PLACE_CLASSES, ROAD_CLASSES, concreteFontStack, paletteFromTokens, pixels } from "../src/lib/map-theme";
 import { originOfUrlTemplate } from "../src/lib/security";
 import { DEFAULT_THEME, isValidValue, sanitizeTheme } from "../src/lib/theme";
 import { cssToTheme, themeToCss } from "../src/lib/theme.css";
@@ -27,9 +27,11 @@ async function main() {
     const colors = [palette.land, palette.water, palette.road, palette.building, palette.boundary, palette.park, palette.label, palette.labelHalo, palette.roadLabel];
     assert(colors.every((c) => isValidValue("color", c)), `${scheme} theme yields a valid color for every map role`);
     assert(palette.labelHalo === palette.land, `${scheme}: label halo is the land color so names read over lines`);
+    assert(palette.glowPx === 6 && palette.road === "#22d3ee" && palette.tileFilter.startsWith("invert(1)"), `${scheme}: the default palette is Cypherpunk (6px glow, cyan roads, inverted picture tiles)`);
   }
   const fromEmpty = paletteFromTokens(() => "");
   assert(isValidValue("color", fromEmpty.water) && fromEmpty.fontFamily.length > 0, "with no theme readable, the palette falls back to defaults");
+  assert(pixels("6px") === 6 && pixels("0px") === 0 && pixels("nonsense") === 0 && pixels("99px") === 24, "glow is read in pixels, off when unreadable, capped at 24");
   assert(concreteFontStack("var(--font-geist-sans), system-ui, sans-serif") === "system-ui, sans-serif", "canvas fonts drop var() parts the canvas cannot resolve");
 
   // The new map tokens survive the theme editor's CSS round trip and the sanitizer.

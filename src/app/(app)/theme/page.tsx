@@ -10,10 +10,10 @@ export default async function ThemePage({ searchParams }: { searchParams: Promis
     <div className="space-y-6">
       <PageTitle
         title="Theme"
-        subtitle="Colors, type, and shape, saved to your account. Change a control or edit the CSS; the page updates as you type. Save to keep it."
+        subtitle="Colors, type, shape, depth, and the map, saved to your account. Change a control or edit the CSS; the page updates as you type. Save to keep it."
       />
       <Notice error={sp.error} ok={sp.ok} />
-      <ThemeEditor initial={sanitizeTheme(me.theme)} />
+      <ThemeEditor initial={sanitizeTheme(me.theme)} mapCenter={{ lat: me.lat, lng: me.lng }} />
     </div>
   );
 }
