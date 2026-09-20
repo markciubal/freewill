@@ -119,7 +119,7 @@ export const PROGRAMS: Program[] = [
     route: "/sabul",
     summary: "A self-audit that asks, of the live data, where power could still creep in: concentration of trust, hoarding, vouch rings, channel capture, lottery skew, and how much trust is unforgeable.",
     why: "A society is stateless only as long as no one quietly becomes the state. Le Guin's Sabul is the model of how that happens without any office. Turned into a critic, he is an inspection light on the rails the design relies on.",
-    features: ["Six findings with plain detail and a critic's remark", "Reads live data, judges nothing", "Signature-coverage tracks how forgeable the web of trust is"],
+    features: ["Six findings with plain detail and a critic's remark", "Reads live data, judges nothing", "Each finding says what one person can do, and where", "No one is assigned to act on it; that is the point", "Signature-coverage tracks how forgeable the web of trust is"],
   },
   {
     key: "support",

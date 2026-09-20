@@ -110,7 +110,7 @@ Next (Phase D, not yet built): member-held Ed25519 keys for true self-custody an
 
 **Phase D2: member-held identity keys (done).** Device-generated Ed25519 keys (`src/lib/keys.ts`, `/keys`); signed vouches verified against the member's public key and marked on person pages; `/api/trust/export` emits a trust bundle that `verifyTrustBundle` checks with no server. Anti-Sabul (unforgeable attribution) and anti-wall (federation-verifiable trust). Still commons-signed: the money ledger; per-record member signatures on transfers are the next step.
 
-**The critic (done).** `/sabul` runs six self-audit findings over live data (trust concentration, hoarding, vouch rings, channel capture, lottery skew, signature coverage) in Sabul's voice.
+**The critic (done).** `/sabul` runs six self-audit findings over live data (trust concentration, hoarding, vouch rings, channel capture, lottery skew, signature coverage) in Sabul's voice. Each finding ends with what one member can do about it, linked to the page where they do it (after Jemisin's "The Ones Who Stay and Fight": the utopia is maintenance, and the cost is borne by everyone who chooses to). The mechanism from that story is refused: there are no social workers, no role that acts on findings or removes people.
 
 **Infrastructure funding (done, deliberately narrow).** `/support` is a tip jar (SUPPORT_URL) kept entirely apart from Grace. A "buy Grace / 1% fee" payments API was declined: it would be unlicensed money transmission, create a seizable reserve, let wealth buy influence, and require KYC that contradicts the privacy design.
 
