@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { latestRun } from "./demurrage";
+import { explainZeroSum, zeroSumParts } from "./explain";
 
 // The jubilee / wind-down. Your instinct - "if it fails, wealth distributes
 // evenly as a fail-safe" - is already baked into mutual credit, and this makes
@@ -11,51 +11,47 @@ import { latestRun } from "./demurrage";
 
 export type WindDownReport = {
   members: number;
-  graceDebtForgiven: number; // sum of what debtors owed the commons
-  gracePositiveReleased: number; // sum of what creditors held
+  graceDebtForgiven: number; // sum of what debtors owed the commons, in cents
+  gracePositiveReleased: number; // sum of what creditors held, in cents
   hoursDebtForgiven: number; // in minutes
   hoursPositiveReleased: number;
-  outstandingVouchers: number;
-  remainder: number;
+  outstandingVouchers: number; // Grace held in unredeemed vouchers and locked cash notes, in cents
+  remainder: number; // cents carried by the last demurrage run
   openDisputes: number;
   commons: number;
   balances: boolean; // does everything still net to zero
 };
 
 export async function windDownReport(): Promise<WindDownReport> {
-  const [users, run, voucherAgg, cashAgg, openDisputes, commons] = await Promise.all([
+  const [members, parts, openDisputes, commons] = await Promise.all([
     db.user.findMany({ select: { graceBalance: true, hoursBalance: true } }),
-    latestRun(),
-    db.voucher.aggregate({ where: { status: "ISSUED" }, _sum: { amount: true } }),
-    db.cashNote.aggregate({ where: { status: "LOCKED" }, _sum: { denomination: true } }),
+    zeroSumParts(),
     db.circle.count({ where: { status: { in: ["OPEN", "GATHERING"] } } }),
     db.commons.count(),
   ]);
-  const vouchers = (voucherAgg._sum.amount ?? 0) + (cashAgg._sum.denomination ?? 0);
 
-  let graceDebt = 0, gracePos = 0, hoursDebt = 0, hoursPos = 0, graceSum = 0, hoursSum = 0;
-  for (const u of users) {
-    graceSum += u.graceBalance;
-    hoursSum += u.hoursBalance;
-    if (u.graceBalance < 0) graceDebt += -u.graceBalance;
-    else gracePos += u.graceBalance;
-    if (u.hoursBalance < 0) hoursDebt += -u.hoursBalance;
-    else hoursPos += u.hoursBalance;
+  let graceDebtForgiven = 0;
+  let gracePositiveReleased = 0;
+  let hoursDebtForgiven = 0;
+  let hoursPositiveReleased = 0;
+  for (const member of members) {
+    if (member.graceBalance < 0) graceDebtForgiven += -member.graceBalance;
+    else gracePositiveReleased += member.graceBalance;
+    if (member.hoursBalance < 0) hoursDebtForgiven += -member.hoursBalance;
+    else hoursPositiveReleased += member.hoursBalance;
   }
-  const remainder = run?.remainder ?? 0;
 
   return {
-    members: users.length,
-    graceDebtForgiven: graceDebt,
-    gracePositiveReleased: gracePos,
-    hoursDebtForgiven: hoursDebt,
-    hoursPositiveReleased: hoursPos,
-    outstandingVouchers: vouchers,
-    remainder,
+    members: members.length,
+    graceDebtForgiven,
+    gracePositiveReleased,
+    hoursDebtForgiven,
+    hoursPositiveReleased,
+    outstandingVouchers: parts.reservedInVouchers + parts.lockedInCash,
+    remainder: parts.carriedRemainder,
     openDisputes,
     commons,
-    // Grace nets to zero once the demurrage remainder and voucher reserves are
-    // counted; Hours nets to zero on its own.
-    balances: graceSum + remainder + vouchers === 0 && hoursSum === 0,
+    // The same check "Show the work" walks through step by step.
+    balances: explainZeroSum(parts).balances,
   };
 }

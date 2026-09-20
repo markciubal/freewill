@@ -34,7 +34,8 @@
     "smoke:locality": "tsx --env-file=.env scripts/locality-check.ts",
     "smoke:keys": "tsx --env-file=.env scripts/keys-check.ts",
     "smoke:security": "tsx --env-file=.env scripts/security-check.ts",
-    "smoke:map": "tsx --env-file=.env scripts/map-check.ts"
+    "smoke:map": "tsx --env-file=.env scripts/map-check.ts",
+    "smoke:explain": "tsx --env-file=.env scripts/explain-check.ts"
   },
   "dependencies": {
     "@noble/curves": "^2.4.0",

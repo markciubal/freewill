@@ -47,6 +47,7 @@ const GROUPS: Group[] = [
     label: "How it works",
     items: [
       { href: "/programs", label: "Programs", hint: "What this is" },
+      { href: "/explain", label: "Show the work", hint: "Your numbers, step by step" },
       { href: "/verify", label: "Verify ledger", hint: "Check the history yourself" },
       { href: "/sabul", label: "The critic", hint: "How power could still creep in" },
       { href: "/wind-down", label: "Wind-down", hint: "The fail-safe, checked" },

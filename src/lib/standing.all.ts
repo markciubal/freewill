@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { localityKey } from "./form";
-import { computeStanding, requiredVouchesFor, type Standing } from "./standing";
+import { computeStanding, requiredVouchesFor, type Standing, type StandingInput } from "./standing";
 
 export type Member = { id: string; username: string; locality: string; createdAt: Date };
 export type StandingMap = Map<string, Standing & { user: Member }>;
@@ -9,8 +9,15 @@ export type StandingMap = Map<string, Standing & { user: Member }>;
 // is relative to the locality, and a vouch counts fully only when it comes from
 // someone who is themselves verified. To bootstrap a new locality, all vouches
 // count until there are at least `requiredVouches` verified people there.
-export async function getStandingAll(): Promise<StandingMap> {
-  const [users, vouches, pledges, tOut, tIn, harms, unfounded, kept] = await Promise.all([
+//
+// The work happens in two halves so the "Show the work" page can reuse the
+// first: `getStandingInputs` gathers, for every member, the raw counts the
+// rule needs; `getStandingAll` runs the rule over them.
+
+type MemberRow = Member & { humanVerifiedAt: Date | null };
+
+export async function getStandingInputs(): Promise<Map<string, StandingInput & { user: MemberRow }>> {
+  const [members, vouches, completedPledgesByUser, transfersSentByUser, transfersReceivedByUser, harmsFoundAboutUser, unfoundedRaisedByUser, resolvedCircles] = await Promise.all([
     db.user.findMany({ select: { id: true, username: true, locality: true, createdAt: true, humanVerifiedAt: true } }),
     db.vouch.findMany({ select: { fromId: true, toId: true } }),
     db.pledge.groupBy({ by: ["userId"], where: { status: "COMPLETED" }, _count: { _all: true } }),
@@ -21,71 +28,97 @@ export async function getStandingAll(): Promise<StandingMap> {
     db.circle.findMany({ where: { status: "RESOLVED" }, select: { keeperIds: true } }),
   ]);
 
-  const count = (rows: { _count: { _all: number } }[], key: (r: never) => string | null) => {
-    const m = new Map<string, number>();
-    for (const r of rows) {
-      const k = key(r as never);
-      if (k) m.set(k, r._count._all);
+  // Turn each grouped query into "user id -> count".
+  const countByUser = (rows: { _count: { _all: number } }[], userIdOf: (row: never) => string | null) => {
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const userId = userIdOf(row as never);
+      if (userId) counts.set(userId, row._count._all);
     }
-    return m;
+    return counts;
   };
-  const pledgesKept = count(pledges, (r: { userId: string }) => r.userId);
-  const outCount = count(tOut, (r: { fromId: string }) => r.fromId);
-  const inCount = count(tIn, (r: { toId: string }) => r.toId);
-  const harmCount = count(harms, (r: { aboutId: string | null }) => r.aboutId);
-  const unfoundedCount = count(unfounded, (r: { raisedById: string }) => r.raisedById);
-  const keptCount = new Map<string, number>();
-  for (const c of kept) for (const k of c.keeperIds) keptCount.set(k, (keptCount.get(k) ?? 0) + 1);
+  const pledgesKept = countByUser(completedPledgesByUser, (row: { userId: string }) => row.userId);
+  const transfersSent = countByUser(transfersSentByUser, (row: { fromId: string }) => row.fromId);
+  const transfersReceived = countByUser(transfersReceivedByUser, (row: { toId: string }) => row.toId);
+  const harmsFound = countByUser(harmsFoundAboutUser, (row: { aboutId: string | null }) => row.aboutId);
+  const unfoundedAccusations = countByUser(unfoundedRaisedByUser, (row: { raisedById: string }) => row.raisedById);
 
-  const received = new Map<string, string[]>();
-  const given = new Map<string, number>();
-  for (const v of vouches) {
-    received.set(v.toId, [...(received.get(v.toId) ?? []), v.fromId]);
-    given.set(v.fromId, (given.get(v.fromId) ?? 0) + 1);
+  // How many resolved disputes each person served on as a mediator.
+  const disputesMediated = new Map<string, number>();
+  for (const circle of resolvedCircles) {
+    for (const keeperId of circle.keeperIds) disputesMediated.set(keeperId, (disputesMediated.get(keeperId) ?? 0) + 1);
   }
 
-  // Group by a case-insensitive key so "North Ridge" and "north ridge" count as
-  // the same place for population and verification.
-  const population = new Map<string, number>();
-  for (const u of users) population.set(localityKey(u.locality), (population.get(localityKey(u.locality)) ?? 0) + 1);
-
-  // Pass 1: who would be verified counting every vouch. Pass 2: count only
-  // vouches from pass-1 verified people, unless the locality is bootstrapping.
-  const pass1 = new Set<string>();
-  for (const u of users) {
-    const bonus = u.humanVerifiedAt !== null ? 1 : 0;
-    if ((received.get(u.id)?.length ?? 0) + bonus >= requiredVouchesFor(population.get(localityKey(u.locality)) ?? 1)) pass1.add(u.id);
+  // Who vouched for whom.
+  const vouchersOf = new Map<string, string[]>(); // user id -> ids of people who vouched for them
+  const vouchesGivenBy = new Map<string, number>();
+  for (const vouch of vouches) {
+    vouchersOf.set(vouch.toId, [...(vouchersOf.get(vouch.toId) ?? []), vouch.fromId]);
+    vouchesGivenBy.set(vouch.fromId, (vouchesGivenBy.get(vouch.fromId) ?? 0) + 1);
   }
-  const verifiedPerLocality = new Map<string, number>();
-  for (const u of users) if (pass1.has(u.id)) verifiedPerLocality.set(localityKey(u.locality), (verifiedPerLocality.get(localityKey(u.locality)) ?? 0) + 1);
+
+  // Population per locality, grouped by a case-insensitive key so "North
+  // Ridge" and "north ridge" count as the same place.
+  const populationOfLocality = new Map<string, number>();
+  for (const member of members) {
+    const key = localityKey(member.locality);
+    populationOfLocality.set(key, (populationOfLocality.get(key) ?? 0) + 1);
+  }
+  const populationFor = (member: MemberRow) => populationOfLocality.get(localityKey(member.locality)) ?? 1;
+
+  // Pass 1: who would be verified if every vouch counted. Pass 2 (inside the
+  // rule) counts only vouches from these people, unless the locality is still
+  // bootstrapping, meaning it has fewer pass-1 verified people than the number
+  // of vouches it requires.
+  const verifiedCountingEveryVouch = new Set<string>();
+  for (const member of members) {
+    const idmeBonus = member.humanVerifiedAt !== null ? 1 : 0;
+    const vouchesReceived = vouchersOf.get(member.id)?.length ?? 0;
+    if (vouchesReceived + idmeBonus >= requiredVouchesFor(populationFor(member))) verifiedCountingEveryVouch.add(member.id);
+  }
+  const verifiedPeopleInLocality = new Map<string, number>();
+  for (const member of members) {
+    if (!verifiedCountingEveryVouch.has(member.id)) continue;
+    const key = localityKey(member.locality);
+    verifiedPeopleInLocality.set(key, (verifiedPeopleInLocality.get(key) ?? 0) + 1);
+  }
 
   const now = Date.now();
-  const map: StandingMap = new Map();
-  for (const u of users) {
-    const pop = population.get(localityKey(u.locality)) ?? 1;
-    const from = received.get(u.id) ?? [];
-    const s = computeStanding({
-      vouchesReceived: from.length,
-      vouchesFromVerified: from.filter((f) => pass1.has(f)).length,
-      vouchesGiven: given.get(u.id) ?? 0,
-      pledgesKept: pledgesKept.get(u.id) ?? 0,
-      transfers: (outCount.get(u.id) ?? 0) + (inCount.get(u.id) ?? 0),
-      circlesKept: keptCount.get(u.id) ?? 0,
-      harms: harmCount.get(u.id) ?? 0,
-      unfounded: unfoundedCount.get(u.id) ?? 0,
-      memberDays: Math.floor((now - u.createdAt.getTime()) / 86_400_000),
-      localityPopulation: pop,
-      bootstrap: (verifiedPerLocality.get(localityKey(u.locality)) ?? 0) < requiredVouchesFor(pop),
-      humanVerified: u.humanVerifiedAt !== null,
+  const inputs = new Map<string, StandingInput & { user: MemberRow }>();
+  for (const member of members) {
+    const population = populationFor(member);
+    const voucherIds = vouchersOf.get(member.id) ?? [];
+    inputs.set(member.id, {
+      user: member,
+      vouchesReceived: voucherIds.length,
+      vouchesFromVerified: voucherIds.filter((voucherId) => verifiedCountingEveryVouch.has(voucherId)).length,
+      vouchesGiven: vouchesGivenBy.get(member.id) ?? 0,
+      pledgesKept: pledgesKept.get(member.id) ?? 0,
+      transfers: (transfersSent.get(member.id) ?? 0) + (transfersReceived.get(member.id) ?? 0),
+      circlesKept: disputesMediated.get(member.id) ?? 0,
+      harms: harmsFound.get(member.id) ?? 0,
+      unfounded: unfoundedAccusations.get(member.id) ?? 0,
+      memberDays: Math.floor((now - member.createdAt.getTime()) / 86_400_000),
+      localityPopulation: population,
+      bootstrap: (verifiedPeopleInLocality.get(localityKey(member.locality)) ?? 0) < requiredVouchesFor(population),
+      humanVerified: member.humanVerifiedAt !== null,
     });
-    map.set(u.id, { ...s, user: u });
   }
-  return map;
+  return inputs;
+}
+
+export async function getStandingAll(): Promise<StandingMap> {
+  const inputs = await getStandingInputs();
+  const standings: StandingMap = new Map();
+  for (const [userId, { user, ...input }] of inputs) {
+    standings.set(userId, { ...computeStanding(input), user });
+  }
+  return standings;
 }
 
 export async function getStanding(userId: string): Promise<Standing> {
   const all = await getStandingAll();
-  const s = all.get(userId);
-  if (!s) throw new Error("No such person.");
-  return s;
+  const standing = all.get(userId);
+  if (!standing) throw new Error("No such person.");
+  return standing;
 }

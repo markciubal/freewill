@@ -65,7 +65,7 @@ export default async function HomePage() {
           <Stat
             label={<>Standing <InfoDot term="standing" /></>}
             value={TIER_LABEL[standing.tier]}
-            sub={`${standing.score} pts: ${standing.vouchesReceived} vouches, ${standing.pledgesKept} kept pledges`}
+            sub={<>{standing.score} pts: {standing.vouchesReceived} vouches, {standing.pledgesKept} kept pledges. <Link href="/explain" className="text-accent hover:underline">Show the work</Link></>}
           />
         </Card>
         <Card>

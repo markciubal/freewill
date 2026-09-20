@@ -38,9 +38,10 @@ export default async function WindDownPage() {
           <Badge tone={r.balances ? "accent" : "danger"}>{r.balances ? "net zero" : "off — investigate"}</Badge>
         </div>
         <p className="text-sm text-muted">
-          Grace balances plus the {r.remainder} carried from demurrage plus the {r.outstandingVouchers} reserved in vouchers sum to zero.
+          Grace balances plus the <Grace n={r.remainder} /> carried from demurrage plus the <Grace n={r.outstandingVouchers} /> held in notes sum to zero.
           Hours (currently {fmtHours(r.hoursPositiveReleased)} of credit against {fmtHours(r.hoursDebtForgiven)} of debt) sum to zero on their own.
-          There is no treasury to seize, so there is nothing a hostile authority can take by dissolving the commons.
+          There is no treasury to seize, so there is nothing a hostile authority can take by dissolving the commons.{" "}
+          <Link href="/explain" className="text-accent hover:underline">See the arithmetic.</Link>
         </p>
         <p className="text-sm text-muted">
           This page is a mirror, not a button. Winding down is something the people decide together in an{" "}
