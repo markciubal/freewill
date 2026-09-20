@@ -18,17 +18,23 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
+  const err = url.searchParams.get("error");
+  const errDesc = url.searchParams.get("error_description");
   const jar = await cookies();
   const saved = jar.get("idme_oauth")?.value;
   jar.delete("idme_oauth");
   let parsed: { state?: string; verifier?: string } = {};
   try { parsed = JSON.parse(saved ?? "{}"); } catch {}
   // Distinguish the failure modes so a retry can be diagnosed, not guessed at.
+  if (err) {
+    // ID.me told us why it sent no code (e.g. access_denied, invalid_scope).
+    return back("error=" + encodeURIComponent(`ID.me declined: ${err}${errDesc ? ` - ${decodeURIComponent(errDesc)}` : ""}. Nothing was recorded.`));
+  }
   if (!saved) {
     return back("error=" + encodeURIComponent("Your browser didn't return the sign-in cookie. Start and finish on the same address (the public site, not a forwarded or preview URL), and allow cookies. Nothing was recorded."));
   }
   if (!code || !state) {
-    return back("error=" + encodeURIComponent("ID.me didn't return a code. Nothing was recorded; try again."));
+    return back("error=" + encodeURIComponent("ID.me sent no code and no error. Check the app's scope/policy in the ID.me portal. Nothing was recorded."));
   }
   if (state !== parsed.state) {
     return back("error=" + encodeURIComponent("The security check (state) didn't match. Nothing was recorded; try again."));
