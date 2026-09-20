@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Button, Field, Input, Notice } from "@/components/ui";
 import { LocationPicker } from "@/components/location-picker";
 import { COVENANT } from "@/lib/covenant";
+import { PASSWORD_MIN_LENGTH } from "@/lib/security";
 import { join, type AuthState } from "../actions";
 
 export default function JoinPage() {
@@ -20,8 +21,8 @@ export default function JoinPage() {
       <Field label="Username" hint="Lowercase letters, numbers, underscores. This is how people will find you.">
         <Input name="username" autoComplete="username" required autoFocus pattern="[a-z0-9_]{3,24}" />
       </Field>
-      <Field label="Password" hint="At least 8 characters. Cannot be reset.">
-        <Input name="password" type="password" autoComplete="new-password" required minLength={8} />
+      <Field label="Password" hint={`At least ${PASSWORD_MIN_LENGTH} characters. A few unrelated words is easiest to remember. Cannot be reset.`}>
+        <Input name="password" type="password" autoComplete="new-password" required minLength={PASSWORD_MIN_LENGTH} />
       </Field>
       <Field label="Display name (optional)">
         <Input name="displayName" maxLength={60} />

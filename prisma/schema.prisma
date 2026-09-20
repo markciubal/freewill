@@ -16,6 +16,10 @@ model User {
   id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   username           String    @unique
   passwordHash       String
+  // Bumped when the password changes or the person logs out everywhere. A
+  // session token carries the version it was issued with; a mismatch means the
+  // token is dead, which is the only way to revoke a signed cookie.
+  sessionVersion     Int       @default(0)
   displayName        String?
   bio                String?
   locality           String // set once at join, never changed: neighborhood, valley, block, mesh node...
@@ -65,6 +69,18 @@ model User {
   adjustments      LedgerAdjustment[]
   proposals        Proposal[]
   ballots          Ballot[]
+}
+
+// A failed login or a join attempt, kept briefly so the same address or the
+// same username cannot be hammered. Not part of the ledger: rows are pruned
+// after a day. `key` is "ip:<address>" or "user:<username>".
+model AuthAttempt {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  kind      String // "login" | "join"
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([kind, key, createdAt])
 }
 
 // A vouch is the atom of trust. Standing is derived from the web of vouches,

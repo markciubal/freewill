@@ -6,7 +6,8 @@ import { requireUser } from "@/lib/auth";
 import { Badge, Button } from "@/components/ui";
 import { idmeEnabled, idmePolicies, policyLabel } from "@/lib/idme";
 import { fmtDate } from "@/components/ui";
-import { unlinkIdme, updateProfile } from "./actions";
+import { PASSWORD_MIN_LENGTH } from "@/lib/security";
+import { changePassword, logoutEverywhere, unlinkIdme, updateProfile } from "./actions";
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string }> }) {
   const me = await requireUser();
@@ -76,7 +77,26 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           )}
         </Card>
       )}
-      <p className="mt-4 text-xs text-muted">Passwords cannot be changed or reset, so keep yours somewhere safe.</p>
+      <Card className="mt-6 space-y-4">
+        <div className="text-sm font-medium">Password</div>
+        <p className="text-sm text-muted">
+          You can change your password here, but nobody can reset it for you: there is no email on file and no one with the power to. Keep it somewhere safe.
+        </p>
+        <form action={changePassword} className="space-y-3">
+          <Field label="Current password"><Input name="currentPassword" type="password" autoComplete="current-password" required /></Field>
+          <Field label="New password" hint={`At least ${PASSWORD_MIN_LENGTH} characters. A few unrelated words is easiest to remember.`}>
+            <Input name="newPassword" type="password" autoComplete="new-password" required minLength={PASSWORD_MIN_LENGTH} />
+          </Field>
+          <Field label="New password again"><Input name="confirmPassword" type="password" autoComplete="new-password" required minLength={PASSWORD_MIN_LENGTH} /></Field>
+          <SubmitButton pendingText="Changing...">Change password</SubmitButton>
+        </form>
+        <div className="border-t border-border pt-3">
+          <p className="mb-2 text-xs text-muted">Lost a phone, or used a shared computer? This signs you out everywhere except here.</p>
+          <form action={logoutEverywhere}>
+            <Button variant="ghost" type="submit">Log out everywhere else</Button>
+          </form>
+        </div>
+      </Card>
     </div>
   );
 }

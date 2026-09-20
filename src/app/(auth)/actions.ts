@@ -8,6 +8,8 @@ import { db } from "@/lib/db";
 import { normalizeLocality } from "@/lib/form";
 import { isValidLatLng, roundPin } from "@/lib/geo";
 import { DUMMY_HASH, hashPassword, verifyPassword } from "@/lib/password";
+import { RATE_LIMITS, clientAddressKey, rateLimitPermits, recordAttempt, usernameKey } from "@/lib/ratelimit";
+import { PASSWORD_MAX_LENGTH, passwordProblem, rateLimitMessage } from "@/lib/security";
 
 export type AuthState = { error?: string };
 
@@ -19,9 +21,17 @@ const username = z
   .max(24, "Username can be at most 24 characters")
   .regex(/^[a-z0-9_]+$/, "Username: letters, numbers and underscores only");
 
-const password = z.string().min(8, "Password needs at least 8 characters").max(128);
+// Length is checked here; the full rule (well-known passwords, the username
+// inside the password) runs in passwordProblem once the username is known.
+const password = z.string().min(1, "Password is required").max(PASSWORD_MAX_LENGTH);
 
 export async function join(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  // Each join creates an account, so the address is throttled before anything
+  // else is looked at.
+  const addressKey = await clientAddressKey();
+  const permitted = await rateLimitPermits("join", [{ key: addressKey, limit: RATE_LIMITS.joinPerAddress }]);
+  if (!permitted.allowed) return { error: rateLimitMessage(permitted.limit) };
+
   const parsed = z
     .object({
       username,
@@ -44,8 +54,11 @@ export async function join(_prev: AuthState, formData: FormData): Promise<AuthSt
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const d = parsed.data;
+  const weakPassword = passwordProblem(d.password, d.username);
+  if (weakPassword) return { error: weakPassword };
   if (!isValidLatLng(d)) return { error: "Place your pin on the map." };
   const pin = roundPin(d);
+  await recordAttempt("join", [addressKey]);
   let userId: string;
   try {
     const user = await db.user.create({
@@ -68,7 +81,7 @@ export async function join(_prev: AuthState, formData: FormData): Promise<AuthSt
     throw e;
   }
 
-  await createSession(userId);
+  await createSession(userId, 0);
   redirect("/home");
 }
 
@@ -78,15 +91,29 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
     .safeParse({ username: formData.get("username"), password: formData.get("password") });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
+  // Two throttles: the address (someone trying many names) and the username
+  // (many addresses trying one name). Only failures are recorded below, so a
+  // person who types their password right is never slowed down.
+  const addressKey = await clientAddressKey();
+  const nameKey = usernameKey(parsed.data.username);
+  const permitted = await rateLimitPermits("login", [
+    { key: addressKey, limit: RATE_LIMITS.loginPerAddress },
+    { key: nameKey, limit: RATE_LIMITS.loginPerUsername },
+  ]);
+  if (!permitted.allowed) return { error: rateLimitMessage(permitted.limit) };
+
   const user = await db.user.findUnique({
     where: { username: parsed.data.username },
-    select: { id: true, passwordHash: true },
+    select: { id: true, passwordHash: true, sessionVersion: true },
   });
   // Always run the comparison so timing does not reveal whether the name exists.
   const valid = await verifyPassword(parsed.data.password, user?.passwordHash ?? DUMMY_HASH);
-  if (!user || !valid) return { error: "Wrong username or password. Passwords cannot be reset, so check it carefully." };
+  if (!user || !valid) {
+    await recordAttempt("login", [addressKey, nameKey]);
+    return { error: "Wrong username or password. Passwords cannot be reset, so check it carefully." };
+  }
 
-  await createSession(user.id);
+  await createSession(user.id, user.sessionVersion);
   redirect("/home");
 }
 
