@@ -5,9 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { logout } from "@/app/(auth)/actions";
 
-// The header, organized into three task groups plus an account menu. Grouping,
+// The header, organized into four task groups plus an account menu. Grouping,
 // not a longer list: "what can I get or give", "who is here and how we decide",
-// "what is around me". Each item carries a plain one-line descriptor.
+// "what is around me", "how this works and how to check it". The account menu
+// holds only things about you. Each item carries a plain one-line descriptor.
 
 type Item = { href: string; label: string; hint: string };
 type Group = { id: string; label: string; items: Item[] };
@@ -19,9 +20,9 @@ const GROUPS: Group[] = [
     items: [
       { href: "/board", label: "Board", hint: "Needs & offers" },
       { href: "/ledger", label: "Ledger", hint: "Grace & Hours" },
+      { href: "/cash", label: "Cash", hint: "Offline bearer notes" },
       { href: "/commons", label: "Commons", hint: "Shared resources" },
       { href: "/seeds", label: "Seed bank", hint: "Seeds & plant exchange" },
-      { href: "/cash", label: "Cash", hint: "Offline bearer notes" },
     ],
   },
   {
@@ -41,18 +42,24 @@ const GROUPS: Group[] = [
       { href: "/bulletins", label: "Bulletins", hint: "Alerts & notices" },
     ],
   },
+  {
+    id: "system",
+    label: "How it works",
+    items: [
+      { href: "/programs", label: "Programs", hint: "What this is" },
+      { href: "/verify", label: "Verify ledger", hint: "Check the history yourself" },
+      { href: "/sabul", label: "The critic", hint: "How power could still creep in" },
+      { href: "/wind-down", label: "Wind-down", hint: "The fail-safe, checked" },
+      { href: "/support", label: "Support the server", hint: "Fund the infrastructure" },
+    ],
+  },
 ];
 
 const ACCOUNT: Item[] = [
   { href: "/home", label: "Home", hint: "Your overview" },
   { href: "/profile", label: "Profile", hint: "You & your pin" },
-  { href: "/theme", label: "Theme", hint: "Colors, type, shape" },
   { href: "/keys", label: "Identity key", hint: "Sign your vouches" },
-  { href: "/programs", label: "Programs", hint: "What this is" },
-  { href: "/sabul", label: "The critic", hint: "How power could still creep in" },
-  { href: "/verify", label: "Verify ledger", hint: "Check the history yourself" },
-  { href: "/wind-down", label: "Wind-down", hint: "The fail-safe, checked" },
-  { href: "/support", label: "Support the server", hint: "Fund the infrastructure" },
+  { href: "/theme", label: "Theme", hint: "Colors, type, shape" },
 ];
 
 function Chevron({ open }: { open: boolean }) {
