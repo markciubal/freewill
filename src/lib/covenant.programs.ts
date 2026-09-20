@@ -19,7 +19,7 @@ export const PROGRAMS: Program[] = [
     route: "/map",
     summary: "A pin chosen on a map at join, no address, no forced GPS. Needs, offers, commons and hazards drawn around you; people shown only as a distance.",
     why: "Mutual aid is physical: who is close enough to carry water tonight. But a map of where everyone sleeps is exactly what a hostile state wants. So pins are rounded to a hundred meters, people are never drawn, and only what someone chose to publish appears on the map.",
-    features: ["OpenStreetMap pin picker at join", "Pins rounded to ~100 m", "Distance on every card", "Within-10-km scope", "Hazard radius circles", "Self-hosted map file (PMTiles) drawn line by line in your own map colors", "Map looks: Cypherpunk (default), Paper, Blueprint, Phosphor, or any color you like", "Picture tiles recolored by your map filter", "Works with no internet beyond this server", "Fallback: any raster tile server via NEXT_PUBLIC_TILE_URL"],
+    features: ["OpenStreetMap pin picker at join", "Pins rounded to ~100 m, movable from your profile", "Distance on every card", "Within-10-km scope", "Hazard radius circles", "Self-hosted map file (PMTiles) drawn line by line in your own map colors", "Map looks: Cypherpunk (default), Paper, Blueprint, Phosphor, or any color you like", "Picture tiles recolored by your map filter", "Works with no internet beyond this server", "Fallback: any raster tile server via NEXT_PUBLIC_TILE_URL"],
   },
   {
     key: "trust",

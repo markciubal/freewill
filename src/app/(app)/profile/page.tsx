@@ -7,6 +7,7 @@ import { Badge, Button } from "@/components/ui";
 import { idmeEnabled, idmePolicies, policyLabel } from "@/lib/idme";
 import { fmtDate } from "@/components/ui";
 import { PASSWORD_MIN_LENGTH } from "@/lib/security";
+import { PasswordKeeping } from "@/components/password-keeping";
 import { changePassword, logoutEverywhere, unlinkIdme, updateProfile } from "./actions";
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string }> }) {
@@ -16,7 +17,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
     <div className="mx-auto max-w-xl">
       <PageTitle
         title="Your profile"
-        subtitle="Skills are how responders are found. List everything you can actually do."
+        subtitle="Everything you chose at sign-up except your username can be changed here. Skills are how responders are found; list everything you can actually do."
         action={<Link href={`/people/${me.username}`} className="text-sm text-accent hover:underline">View as others see it</Link>}
       />
       <Notice error={sp.error} ok={sp.ok} />
@@ -24,11 +25,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <form action={updateProfile} className="space-y-4">
           <Field label="Username"><Input value={`@${me.username}`} disabled /></Field>
           <Field label="Display name"><Input name="displayName" maxLength={60} defaultValue={me.displayName ?? ""} /></Field>
-          <Field label="Locality" hint="Where you are. You can change this; matching ignores capitalization."><Input name="locality" required minLength={2} maxLength={80} defaultValue={me.locality} /></Field>
+          <Field label="Locality" hint="Where you are now. Change it when you move; matching ignores capitalization, and verification counts vouches from people in the locality you name."><Input name="locality" required minLength={2} maxLength={80} defaultValue={me.locality} /></Field>
           <div className="text-sm">
             <span className="mb-1 block font-medium">Your pin</span>
-            <p className="mb-2 text-xs text-muted">Set when you joined, rounded to about a hundred meters. Others see only a distance, never this point. ({me.lat}, {me.lng})</p>
-            <LocationPicker initial={{ lat: me.lat, lng: me.lng }} readOnly />
+            <p className="mb-2 text-xs text-muted">Click the map to move it if you have moved. Nearby is enough, not your door. It is rounded to about a hundred meters and others only ever see a distance, never this point. Things you already published keep the pin they were published with. Currently ({me.lat}, {me.lng}).</p>
+            <LocationPicker initial={{ lat: me.lat, lng: me.lng }} />
           </div>
           <Field label="Skills" hint="Comma-separated. e.g. first aid, welding, water purification, midwifery, ham radio, carpentry">
             <Textarea name="skills" rows={3} maxLength={500} defaultValue={me.skills.join(", ")} />
@@ -79,9 +80,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       )}
       <Card className="mt-6 space-y-4">
         <div className="text-sm font-medium">Password</div>
-        <p className="text-sm text-muted">
-          You can change your password here, but nobody can reset it for you: there is no email on file and no one with the power to. Keep it somewhere safe.
-        </p>
+        <PasswordKeeping />
         <form action={changePassword} className="space-y-3">
           <Field label="Current password"><Input name="currentPassword" type="password" autoComplete="current-password" required /></Field>
           <Field label="New password" hint={`At least ${PASSWORD_MIN_LENGTH} characters. A few unrelated words is easiest to remember.`}>

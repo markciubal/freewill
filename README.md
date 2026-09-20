@@ -88,4 +88,4 @@ Grace amounts are written with an olive-sprig mark, the way $ marks a dollar: `<
 
 ## Design rules (short version)
 
-No admin. No issuer. No resets. Locality is set once. Standing is computed, never assigned. Verification scales with the locality. Sum of balances (plus carried demurrage remainder) is always zero. Harm goes to a circle whose keepers are drawn by lot. Survival needs first. See BUILD_PROMPT.md.
+No admin. No issuer. No resets (passwords can be changed, never recovered). Locality and pin are yours to update. Standing is computed, never assigned. Verification scales with the locality. Sum of balances (plus carried demurrage remainder) is always zero. Harm goes to a circle whose keepers are drawn by lot. Survival needs first. See BUILD_PROMPT.md.

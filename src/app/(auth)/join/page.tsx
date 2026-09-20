@@ -6,6 +6,7 @@ import { Button, Field, Input, Notice } from "@/components/ui";
 import { LocationPicker } from "@/components/location-picker";
 import { COVENANT } from "@/lib/covenant";
 import { PASSWORD_MIN_LENGTH } from "@/lib/security";
+import { PasswordKeeping } from "@/components/password-keeping";
 import { join, type AuthState } from "../actions";
 
 export default function JoinPage() {
@@ -14,16 +15,16 @@ export default function JoinPage() {
     <form action={action} className="space-y-4">
       <h1 className="text-xl font-semibold">Create an account</h1>
       <p className="text-sm text-muted">
-        Just a username and a password. There is no email on file and no reset: if you lose the password you will
-        need a new account and new vouches. Write it down somewhere safe.
+        Just a username and a password. Everything else you enter here can be changed later from your profile; the username cannot.
       </p>
       <Notice error={state.error} />
       <Field label="Username" hint="Lowercase letters, numbers, underscores. This is how people will find you.">
         <Input name="username" autoComplete="username" required autoFocus pattern="[a-z0-9_]{3,24}" />
       </Field>
-      <Field label="Password" hint={`At least ${PASSWORD_MIN_LENGTH} characters. A few unrelated words is easiest to remember. Cannot be reset.`}>
+      <Field label="Password" hint={`At least ${PASSWORD_MIN_LENGTH} characters. A few unrelated words is easiest to remember.`}>
         <Input name="password" type="password" autoComplete="new-password" required minLength={PASSWORD_MIN_LENGTH} />
       </Field>
+      <PasswordKeeping compact />
       <Field label="Display name (optional)">
         <Input name="displayName" maxLength={60} />
       </Field>
@@ -33,7 +34,7 @@ export default function JoinPage() {
       <div className="text-sm">
         <span className="mb-1 block font-medium">Your pin</span>
         <p className="mb-2 text-xs text-muted">
-          Click the map to place a pin near where you live. Not on your door: nearby is enough. It is rounded to about a hundred meters, it never changes, and nobody else ever sees it as a point, only as a distance from them. No address is asked. The device location button is optional and only runs if you press it.
+          Click the map to place a pin near where you live. Not on your door: nearby is enough. It is rounded to about a hundred meters, you can move it later from your profile, and nobody else ever sees it as a point, only as a distance from them. No address is asked. The device location button is optional and only runs if you press it.
         </p>
         <LocationPicker />
       </div>

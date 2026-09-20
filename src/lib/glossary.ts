@@ -82,7 +82,7 @@ export const GLOSSARY = {
   },
   locality: {
     label: "Locality",
-    short: "Where you are: a neighborhood, valley, or block. You set it once when you join, on a map, and it never changes.",
+    short: "Where you are: a neighborhood, valley, or block. You name it when you join and change it from your profile when you move; your map pin lives there too.",
     more: "Chosen on an OpenStreetMap pin and rounded to about a hundred meters; no address is stored. It scopes the board, bulletins, commons, disputes, and assemblies. People are never drawn as a point, only shown as a distance. Honesty about it is what makes local vouches and votes mean something.",
   },
   jubilee: {

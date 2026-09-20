@@ -22,9 +22,10 @@ model User {
   sessionVersion     Int       @default(0)
   displayName        String?
   bio                String?
-  locality           String // set once at join, never changed: neighborhood, valley, block, mesh node...
-  // A pin chosen on a map at join, rounded to ~100 m. Never shown to others as
-  // a point, only as a distance. No address, no GPS unless the person asks.
+  locality           String // neighborhood, valley, block, mesh node... Editable on the profile.
+  // A pin chosen on a map at join and movable from the profile, always rounded
+  // to ~100 m. Never shown to others as a point, only as a distance. No address,
+  // no GPS unless the person asks. Published records keep the pin they had.
   lat                Float
   lng                Float
   skills             String[]  @default([])
