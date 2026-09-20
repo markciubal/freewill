@@ -108,6 +108,12 @@ Next (Phase D, not yet built): member-held Ed25519 keys for true self-custody an
 
 **Grace decimalized to cents (done).** Grace is stored in hundredths; transfers and board prices take two decimals; cash notes are any whole denomination 1-100. Migration: `npm run migrate:grace-cents` (guarded, scales x100, re-derives the hash chain in place).
 
+**Phase D2: member-held identity keys (done).** Device-generated Ed25519 keys (`src/lib/keys.ts`, `/keys`); signed vouches verified against the member's public key and marked on person pages; `/api/trust/export` emits a trust bundle that `verifyTrustBundle` checks with no server. Anti-Sabul (unforgeable attribution) and anti-wall (federation-verifiable trust). Still commons-signed: the money ledger; per-record member signatures on transfers are the next step.
+
+**The critic (done).** `/sabul` runs six self-audit findings over live data (trust concentration, hoarding, vouch rings, channel capture, lottery skew, signature coverage) in Sabul's voice.
+
+**Infrastructure funding (done, deliberately narrow).** `/support` is a tip jar (SUPPORT_URL) kept entirely apart from Grace. A "buy Grace / 1% fee" payments API was declined: it would be unlicensed money transmission, create a seizable reserve, let wealth buy influence, and require KYC that contradicts the privacy design.
+
 **Phase D1: portable ledger checkpoints (done).** `checkpoint.ts`/`.shared.ts`: the commons signs the Merkle root; `/api/ledger/export` downloads the full signed chain; `/verify` re-derives and checks it off-server with only the public key. The foundation for node-to-node sync and public root-anchoring. **Consolidation:** Cash supersedes Vouchers; `/vouchers` is retired to redeem-only and off the nav. Still ahead: member-held keys (per-user signing), blind-signature anonymous cash, node-to-node merge.
 
 **Phase A9: seed bank & plant exchange.** Done. `SeedShare` + `SeedRequest` models and `src/lib/seeds.ts`. A grower shares a variety (form, type, open-pollinated, days to maturity, sow months); others request it, receive it (GIVEN), grow it, and return seed at harvest (RETURNED). Gift-first, locality-scoped, with a "sow this month" filter. Ties food resilience into the app.

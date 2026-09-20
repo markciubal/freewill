@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge, Button, Card, Empty, Field, Grace, Input, Notice, PageTitle, SectionTitle, Stat, fmtDate, fmtHours, personName } from "@/components/ui";
-import { SubmitButton } from "@/components/submit-button";
+import { Badge, Button, Card, Empty, Grace, Notice, PageTitle, SectionTitle, Stat, fmtDate, fmtHours, personName } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
@@ -9,8 +8,10 @@ import { fmtDistance, haversineKm } from "@/lib/geo";
 import { idmeEnabled, policyLabel } from "@/lib/idme";
 import { TIER_LABEL } from "@/lib/standing";
 import { getStanding } from "@/lib/standing.all";
-import { unvouch, vouch } from "../actions";
+import { unvouch } from "../actions";
 import { InfoDot } from "@/components/info-dot";
+import { VouchForm } from "@/components/vouch-form";
+import { verifyMessage, vouchToken } from "@/lib/keys";
 
 export default async function PersonPage({ params, searchParams }: { params: Promise<{ username: string }>; searchParams: Promise<{ error?: string }> }) {
   const me = await requireUser();
@@ -21,7 +22,8 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
     select: {
       id: true, username: true, displayName: true, bio: true, locality: true, skills: true, createdAt: true, lat: true, lng: true, humanVerifiedAt: true, affiliations: true,
       graceBalance: true, hoursBalance: true,
-      vouchesReceived: { include: { from: { select: { username: true } } }, orderBy: { createdAt: "desc" } },
+      vouchesReceived: { include: { from: { select: { username: true, publicKey: true } } }, orderBy: { createdAt: "desc" } },
+      publicKey: true,
       listings: { where: { status: { in: ["OPEN", "MATCHED"] } }, orderBy: { createdAt: "desc" }, take: 10 },
       stewardships: { select: { id: true, name: true } },
     },
@@ -72,14 +74,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
           <p className="mb-3 text-sm text-muted">
             A vouch says you know this person and trust them. It raises their standing and credit limit, so only vouch for people you actually know.
           </p>
-          <form action={vouch.bind(null, p.username)} className="flex flex-wrap items-end gap-2">
-            <div className="min-w-60 flex-1">
-              <Field label="How do you know them? (optional)">
-                <Input name="note" maxLength={200} defaultValue={myVouch?.note ?? ""} />
-              </Field>
-            </div>
-            <SubmitButton pendingText="...">{myVouch ? "Update vouch" : "Vouch"}</SubmitButton>
-          </form>
+          <VouchForm username={p.username} fromId={me.id} toId={p.id} hasKey={!!me.publicKey} defaultNote={myVouch?.note ?? ""} isUpdate={!!myVouch} />
           {myVouch && (
             <form action={unvouch.bind(null, p.username)} className="mt-2">
               <Button variant="ghost" type="submit">Withdraw my vouch</Button>
@@ -94,12 +89,16 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
           <Empty>Nobody has vouched yet.</Empty>
         ) : (
           <ul className="space-y-1 text-sm">
-            {p.vouchesReceived.map((v) => (
-              <li key={v.id}>
-                <Link href={`/people/${v.from.username}`} className="font-medium hover:underline">@{v.from.username}</Link>
-                {v.note && <span className="text-muted">: {v.note}</span>}
-              </li>
-            ))}
+            {p.vouchesReceived.map((v) => {
+              const signed = !!(v.signature && v.from.publicKey && verifyMessage(vouchToken(v.fromId, v.toId), v.signature, v.from.publicKey));
+              return (
+                <li key={v.id}>
+                  <Link href={`/people/${v.from.username}`} className="font-medium hover:underline">@{v.from.username}</Link>
+                  {signed && <span title="Signed with their identity key" className="ml-1 text-accent">✓</span>}
+                  {v.note && <span className="text-muted">: {v.note}</span>}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

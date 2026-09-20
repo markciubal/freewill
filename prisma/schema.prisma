@@ -28,6 +28,10 @@ model User {
   // Mutual-credit balances. Sum across all users is always 0 for each ledger.
   graceBalance       Int       @default(0) // Grace (GRC), whole units
   hoursBalance       Int       @default(0) // Hours, stored in minutes
+  // Member-held identity key (Ed25519 public key, hex). The private key lives
+  // only on the member device; signatures on their vouches prove authorship.
+  publicKey          String?
+  keySetAt           DateTime?
   // Personal look: CSS custom properties, validated in src/lib/theme.ts. Nobody sets it for anyone else.
   theme              Json?
   // Optional ID.me attestation: when this deployment enables it, a person may
@@ -70,6 +74,7 @@ model Vouch {
   fromId    String   @db.ObjectId
   toId      String   @db.ObjectId
   note      String?
+  signature String? // member signature over FWVOUCH1:fromId:toId, verified against from.publicKey
   createdAt DateTime @default(now())
 
   from User @relation("VouchFrom", fields: [fromId], references: [id])

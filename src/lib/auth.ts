@@ -63,6 +63,8 @@ export const userSelect = {
   skills: true,
   graceBalance: true,
   hoursBalance: true,
+  publicKey: true,
+  keySetAt: true,
   theme: true,
   createdAt: true,
   covenantAcceptedAt: true,

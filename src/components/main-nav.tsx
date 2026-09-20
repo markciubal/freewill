@@ -47,9 +47,12 @@ const ACCOUNT: Item[] = [
   { href: "/home", label: "Home", hint: "Your overview" },
   { href: "/profile", label: "Profile", hint: "You & your pin" },
   { href: "/theme", label: "Theme", hint: "Colors, type, shape" },
+  { href: "/keys", label: "Identity key", hint: "Sign your vouches" },
   { href: "/programs", label: "Programs", hint: "What this is" },
+  { href: "/sabul", label: "The critic", hint: "How power could still creep in" },
   { href: "/verify", label: "Verify ledger", hint: "Check the history yourself" },
   { href: "/wind-down", label: "Wind-down", hint: "The fail-safe, checked" },
+  { href: "/support", label: "Support the server", hint: "Fund the infrastructure" },
 ];
 
 function Chevron({ open }: { open: boolean }) {
