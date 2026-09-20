@@ -8,6 +8,16 @@ import { getStandingAll } from "./standing.all";
 // the population. Each draw is seeded from the drand public randomness beacon
 // and logged on the dispute (pool, seed, result), so nobody - including the
 // operator - can quietly redraw until they like the panel.
+//
+// The process for one dispute:
+//   1. Work out how many seats are still empty.
+//   2. Build the pool: verified, not a newcomer, not a party to the dispute,
+//      not already seated, not someone who declined. Sorted by standing so
+//      the same people are in the same order every time (a logged draw can
+//      be recomputed exactly).
+//   3. Fetch a public random value, derive the seed from it and the dispute id.
+//   4. Draw the empty seats from the pool with that seed.
+//   5. Write the seats and an audit line (source, round, seed, pool, drawn).
 
 export function keeperPoolSize(population: number) {
   return Math.max(3, Math.ceil(5 * Math.sqrt(Math.max(population, 1) / 100)));
@@ -17,47 +27,57 @@ export const KEEPERS_PER_CIRCLE = 3;
 
 // The eligible pool, deterministically ordered (score desc, then id) so a
 // logged draw can be recomputed exactly.
-export async function keeperPool(opts: { locality: string; exclude: string[] }) {
-  const all = await getStandingAll();
-  const excluded = new Set(opts.exclude);
-  const eligible = [...all.values()].filter((s) => s.verified && s.tier !== "newcomer" && !excluded.has(s.user.id));
-  const byRank = (a: (typeof eligible)[number], b: (typeof eligible)[number]) =>
+export async function keeperPool(options: { locality: string; exclude: string[] }) {
+  const standings = await getStandingAll();
+  const excludedIds = new Set(options.exclude);
+  const eligibleEverywhere = [...standings.values()].filter(
+    (standing) => standing.verified && standing.tier !== "newcomer" && !excludedIds.has(standing.user.id),
+  );
+  const byStandingThenId = (a: (typeof eligibleEverywhere)[number], b: (typeof eligibleEverywhere)[number]) =>
     b.score - a.score || (a.user.id < b.user.id ? -1 : 1);
-  const local = eligible.filter((s) => s.user.locality === opts.locality).sort(byRank);
-  const localPop = [...all.values()].filter((s) => s.user.locality === opts.locality).length;
 
-  let pool = local.slice(0, keeperPoolSize(localPop));
-  if (pool.length < KEEPERS_PER_CIRCLE) pool = eligible.sort(byRank).slice(0, keeperPoolSize(all.size));
-  return pool.map((s) => ({ id: s.user.id, username: s.user.username }));
+  const eligibleHere = eligibleEverywhere.filter((standing) => standing.user.locality === options.locality).sort(byStandingThenId);
+  const populationHere = [...standings.values()].filter((standing) => standing.user.locality === options.locality).length;
+
+  // Prefer the locality's own pool. If it cannot seat a full panel, widen to
+  // everyone eligible, sized for the whole membership.
+  let pool = eligibleHere.slice(0, keeperPoolSize(populationHere));
+  if (pool.length < KEEPERS_PER_CIRCLE) pool = eligibleEverywhere.sort(byStandingThenId).slice(0, keeperPoolSize(standings.size));
+  return pool.map((standing) => ({ id: standing.user.id, username: standing.user.username }));
 }
 
 // Fill any empty mediator seats on a dispute, seeded by the public beacon, and
 // append an audit entry. Safe to call repeatedly.
 export async function fillKeepers(circleId: string) {
-  const c = await db.circle.findUnique({ where: { id: circleId } });
-  if (!c || (c.status !== "OPEN" && c.status !== "GATHERING")) return c;
-  const short = c.keepersNeeded - c.keeperIds.length;
-  if (short <= 0) return c;
+  const circle = await db.circle.findUnique({ where: { id: circleId } });
+  if (!circle || (circle.status !== "OPEN" && circle.status !== "GATHERING")) return circle;
 
-  const exclude = [c.raisedById, ...(c.aboutId ? [c.aboutId] : []), ...c.keeperIds, ...c.declinedKeeperIds];
-  const pool = await keeperPool({ locality: c.locality, exclude });
-  if (!pool.length) return c;
+  // Step 1.
+  const emptySeats = circle.keepersNeeded - circle.keeperIds.length;
+  if (emptySeats <= 0) return circle;
 
+  // Step 2.
+  const cannotServe = [circle.raisedById, ...(circle.aboutId ? [circle.aboutId] : []), ...circle.keeperIds, ...circle.declinedKeeperIds];
+  const pool = await keeperPool({ locality: circle.locality, exclude: cannotServe });
+  if (!pool.length) return circle;
+
+  // Steps 3 and 4.
   const beacon = await fetchBeacon();
-  const seed = drawSeed(c.id, beacon.randomness);
-  const drawn = seededDraw(pool, short, seed);
+  const seed = drawSeed(circle.id, beacon.randomness);
+  const drawn = seededDraw(pool, emptySeats, seed);
 
-  const entry = [
+  // Step 5.
+  const auditLine = [
     new Date().toISOString(),
     `source=${beacon.source}`,
     beacon.source === "drand" ? `round=${beacon.round}` : `randomness=${beacon.randomness}`,
     `seed=${seed}`,
-    `pool=${pool.map((p) => p.username).join(",")}`,
-    `drew=${drawn.map((p) => p.username).join(",")}`,
+    `pool=${pool.map((member) => member.username).join(",")}`,
+    `drew=${drawn.map((member) => member.username).join(",")}`,
   ].join(" ");
 
   return db.circle.update({
     where: { id: circleId },
-    data: { keeperIds: { push: drawn.map((p) => p.id) }, status: "GATHERING", drawLog: { push: entry } },
+    data: { keeperIds: { push: drawn.map((member) => member.id) }, status: "GATHERING", drawLog: { push: auditLine } },
   });
 }

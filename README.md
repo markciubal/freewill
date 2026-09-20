@@ -2,7 +2,7 @@
 
 A commons for a society without a state, where morality is the only law. Built to keep neighbors civil, fed, safe, and honest when the government is gone or has turned on them.
 
-Read [BUILD_PROMPT.md](BUILD_PROMPT.md) for what this is and why. This file is how to run it.
+Read [BUILD_PROMPT.md](BUILD_PROMPT.md) for what this is and why. This file is how to run it. [docs/reading-guide.md](docs/reading-guide.md) is how to check what it does, rule by rule, and [docs/maps.md](docs/maps.md) is how to host your own map.
 
 ## What is in the skeleton
 
