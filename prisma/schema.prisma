@@ -13,8 +13,8 @@ datasource db {
 // --- People -----------------------------------------------------------------
 
 model User {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
-  username           String   @unique
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  username           String    @unique
   passwordHash       String
   displayName        String?
   bio                String?
@@ -23,14 +23,20 @@ model User {
   // a point, only as a distance. No address, no GPS unless the person asks.
   lat                Float
   lng                Float
-  skills             String[] @default([])
+  skills             String[]  @default([])
   covenantAcceptedAt DateTime
   // Mutual-credit balances. Sum across all users is always 0 for each ledger.
-  graceBalance       Int      @default(0) // Grace (GRC), whole units
-  hoursBalance       Int      @default(0) // Hours, stored in minutes
+  graceBalance       Int       @default(0) // Grace (GRC), whole units
+  hoursBalance       Int       @default(0) // Hours, stored in minutes
   // Personal look: CSS custom properties, validated in src/lib/theme.ts. Nobody sets it for anyone else.
   theme              Json?
-  createdAt          DateTime @default(now())
+  // Optional ID.me attestation: when this deployment enables it, a person may
+  // prove they are one distinct human. We store only the date and an HMAC of
+  // the ID.me subject id (uniqueness enforced in the callback), never a name
+  // or document. Effect: one extra vouch toward local verification, nothing else.
+  humanVerifiedAt    DateTime?
+  idmeHash           String?
+  createdAt          DateTime  @default(now())
 
   vouchesGiven    Vouch[]            @relation("VouchFrom")
   vouchesReceived Vouch[]            @relation("VouchTo")
@@ -42,6 +48,7 @@ model User {
   circlesRaised   Circle[]           @relation("CircleRaisedBy")
   circlesAbout    Circle[]           @relation("CircleAbout")
   bulletins       Bulletin[]
+  reflections     Reflection[]
   adjustments     LedgerAdjustment[]
   proposals       Proposal[]
   ballots         Ballot[]
@@ -111,9 +118,10 @@ model Listing {
   createdAt     DateTime      @default(now())
   fulfilledAt   DateTime?
 
-  owner     User       @relation(fields: [ownerId], references: [id])
-  pledges   Pledge[]
-  transfers Transfer[]
+  owner       User         @relation(fields: [ownerId], references: [id])
+  pledges     Pledge[]
+  transfers   Transfer[]
+  reflections Reflection[]
 
   @@index([kind, status, createdAt])
   @@index([ownerId])
@@ -216,6 +224,9 @@ model Circle {
   lng               Float?
   keepersNeeded     Int            @default(3)
   declinedKeeperIds String[]       @default([])
+  // Audit log of mediator draws: time, seed source (drand round or local),
+  // the eligible pool, and who was drawn. Anyone can recompute each draw.
+  drawLog           String[]       @default([])
   resolution        String? // what was agreed
   keeperIds         String[]       @default([]) // users holding the circle (not the parties)
   raisedById        String         @db.ObjectId
@@ -320,4 +331,22 @@ model Ballot {
   user     User     @relation(fields: [userId], references: [id])
 
   @@unique([proposalId, userId])
+}
+
+// After an exchange settles, each side may answer one question: did it leave
+// you better off? Private per person, public only in aggregate, and it never
+// touches standing. This is the community measuring what trade creates: the
+// ledger sums to zero, wellbeing does not.
+model Reflection {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  listingId String   @db.ObjectId
+  userId    String   @db.ObjectId
+  delta     Int // -2 (much worse) .. 2 (much better)
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([listingId, userId])
+  @@index([createdAt])
 }

@@ -1,6 +1,7 @@
 // Sanity checks for the instant-runoff tally and the keeper lot. Run: npx tsx --env-file=.env scripts/rcv-check.ts
 import { db } from "../src/lib/db";
-import { drawKeepers, keeperPoolSize } from "../src/lib/keepers";
+import { drawSeed, seededDraw } from "../src/lib/beacon";
+import { keeperPool, keeperPoolSize } from "../src/lib/keepers";
 import { tallyIRV } from "../src/lib/rcv";
 import { applyNear, haversineKm, roundPin } from "../src/lib/geo";
 import { requiredVouchesFor } from "../src/lib/standing";
@@ -34,11 +35,13 @@ async function main() {
 
   const flats = await db.user.findMany({ where: { locality: "River Flats" }, select: { id: true, username: true } });
   const dee = flats.find((u) => u.username === "dee")!;
-  const drawn = await drawKeepers({ locality: "River Flats", exclude: [dee.id], needed: 3 });
-  const names = await db.user.findMany({ where: { id: { in: drawn } }, select: { username: true } });
-  console.log("drawn keepers for a circle raised by dee:", names.map((n) => n.username).join(", "));
-  assert(drawn.length > 0 && !drawn.includes(dee.id), "lot excludes the raiser and draws someone");
-  assert(!names.some((n) => n.username === "eli"), "unverified eli is never drawn");
+  const pool = await keeperPool({ locality: "River Flats", exclude: [dee.id] });
+  const drawn = seededDraw(pool, 3, drawSeed("test-dispute", "deadbeef"));
+  console.log("drawn mediators for a dispute opened by dee:", drawn.map((n) => n.username).join(", "));
+  assert(drawn.length > 0 && !drawn.some((p) => p.id === dee.id), "lot excludes the raiser and draws someone");
+  assert(!drawn.some((n) => n.username === "eli"), "unverified eli is never in the pool");
+  const again = seededDraw(await keeperPool({ locality: "River Flats", exclude: [dee.id] }), 3, drawSeed("test-dispute", "deadbeef"));
+  assert(again.map((p) => p.id).join(",") === drawn.map((p) => p.id).join(","), "same dispute + beacon -> identical panel (auditable)");
   await db.$disconnect();
 }
 main().catch((e) => { console.error(e); process.exit(1); });

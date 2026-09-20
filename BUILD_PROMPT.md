@@ -97,6 +97,14 @@ The order is not arbitrary. Tier 0 is what a group of strangers needs in the fir
 
 **Phase A: skeleton.** Done. Auth, schema, all Tier 0 and Tier 1 flows end to end, seed data, this document.
 
+**Phase A8: verifiable mediator lottery.** Done. Draws seed from the drand public randomness beacon: seed = sha256(disputeId + ":" + round randomness), deterministic draw over a deterministically ordered pool, all logged on the dispute (source, round, seed, pool, result) and shown on the dispute page. Falls back to a local seed only when the beacon is unreachable, and the log says so.
+
+**Phase A7: optional ID.me attestation.** Done, off by default (IDME_ENABLED). OIDC code flow with PKCE; stores only a date and an HMAC of the subject id; one legal identity attests for at most one account. Sole effect: one extra counted vouch toward local verification. The UI states the trade plainly: ID.me links legal identity to this community in ID.me's own records, which is why it can never be required for anything.
+
+**Phase A6: trade pulse.** Done. `Reflection` model + `src/lib/pulse.ts`: after a settled exchange each party answers "did this leave you better off?" (-2..+2); private per person, aggregate-only display on the ledger; never affects standing.
+
+**Phase A5: match finding.** Done. `src/lib/matches.ts` finds counterpart listings (opposite kind, same category, same locality or within 10 km) and true reciprocal pairs (you offer what they need and they offer what you need), shown on the board and counted on Home. Planned next: parse wantsInReturn against categories; three-way rings.
+
 **Phase A4: personal themes.** Done. `/theme`, validated tokens, live CSS.
 
 **Phase A3: geography.** Done. Map pin at join, distances, near scope, `/map`.

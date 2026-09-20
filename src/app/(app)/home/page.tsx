@@ -3,13 +3,15 @@ import { Badge, Card, Empty, Grace, SectionTitle, Stat, fmtDateTime, fmtHours } 
 import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL, SURVIVAL } from "@/lib/covenant";
 import { db } from "@/lib/db";
+import { findMatchesForUser } from "@/lib/matches";
 import { TIER_LABEL } from "@/lib/standing";
 import { getStanding } from "@/lib/standing.all";
 
 export default async function HomePage() {
   const user = await requireUser();
-  const [standing, urgentNeeds, alerts, myPledges, awaitingMe] = await Promise.all([
+  const [standing, matches, urgentNeeds, alerts, myPledges, awaitingMe] = await Promise.all([
     getStanding(user.id),
+    findMatchesForUser(user),
     db.listing.findMany({
       where: { kind: "NEED", status: "OPEN", category: { in: SURVIVAL } },
       orderBy: { createdAt: "desc" },
@@ -71,6 +73,15 @@ export default async function HomePage() {
           <Stat label="Hours" value={fmtHours(user.hoursBalance)} sub={`may go to -${fmtHours(standing.hoursLimit)}`} />
         </Card>
       </div>
+
+      {matches.total > 0 && (
+        <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
+          {matches.reciprocals.length > 0
+            ? `${matches.reciprocals.length} direct trade${matches.reciprocals.length === 1 ? "" : "s"} possible near you, plus ${matches.counterparts.length} other match${matches.counterparts.length === 1 ? "" : "es"} for your listings.`
+            : `${matches.counterparts.length} listing${matches.counterparts.length === 1 ? " matches" : "s match"} yours nearby.`}{" "}
+          <Link href="/board" className="text-accent hover:underline">See the board.</Link>
+        </p>
+      )}
 
       {alerts.length > 0 && (
         <section>

@@ -32,3 +32,12 @@ export async function updateProfile(formData: FormData) {
   revalidatePath(`/people/${me.username}`);
   ok("/profile", "Saved.");
 }
+
+// Remove the optional ID.me attestation from this account. ID.me keeps its
+// own records; this only clears what we hold.
+export async function unlinkIdme() {
+  const me = await requireUser();
+  await db.user.update({ where: { id: me.id }, data: { humanVerifiedAt: null, idmeHash: null } });
+  revalidatePath("/profile");
+  ok("/profile", "Removed. The extra vouch no longer counts.");
+}

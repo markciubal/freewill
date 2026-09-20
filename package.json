@@ -12,14 +12,17 @@
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
-    "db:local": "mongod --replSet rs0 --port 27018 --dbpath .mongo --bind_ip 127.0.0.1",
+    "db:local": "mongod --replSet rs0 --port 27018 --dbpath .mongo --bind_ip 127.0.0.1 --setParameter diagnosticDataCollectionEnabled=false",
     "db:rs-init": "node --env-file=.env scripts/rs-init.mjs",
     "demurrage": "tsx --env-file=.env scripts/demurrage.ts",
     "smoke": "tsx --env-file=.env scripts/ledger-smoke.ts",
     "smoke:rcv": "tsx --env-file=.env scripts/rcv-check.ts",
     "smoke:theme": "tsx scripts/theme-check.ts",
     "db:push:prod": "node scripts/prisma-prod.mjs db push",
-    "db:studio:prod": "node scripts/prisma-prod.mjs studio"
+    "db:studio:prod": "node scripts/prisma-prod.mjs studio",
+    "smoke:matches": "tsx --env-file=.env scripts/matches-check.ts",
+    "smoke:pulse": "tsx --env-file=.env scripts/pulse-check.ts",
+    "smoke:lottery": "tsx --env-file=.env scripts/lottery-check.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

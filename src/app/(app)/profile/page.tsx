@@ -3,7 +3,10 @@ import { Card, Field, Input, Notice, PageTitle, Textarea } from "@/components/ui
 import { SubmitButton } from "@/components/submit-button";
 import { LocationPicker } from "@/components/location-picker";
 import { requireUser } from "@/lib/auth";
-import { updateProfile } from "./actions";
+import { Badge, Button } from "@/components/ui";
+import { idmeEnabled } from "@/lib/idme";
+import { fmtDate } from "@/components/ui";
+import { unlinkIdme, updateProfile } from "./actions";
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string }> }) {
   const me = await requireUser();
@@ -33,6 +36,35 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <SubmitButton pendingText="Saving...">Save</SubmitButton>
         </form>
       </Card>
+      {idmeEnabled() && (
+        <Card className="mt-6">
+          <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+            One distinct person <Badge tone={me.humanVerifiedAt ? "accent" : "neutral"}>{me.humanVerifiedAt ? "attested" : "optional"}</Badge>
+          </div>
+          {me.humanVerifiedAt ? (
+            <>
+              <p className="text-sm text-muted">
+                Attested via ID.me on {fmtDate(me.humanVerifiedAt)}. It counts as one extra vouch toward verification, nothing more.
+                Plain trade-off: ID.me keeps a record linking your legal identity to this community. We hold only the date and an anonymous code.
+              </p>
+              <form action={unlinkIdme} className="mt-2">
+                <Button variant="ghost" type="submit">Remove it</Button>
+              </form>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted">
+                Optional: prove through ID.me that you are one distinct person. It counts as one extra vouch toward verification and gates nothing.
+                Plain trade-off: ID.me verifies you with government ID and keeps a record linking your legal identity to this community.
+                We store only the date and an anonymous code, never your name or documents. Vouches from neighbors work without it.
+              </p>
+              <a href="/api/idme/start" className="mt-2 inline-block rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-border/40">
+                Verify with ID.me
+              </a>
+            </>
+          )}
+        </Card>
+      )}
       <p className="mt-4 text-xs text-muted">Passwords cannot be changed or reset, so keep yours somewhere safe.</p>
     </div>
   );

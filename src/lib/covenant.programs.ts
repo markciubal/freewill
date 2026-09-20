@@ -9,7 +9,7 @@ export const PROGRAMS: Program[] = [
     route: "/board",
     summary: "A public board of who needs what and who has what, by category and locality.",
     why: "The first casualty of collapse is coordination; the second is trust. A shared list of needs and offers is the minimum viable society. Everything else builds on it.",
-    features: ["Post a need or an offer", "Pure barter: what would you take in return?", "Optional Grace or Hours ask", "Pledge to meet a need or take an offer", "Survival needs surfaced first"],
+    features: ["Post a need or an offer", "Pure barter: what would you take in return?", "Optional Grace or Hours ask", "Pledge to meet a need or take an offer", "Survival needs surfaced first", "Match finding: counterpart suggestions and direct two-way trades"],
   },
   {
     key: "map",
@@ -29,7 +29,7 @@ export const PROGRAMS: Program[] = [
     route: "/people",
     summary: "Identity comes from vouches. A person is verified once enough locals vouch (about the square root of the locality over three: 1 at 5 people, 3 at 100, never more than 7).",
     why: "With no ID authority, the only proof of a person is other people. Vouching makes fake identities expensive and makes standing something you earn from neighbors rather than receive from an office.",
-    features: ["Vouch for a person, with a note", "Verification threshold scales with locality", "Only verified people can vouch, mediate, or vote", "Standing score and tier", "Credit limits derived from standing"],
+    features: ["Vouch for a person, with a note", "Verification threshold scales with locality", "Only verified people can vouch, mediate, or vote", "Standing score and tier", "Credit limits derived from standing", "Optional ID.me attestation: one extra vouch, never required, off by default"],
   },
   {
     key: "bulletins",
@@ -62,6 +62,16 @@ export const PROGRAMS: Program[] = [
     features: ["Pay anyone by username", "Negative balances up to a standing-based limit", "Demurrage: positive balances decay 3% a month into an equal dividend for verified members", "Full history", "Settle board listings on completion"],
   },
   {
+    key: "pulse",
+    name: "Trade Pulse",
+    tier: 1,
+    status: "live",
+    route: "/ledger",
+    summary: "After each settled exchange, both people answer one question: did it leave you better off? The community total is public.",
+    why: "The classroom experiment: rate what you were handed, trade freely, rate again, and the total rises. Exchange creates value without creating goods. Measuring that, in the open, is how a community sees that its ledger summing to zero is not the same as nobody gaining.",
+    features: ["One private answer per person per exchange", "Aggregates only, never individual answers", "Never affects standing", "30-day and all-time totals on the ledger"],
+  },
+  {
     key: "hours",
     name: "Hours Time Bank",
     tier: 1,
@@ -89,7 +99,7 @@ export const PROGRAMS: Program[] = [
     route: "/circles",
     summary: "A public process for harm: mediators drawn at random, everyone heard, an agreed repair written down.",
     why: "Without police or courts, the alternative to a fair process is retaliation. Disputes make harm public, heard, and repaired, and their outcomes feed back into standing.",
-    features: ["Open a dispute about a harm", "Mediators drawn at random from a pool that grows with the square root of the locality", "Outcomes: harm found, no harm, unfounded", "Unfounded claims cost the claimant standing", "Only so many open disputes per person"],
+    features: ["Open a dispute about a harm", "Mediators drawn by public lottery seeded from the drand randomness beacon; every draw is logged and recomputable", "Outcomes: harm found, no harm, unfounded", "Unfounded claims cost the claimant standing", "Only so many open disputes per person"],
   },
   {
     key: "rotas",

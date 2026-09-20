@@ -45,9 +45,10 @@ export function computeStanding(i: {
   memberDays: number;
   localityPopulation: number;
   bootstrap: boolean; // too few verified people locally: count all vouches
+  humanVerified?: boolean; // optional ID.me attestation: one extra counted vouch
 }): Standing {
   const requiredVouches = requiredVouchesFor(i.localityPopulation);
-  const counted = i.bootstrap ? i.vouchesReceived : i.vouchesFromVerified;
+  const counted = (i.bootstrap ? i.vouchesReceived : i.vouchesFromVerified) + (i.humanVerified ? 1 : 0);
   const verified = counted >= requiredVouches;
 
   const vouchScore = Math.min(i.vouchesReceived, 12) * 5; // up to 60

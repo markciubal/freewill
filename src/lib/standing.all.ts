@@ -10,7 +10,7 @@ export type StandingMap = Map<string, Standing & { user: Member }>;
 // count until there are at least `requiredVouches` verified people there.
 export async function getStandingAll(): Promise<StandingMap> {
   const [users, vouches, pledges, tOut, tIn, harms, unfounded, kept] = await Promise.all([
-    db.user.findMany({ select: { id: true, username: true, locality: true, createdAt: true } }),
+    db.user.findMany({ select: { id: true, username: true, locality: true, createdAt: true, humanVerifiedAt: true } }),
     db.vouch.findMany({ select: { fromId: true, toId: true } }),
     db.pledge.groupBy({ by: ["userId"], where: { status: "COMPLETED" }, _count: { _all: true } }),
     db.transfer.groupBy({ by: ["fromId"], _count: { _all: true } }),
@@ -50,7 +50,8 @@ export async function getStandingAll(): Promise<StandingMap> {
   // vouches from pass-1 verified people, unless the locality is bootstrapping.
   const pass1 = new Set<string>();
   for (const u of users) {
-    if ((received.get(u.id)?.length ?? 0) >= requiredVouchesFor(population.get(u.locality) ?? 1)) pass1.add(u.id);
+    const bonus = u.humanVerifiedAt !== null ? 1 : 0;
+    if ((received.get(u.id)?.length ?? 0) + bonus >= requiredVouchesFor(population.get(u.locality) ?? 1)) pass1.add(u.id);
   }
   const verifiedPerLocality = new Map<string, number>();
   for (const u of users) if (pass1.has(u.id)) verifiedPerLocality.set(u.locality, (verifiedPerLocality.get(u.locality) ?? 0) + 1);
@@ -72,6 +73,7 @@ export async function getStandingAll(): Promise<StandingMap> {
       memberDays: Math.floor((now - u.createdAt.getTime()) / 86_400_000),
       localityPopulation: pop,
       bootstrap: (verifiedPerLocality.get(u.locality) ?? 0) < requiredVouchesFor(pop),
+      humanVerified: u.humanVerifiedAt !== null,
     });
     map.set(u.id, { ...s, user: u });
   }

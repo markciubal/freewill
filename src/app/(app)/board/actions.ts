@@ -9,6 +9,7 @@ import { CATEGORIES } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { fail, firstIssue, isObjectId, str } from "@/lib/form";
 import { LedgerError, transfer } from "@/lib/ledger";
+import { canReflect } from "@/lib/pulse";
 
 const listingSchema = z.object({
   kind: z.enum(["OFFER", "NEED"]),
@@ -123,6 +124,27 @@ export async function completeListing(listingId: string, pledgeId: string, formD
       data: { status: "DECLINED" },
     }),
   ]);
+  revalidatePath(path);
+  redirect(path);
+}
+
+// One answer per person per settled exchange. Changing your answer is allowed;
+// it never affects standing and is only ever shown in aggregate.
+export async function recordReflection(listingId: string, delta: number) {
+  const me = await requireUser();
+  if (!isObjectId(listingId)) redirect("/board");
+  const path = `/board/${listingId}`;
+  if (!Number.isInteger(delta) || delta < -2 || delta > 2) fail(path, "That answer did not make sense.");
+  const listing = await db.listing.findUnique({
+    where: { id: listingId },
+    select: { status: true, ownerId: true, pledges: { select: { userId: true, status: true } } },
+  });
+  if (!listing || !canReflect(listing, me.id)) fail(path, "Only the two people in a settled exchange can answer this.");
+  await db.reflection.upsert({
+    where: { listingId_userId: { listingId, userId: me.id } },
+    create: { listingId, userId: me.id, delta },
+    update: { delta },
+  });
   revalidatePath(path);
   redirect(path);
 }

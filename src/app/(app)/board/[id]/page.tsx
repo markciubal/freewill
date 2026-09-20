@@ -6,7 +6,8 @@ import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { isObjectId } from "@/lib/form";
-import { completeListing, pledge, respondToPledge, withdrawListing } from "../actions";
+import { DELTAS, DELTA_LABEL, canReflect } from "@/lib/pulse";
+import { completeListing, pledge, recordReflection, respondToPledge, withdrawListing } from "../actions";
 
 export default async function ListingPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
   const me = await requireUser();
@@ -18,6 +19,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
     include: {
       owner: { select: { username: true, displayName: true } },
       pledges: { orderBy: { createdAt: "asc" }, include: { user: { select: { username: true } } } },
+      reflections: { select: { userId: true, delta: true } },
       transfers: { include: { from: { select: { username: true } }, to: { select: { username: true } } } },
     },
   });
@@ -118,6 +120,27 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
           </ul>
         )}
       </section>
+
+      {canReflect(l, me.id) && (() => {
+        const mine = l.reflections.find((r) => r.userId === me.id);
+        return (
+          <Card>
+            <SectionTitle>One question</SectionTitle>
+            <p className="mb-3 text-sm text-muted">
+              {mine
+                ? `You answered: ${DELTA_LABEL[mine.delta].toLowerCase()}. You can change it.`
+                : "Did this exchange leave you better off? Answers are private, shown only as community totals on the ledger, and have no effect on standing."}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {DELTAS.map((d) => (
+                <form key={d} action={recordReflection.bind(null, l.id, d)}>
+                  <Button type="submit" variant={mine?.delta === d ? "primary" : "ghost"}>{DELTA_LABEL[d]}</Button>
+                </form>
+              ))}
+            </div>
+          </Card>
+        );
+      })()}
 
       {l.transfers.length > 0 && (
         <section>

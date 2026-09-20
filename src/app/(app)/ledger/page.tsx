@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { DEMURRAGE_INTERVAL_DAYS, DEMURRAGE_RATE_MONTHLY, latestRun, maybeRunDemurrage } from "@/lib/demurrage";
+import { fmtSigned, getPulse } from "@/lib/pulse";
 import { TIER_LABEL } from "@/lib/standing";
 import { getStanding } from "@/lib/standing.all";
 import { sendTransfer } from "./actions";
@@ -13,7 +14,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
   const me0 = await requireUser();
   const sp = await searchParams;
   await maybeRunDemurrage();
-  const [me, standing, transfers, adjustments, totals, run] = await Promise.all([
+  const [me, standing, transfers, adjustments, totals, run, pulse] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: me0.id }, select: { graceBalance: true, hoursBalance: true } }),
     getStanding(me0.id),
     db.transfer.findMany({
@@ -25,6 +26,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
     db.ledgerAdjustment.findMany({ where: { userId: me0.id }, orderBy: { createdAt: "desc" }, take: 50 }),
     db.user.aggregate({ _sum: { graceBalance: true, hoursBalance: true }, _count: true }),
     latestRun(),
+    getPulse(),
   ]);
 
   type Row = { id: string; at: Date; with: string | null; memo: string; ledger: "GRACE" | "HOURS"; amount: number };
@@ -73,6 +75,25 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
           </ul>
         </Card>
       </div>
+
+      <Card>
+        <SectionTitle>Trade pulse</SectionTitle>
+        <p className="text-sm text-muted">
+          The ledger sums to zero by design. Wellbeing does not: after each settled exchange, both people are asked
+          whether it left them better off.
+        </p>
+        {pulse.allTime.answers === 0 ? (
+          <p className="mt-2 text-sm text-muted">No answers yet. Settle an exchange and you will be asked.</p>
+        ) : (
+          <p className="mt-2 text-sm">
+            All time: <span className="font-semibold tabular-nums">{fmtSigned(pulse.allTime.sum)}</span> across{" "}
+            {pulse.allTime.answers} answer{pulse.allTime.answers === 1 ? "" : "s"}. Last 30 days:{" "}
+            <span className="font-semibold tabular-nums">{fmtSigned(pulse.last30.sum)}</span> from{" "}
+            {pulse.last30.answers} answer{pulse.last30.answers === 1 ? "" : "s"} on {pulse.last30.settled} settled
+            exchange{pulse.last30.settled === 1 ? "" : "s"}.
+          </p>
+        )}
+      </Card>
 
       <section>
         <SectionTitle>History</SectionTitle>

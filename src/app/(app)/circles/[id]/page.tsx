@@ -62,6 +62,17 @@ export default async function CirclePage({ params, searchParams }: { params: Pro
             {keepers.map((k) => <li key={k.id}><Link href={`/people/${k.username}`} className="hover:underline">@{k.username}</Link>{k.id === me.id && <span className="text-muted"> (you)</span>}</li>)}
           </ul>
         )}
+        {c.drawLog.length > 0 && (
+          <div className="rounded-md border border-border p-2">
+            <div className="mb-1 text-xs font-medium">Lottery record</div>
+            <p className="mb-1 text-xs text-muted">
+              Each draw is seeded by the drand public randomness beacon (or a local seed, and says so). With the round, pool, and dispute id, anyone can recompute who had to be drawn.
+            </p>
+            <ul className="space-y-1 overflow-x-auto font-mono text-[11px] leading-relaxed text-muted">
+              {c.drawLog.map((e, i) => <li key={i} className="whitespace-nowrap">{e}</li>)}
+            </ul>
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
           {open && short > 0 && (
             <form action={redrawKeepers.bind(null, c.id)}><Button variant="ghost" type="submit">Draw {short} more mediator{short === 1 ? "" : "s"}</Button></form>
