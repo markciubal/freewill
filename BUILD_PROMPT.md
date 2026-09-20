@@ -99,7 +99,7 @@ The order is not arbitrary. Tier 0 is what a group of strangers needs in the fir
 
 **Phase A8: verifiable mediator lottery.** Done. Draws seed from the drand public randomness beacon: seed = sha256(disputeId + ":" + round randomness), deterministic draw over a deterministically ordered pool, all logged on the dispute (source, round, seed, pool, result) and shown on the dispute page. Falls back to a local seed only when the beacon is unreachable, and the log says so.
 
-**Phase A7: optional ID.me attestation.** Done, off by default (IDME_ENABLED). OIDC code flow with PKCE; stores only a date and an HMAC of the subject id; one legal identity attests for at most one account. Sole effect: one extra counted vouch toward local verification. The UI states the trade plainly: ID.me links legal identity to this community in ID.me's own records, which is why it can never be required for anything.
+**Phase A7: optional ID.me affiliation verification.** Done, off by default (IDME_ENABLED). OIDC/OAuth code flow with PKCE; a person proves any enabled affiliation (nurse, responder, teacher, government, military - IDME_POLICIES); stores a date, an HMAC of the subject (one identity per account), and the confirmed affiliation handles. Affiliations are badges on profile and searchable in People, feeding the responder registry; the only standing effect is one extra counted vouch. The UI states the trade plainly.
 
 **Phase A6: trade pulse.** Done. `Reflection` model + `src/lib/pulse.ts`: after a settled exchange each party answers "did this leave you better off?" (-2..+2); private per person, aggregate-only display on the ledger; never affects standing.
 

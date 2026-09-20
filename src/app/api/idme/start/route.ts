@@ -2,22 +2,27 @@ import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/auth";
-import { idmeConfig, publicOrigin } from "@/lib/idme";
+import { idmeConfig, idmePolicies, publicOrigin } from "@/lib/idme";
 
-// Step 1 of the optional ID.me attestation: send the signed-in person to
-// ID.me with state + PKCE. Does nothing unless the deployment enables it.
+// Step 1 of the optional ID.me verification: send the signed-in person to
+// ID.me to prove one affiliation (?policy=nurse|responder|...). The policy
+// handle is the OAuth scope. Does nothing unless the deployment enables it.
 export async function GET(request: Request) {
   const origin = publicOrigin(request);
   const cfg = idmeConfig();
   if (!cfg) return NextResponse.redirect(new URL("/profile?error=" + encodeURIComponent("ID.me is not enabled here."), origin));
   if (!(await getSessionUserId())) return NextResponse.redirect(new URL("/login", origin));
 
+  const requested = new URL(request.url).searchParams.get("policy");
+  const policy = idmePolicies().find((p) => p.handle === requested);
+  if (!policy) return NextResponse.redirect(new URL("/profile?error=" + encodeURIComponent("Choose a verification to add."), origin));
+
   const state = randomBytes(16).toString("hex");
   const verifier = randomBytes(32).toString("base64url");
   const challenge = createHash("sha256").update(verifier).digest("base64url");
 
   const jar = await cookies();
-  jar.set("idme_oauth", JSON.stringify({ state, verifier }), {
+  jar.set("idme_oauth", JSON.stringify({ state, verifier, policy: policy.handle }), {
     httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 600,
   });
 
@@ -25,7 +30,7 @@ export async function GET(request: Request) {
   url.searchParams.set("client_id", cfg.clientId);
   url.searchParams.set("redirect_uri", cfg.redirectUri);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", cfg.scope);
+  url.searchParams.set("scope", policy.handle);
   url.searchParams.set("state", state);
   url.searchParams.set("code_challenge", challenge);
   url.searchParams.set("code_challenge_method", "S256");

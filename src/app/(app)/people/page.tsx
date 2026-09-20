@@ -3,6 +3,7 @@ import { Badge, Empty, Field, Input, PageTitle, ScopeToggle } from "@/components
 import { requireUser } from "@/lib/auth";
 import { readScope, scopeWhere } from "@/lib/form";
 import { applyNear, fmtDistance } from "@/lib/geo";
+import { idmeEnabled, policyLabel } from "@/lib/idme";
 import { SubmitButton } from "@/components/submit-button";
 import { db } from "@/lib/db";
 
@@ -21,6 +22,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
             { displayName: { contains: term, mode: "insensitive" } },
             { locality: { contains: term, mode: "insensitive" } },
             { skills: { has: term } },
+            { affiliations: { has: term } },
           ],
         }
         : {}),
@@ -28,7 +30,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
     orderBy: { createdAt: "asc" },
     take: 200,
     select: {
-      id: true, username: true, displayName: true, locality: true, skills: true, lat: true, lng: true,
+      id: true, username: true, displayName: true, locality: true, skills: true, lat: true, lng: true, affiliations: true,
       _count: { select: { vouchesReceived: true, pledges: { where: { status: "COMPLETED" } } } },
     },
   });
@@ -36,7 +38,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const people = applyNear(peopleRaw, me, scope);
   return (
     <div>
-      <PageTitle title="People" subtitle="Everyone here, and who can do what. Search by name, place, or skill (e.g. midwife, welding, water)."
+      <PageTitle title="People" subtitle="Everyone here, and who can do what. Search by name, place, skill, or verified affiliation (e.g. nurse, responder, welding, water)."
         action={<ScopeToggle scope={scope} base={q ? `/people?q=${encodeURIComponent(q)}` : "/people"} locality={me.locality} />}
       />
       <form className="mb-6 flex max-w-md items-end gap-2">
@@ -54,6 +56,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
                 <div className="font-medium">{p.displayName ?? `@${p.username}`}</div>
                 <div className="text-xs text-muted">@{p.username} / {p.locality}{p.id !== me.id && p.distanceKm !== null ? ` / ${fmtDistance(p.distanceKm)} away` : ""}</div>
                 <div className="mt-2 flex flex-wrap gap-1">
+                  {idmeEnabled() && p.affiliations.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
                   {p.skills.slice(0, 6).map((s) => <Badge key={s}>{s}</Badge>)}
                 </div>
                 <div className="mt-2 text-xs text-muted">

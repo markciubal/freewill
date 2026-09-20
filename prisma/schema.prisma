@@ -36,6 +36,9 @@ model User {
   // or document. Effect: one extra vouch toward local verification, nothing else.
   humanVerifiedAt    DateTime?
   idmeHash           String?
+  // Verified affiliations from ID.me (policy handles: nurse, responder, teacher,
+  // government, military). Badges and responder-registry signal only; never power.
+  affiliations       String[]  @default([])
   createdAt          DateTime  @default(now())
 
   vouchesGiven    Vouch[]            @relation("VouchFrom")

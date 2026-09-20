@@ -29,7 +29,7 @@ export const PROGRAMS: Program[] = [
     route: "/people",
     summary: "Identity comes from vouches. A person is verified once enough locals vouch (about the square root of the locality over three: 1 at 5 people, 3 at 100, never more than 7).",
     why: "With no ID authority, the only proof of a person is other people. Vouching makes fake identities expensive and makes standing something you earn from neighbors rather than receive from an office.",
-    features: ["Vouch for a person, with a note", "Verification threshold scales with locality", "Only verified people can vouch, mediate, or vote", "Standing score and tier", "Credit limits derived from standing", "Optional ID.me attestation: one extra vouch, never required, off by default"],
+    features: ["Vouch for a person, with a note", "Verification threshold scales with locality", "Only verified people can vouch, mediate, or vote", "Standing score and tier", "Credit limits derived from standing", "Optional ID.me affiliation verification: one extra vouch, never required, off by default"],
   },
   {
     key: "bulletins",
@@ -47,9 +47,9 @@ export const PROGRAMS: Program[] = [
     tier: 0,
     status: "live",
     route: "/people",
-    summary: "Who can set a bone, purify water, fix a generator, deliver a baby.",
+    summary: "Who can set a bone, purify water, fix a generator, deliver a baby - self-listed skills plus optional ID.me-verified affiliations.",
     why: "In an emergency the question is never what do we have, but who knows how. Skills are on every profile and searchable.",
-    features: ["Skills on profile", "Search people by skill", "Locality filter"],
+    features: ["Skills on profile", "Search people by skill or verified affiliation", "Optional ID.me affiliation badges (nurse, first responder, teacher, government, military)", "Locality filter"],
   },
   {
     key: "grace",

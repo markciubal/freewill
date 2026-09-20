@@ -22,7 +22,8 @@
     "db:studio:prod": "node scripts/prisma-prod.mjs studio",
     "smoke:matches": "tsx --env-file=.env scripts/matches-check.ts",
     "smoke:pulse": "tsx --env-file=.env scripts/pulse-check.ts",
-    "smoke:lottery": "tsx --env-file=.env scripts/lottery-check.ts"
+    "smoke:lottery": "tsx --env-file=.env scripts/lottery-check.ts",
+    "smoke:idme": "tsx scripts/idme-check.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

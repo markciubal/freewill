@@ -4,7 +4,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { LocationPicker } from "@/components/location-picker";
 import { requireUser } from "@/lib/auth";
 import { Badge, Button } from "@/components/ui";
-import { idmeEnabled } from "@/lib/idme";
+import { idmeEnabled, idmePolicies, policyLabel } from "@/lib/idme";
 import { fmtDate } from "@/components/ui";
 import { unlinkIdme, updateProfile } from "./actions";
 
@@ -37,31 +37,42 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </form>
       </Card>
       {idmeEnabled() && (
-        <Card className="mt-6">
-          <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-            One distinct person <Badge tone={me.humanVerifiedAt ? "accent" : "neutral"}>{me.humanVerifiedAt ? "attested" : "optional"}</Badge>
+        <Card className="mt-6 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            Verified affiliations <Badge tone={me.affiliations.length ? "accent" : "neutral"}>{me.affiliations.length ? `${me.affiliations.length} verified` : "optional"}</Badge>
           </div>
-          {me.humanVerifiedAt ? (
-            <>
-              <p className="text-sm text-muted">
-                Attested via ID.me on {fmtDate(me.humanVerifiedAt)}. It counts as one extra vouch toward verification, nothing more.
-                Plain trade-off: ID.me keeps a record linking your legal identity to this community. We hold only the date and an anonymous code.
-              </p>
-              <form action={unlinkIdme} className="mt-2">
-                <Button variant="ghost" type="submit">Remove it</Button>
-              </form>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-muted">
-                Optional: prove through ID.me that you are one distinct person. It counts as one extra vouch toward verification and gates nothing.
-                Plain trade-off: ID.me verifies you with government ID and keeps a record linking your legal identity to this community.
-                We store only the date and an anonymous code, never your name or documents. Vouches from neighbors work without it.
-              </p>
-              <a href="/api/idme/start" className="mt-2 inline-block rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-border/40">
-                Verify with ID.me
-              </a>
-            </>
+          <p className="text-sm text-muted">
+            Optional: prove an affiliation through ID.me. Each becomes a badge on your profile and helps people find responders. It counts as one extra vouch toward verification and gates nothing.
+            Plain trade-off: ID.me checks you with official records and keeps a record linking your legal identity to this community. We store only the date, an anonymous code, and which affiliations were confirmed, never your name or documents. Vouches from neighbors work without any of this.
+          </p>
+
+          {me.affiliations.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {me.affiliations.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
+              {me.humanVerifiedAt && <span className="text-xs text-muted">since {fmtDate(me.humanVerifiedAt)}</span>}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            {idmePolicies().map((p) => {
+              const has = me.affiliations.includes(p.handle);
+              return (
+                <a
+                  key={p.handle}
+                  href={`/api/idme/start?policy=${p.handle}`}
+                  title={p.hint}
+                  className={`rounded-md border px-3 py-1.5 text-sm font-medium ${has ? "border-accent text-accent hover:bg-accent/10" : "border-border hover:bg-border/40"}`}
+                >
+                  {has ? `Re-verify ${p.label}` : `Verify ${p.label}`}
+                </a>
+              );
+            })}
+          </div>
+
+          {me.affiliations.length > 0 && (
+            <form action={unlinkIdme}>
+              <Button variant="ghost" type="submit">Remove all ID.me verifications</Button>
+            </form>
           )}
         </Card>
       )}

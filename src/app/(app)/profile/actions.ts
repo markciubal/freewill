@@ -37,7 +37,8 @@ export async function updateProfile(formData: FormData) {
 // own records; this only clears what we hold.
 export async function unlinkIdme() {
   const me = await requireUser();
-  await db.user.update({ where: { id: me.id }, data: { humanVerifiedAt: null, idmeHash: null } });
+  await db.user.update({ where: { id: me.id }, data: { humanVerifiedAt: null, idmeHash: null, affiliations: [] } });
   revalidatePath("/profile");
-  ok("/profile", "Removed. The extra vouch no longer counts.");
+  revalidatePath(`/people/${me.username}`);
+  ok("/profile", "Removed. Your ID.me badges and the extra vouch no longer show.");
 }

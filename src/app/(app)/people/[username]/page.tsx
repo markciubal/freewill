@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { fmtDistance, haversineKm } from "@/lib/geo";
+import { idmeEnabled, policyLabel } from "@/lib/idme";
 import { TIER_LABEL } from "@/lib/standing";
 import { getStanding } from "@/lib/standing.all";
 import { unvouch, vouch } from "../actions";
@@ -17,7 +18,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
   const p = await db.user.findUnique({
     where: { username: username.toLowerCase() },
     select: {
-      id: true, username: true, displayName: true, bio: true, locality: true, skills: true, createdAt: true, lat: true, lng: true, humanVerifiedAt: true,
+      id: true, username: true, displayName: true, bio: true, locality: true, skills: true, createdAt: true, lat: true, lng: true, humanVerifiedAt: true, affiliations: true,
       graceBalance: true, hoursBalance: true,
       vouchesReceived: { include: { from: { select: { username: true } } }, orderBy: { createdAt: "desc" } },
       listings: { where: { status: { in: ["OPEN", "MATCHED"] } }, orderBy: { createdAt: "desc" }, take: 10 },
@@ -44,8 +45,11 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
         <Card><Stat label="Vouches" value={standing.vouchesReceived} sub={`${standing.pledgesKept} pledges kept`} /></Card>
         <Card><Stat label="Balances" value={<Grace n={p.graceBalance} />} sub={fmtHours(p.hoursBalance)} /></Card>
       </div>
-      {p.humanVerifiedAt && (
-        <p className="text-xs text-muted">Attested as one distinct person via ID.me ({fmtDate(p.humanVerifiedAt)}). Counts as one extra vouch, nothing more.</p>
+      {idmeEnabled() && p.affiliations.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {p.affiliations.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
+          <span className="text-xs text-muted">verified via ID.me{p.humanVerifiedAt ? ` since ${fmtDate(p.humanVerifiedAt)}` : ""}</span>
+        </div>
       )}
       {standing.harms > 0 && (
         <p className="text-sm text-danger">{standing.harms} resolved dispute{standing.harms === 1 ? "" : "s"} found this person caused harm. Read them before relying on this person.</p>

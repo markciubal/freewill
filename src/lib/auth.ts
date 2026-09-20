@@ -67,6 +67,7 @@ export const userSelect = {
   createdAt: true,
   covenantAcceptedAt: true,
   humanVerifiedAt: true,
+  affiliations: true,
 } as const;
 
 export const getCurrentUser = cache(async () => {
