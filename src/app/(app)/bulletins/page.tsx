@@ -15,7 +15,7 @@ export default async function BulletinsPage({ searchParams }: { searchParams: Pr
     where: {
       AND: [
         { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
-        scope === "local" ? { OR: [{ locality: me.locality }, { locality: null }] } : {},
+        scope === "local" ? { OR: [{ locality: { equals: me.locality, mode: "insensitive" as const } }, { locality: null }] } : {},
       ],
     },
     orderBy: [{ createdAt: "desc" }],

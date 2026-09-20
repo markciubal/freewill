@@ -30,8 +30,15 @@ export const isObjectId = (s: string | undefined): s is string => !!s && /^[0-9a
 // Locality scoping lives in src/lib/geo.ts (local / near / all).
 export { readScope, scopeWhere } from "./geo";
 
-// Locality is set once and never changed. Free text, anywhere in the world,
-// normalized lightly so "north ridge" and "North Ridge" are the same place.
+// Free text, anywhere in the world. Preserve the person's own capitalization
+// and characters; only trim and collapse runs of whitespace. Matching is
+// case-insensitive (scopeWhere, localityKey), so "north ridge" and "North
+// Ridge" are the same place without mangling what they typed.
 export function normalizeLocality(s: string) {
-  return s.trim().replace(/s+/g, " ").toLowerCase().replace(/w/g, (c) => c.toUpperCase());
+  return s.trim().replace(/\s+/g, " ");
+}
+
+// A lowercased key for grouping and comparing localities regardless of casing.
+export function localityKey(s: string) {
+  return s.trim().replace(/\s+/g, " ").toLowerCase();
 }

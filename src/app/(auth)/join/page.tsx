@@ -26,7 +26,7 @@ export default function JoinPage() {
       <Field label="Display name (optional)">
         <Input name="displayName" maxLength={60} />
       </Field>
-      <Field label="Locality" hint="Where you actually are: neighborhood, valley, block, mesh node. Anywhere in the world. Set once, never changed; people near you are the ones who can vouch for you, so be honest.">
+      <Field label="Locality" hint="Where you actually are: neighborhood, valley, block, mesh node. Anywhere in the world. You can change it later; people near you are the ones who can vouch for you, so be honest.">
         <Input name="locality" required minLength={2} maxLength={80} />
       </Field>
       <div className="text-sm">

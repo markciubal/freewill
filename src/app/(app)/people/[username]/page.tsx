@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge, Button, Card, Empty, Field, Grace, Input, Notice, PageTitle, SectionTitle, Stat, fmtDate, fmtHours } from "@/components/ui";
+import { Badge, Button, Card, Empty, Field, Grace, Input, Notice, PageTitle, SectionTitle, Stat, fmtDate, fmtHours, personName } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL } from "@/lib/covenant";
@@ -35,8 +35,8 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageTitle
-        title={p.displayName ?? `@${p.username}`}
-        subtitle={`@${p.username} / ${p.locality}${p.id !== me.id ? ` / ${fmtDistance(haversineKm(me, p))} from you` : ""} / member since ${fmtDate(p.createdAt)}`}
+        title={personName(p)}
+        subtitle={`${p.locality}${p.id !== me.id ? ` / ${fmtDistance(haversineKm(me, p))} from you` : ""} / member since ${fmtDate(p.createdAt)}`}
         action={self ? <Link href="/profile" className="text-sm text-accent hover:underline">Edit profile</Link> : undefined}
       />
       <Notice error={sp.error} />

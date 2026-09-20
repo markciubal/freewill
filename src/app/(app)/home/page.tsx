@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Badge, Card, Empty, Grace, SectionTitle, Stat, fmtDateTime, fmtHours } from "@/components/ui";
+import { Badge, Card, Empty, Grace, SectionTitle, Stat, fmtDateTime, fmtHours, personName } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL, SURVIVAL } from "@/lib/covenant";
 import { db } from "@/lib/db";
@@ -45,7 +45,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{user.displayName ?? `@${user.username}`}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{personName(user)}</h1>
         <p className="text-sm text-muted">{user.locality}</p>
       </div>
 

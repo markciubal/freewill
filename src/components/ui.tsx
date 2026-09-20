@@ -125,6 +125,12 @@ export function fmtGrace(cents: number) {
   return `${cents < 0 ? "-" : ""}${graceDigits(cents)} GRC`;
 }
 
+// How a person's name shows: "Display Name : username" when they have set a
+// display name, otherwise just their handle.
+export function personName(u: { displayName?: string | null; username: string }) {
+  return u.displayName ? `${u.displayName} : ${u.username}` : `@${u.username}`;
+}
+
 export function fmtDate(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }

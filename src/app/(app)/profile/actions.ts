@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fail, firstIssue, ok, str } from "@/lib/form";
+import { fail, firstIssue, normalizeLocality, ok, str } from "@/lib/form";
 
 const schema = z.object({
   displayName: z.string().trim().max(60).optional(),
+  locality: z.string().trim().min(2, "Locality: say where you are").max(80),
   bio: z.string().trim().max(1000).optional(),
   skills: z.string().trim().max(500).optional(),
 });
@@ -16,6 +17,7 @@ export async function updateProfile(formData: FormData) {
   const me = await requireUser();
   const parsed = schema.safeParse({
     displayName: str(formData, "displayName"),
+    locality: str(formData, "locality"),
     bio: str(formData, "bio"),
     skills: str(formData, "skills"),
   });
@@ -26,7 +28,7 @@ export async function updateProfile(formData: FormData) {
   ).slice(0, 30);
   await db.user.update({
     where: { id: me.id },
-    data: { displayName: d.displayName ?? null, bio: d.bio ?? null, skills },
+    data: { displayName: d.displayName ?? null, locality: normalizeLocality(d.locality), bio: d.bio ?? null, skills },
   });
   revalidatePath("/profile");
   revalidatePath(`/people/${me.username}`);

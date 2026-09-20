@@ -23,7 +23,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <form action={updateProfile} className="space-y-4">
           <Field label="Username"><Input value={`@${me.username}`} disabled /></Field>
           <Field label="Display name"><Input name="displayName" maxLength={60} defaultValue={me.displayName ?? ""} /></Field>
-          <Field label="Locality" hint="Set when you joined. It does not change."><Input value={me.locality} disabled /></Field>
+          <Field label="Locality" hint="Where you are. You can change this; matching ignores capitalization."><Input name="locality" required minLength={2} maxLength={80} defaultValue={me.locality} /></Field>
           <div className="text-sm">
             <span className="mb-1 block font-medium">Your pin</span>
             <p className="mb-2 text-xs text-muted">Set when you joined, rounded to about a hundred meters. Others see only a distance, never this point. ({me.lat}, {me.lng})</p>

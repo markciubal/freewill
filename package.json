@@ -30,7 +30,8 @@
     "smoke:jubilee": "tsx --env-file=.env scripts/jubilee-check.ts",
     "smoke:cash": "tsx --env-file=.env scripts/cash-check.ts",
     "smoke:checkpoint": "tsx --env-file=.env scripts/checkpoint-check.ts",
-    "migrate:grace-cents": "tsx --env-file=.env scripts/migrate-grace-cents.ts"
+    "migrate:grace-cents": "tsx --env-file=.env scripts/migrate-grace-cents.ts",
+    "smoke:locality": "tsx --env-file=.env scripts/locality-check.ts"
   },
   "dependencies": {
     "@noble/curves": "^2.4.0",

@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { localityKey } from "./form";
 import { computeStanding, requiredVouchesFor, type Standing } from "./standing";
 
 export type Member = { id: string; username: string; locality: string; createdAt: Date };
@@ -43,23 +44,25 @@ export async function getStandingAll(): Promise<StandingMap> {
     given.set(v.fromId, (given.get(v.fromId) ?? 0) + 1);
   }
 
+  // Group by a case-insensitive key so "North Ridge" and "north ridge" count as
+  // the same place for population and verification.
   const population = new Map<string, number>();
-  for (const u of users) population.set(u.locality, (population.get(u.locality) ?? 0) + 1);
+  for (const u of users) population.set(localityKey(u.locality), (population.get(localityKey(u.locality)) ?? 0) + 1);
 
   // Pass 1: who would be verified counting every vouch. Pass 2: count only
   // vouches from pass-1 verified people, unless the locality is bootstrapping.
   const pass1 = new Set<string>();
   for (const u of users) {
     const bonus = u.humanVerifiedAt !== null ? 1 : 0;
-    if ((received.get(u.id)?.length ?? 0) + bonus >= requiredVouchesFor(population.get(u.locality) ?? 1)) pass1.add(u.id);
+    if ((received.get(u.id)?.length ?? 0) + bonus >= requiredVouchesFor(population.get(localityKey(u.locality)) ?? 1)) pass1.add(u.id);
   }
   const verifiedPerLocality = new Map<string, number>();
-  for (const u of users) if (pass1.has(u.id)) verifiedPerLocality.set(u.locality, (verifiedPerLocality.get(u.locality) ?? 0) + 1);
+  for (const u of users) if (pass1.has(u.id)) verifiedPerLocality.set(localityKey(u.locality), (verifiedPerLocality.get(localityKey(u.locality)) ?? 0) + 1);
 
   const now = Date.now();
   const map: StandingMap = new Map();
   for (const u of users) {
-    const pop = population.get(u.locality) ?? 1;
+    const pop = population.get(localityKey(u.locality)) ?? 1;
     const from = received.get(u.id) ?? [];
     const s = computeStanding({
       vouchesReceived: from.length,
@@ -72,7 +75,7 @@ export async function getStandingAll(): Promise<StandingMap> {
       unfounded: unfoundedCount.get(u.id) ?? 0,
       memberDays: Math.floor((now - u.createdAt.getTime()) / 86_400_000),
       localityPopulation: pop,
-      bootstrap: (verifiedPerLocality.get(u.locality) ?? 0) < requiredVouchesFor(pop),
+      bootstrap: (verifiedPerLocality.get(localityKey(u.locality)) ?? 0) < requiredVouchesFor(pop),
       humanVerified: u.humanVerifiedAt !== null,
     });
     map.set(u.id, { ...s, user: u });

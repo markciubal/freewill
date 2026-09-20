@@ -48,7 +48,8 @@ export function readScope(v: string | undefined): Scope {
 // applied afterwards with `applyNear`, since the populations are small and
 // Prisma has no geo operators for MongoDB.
 export function scopeWhere(scope: Scope, locality: string) {
-  return scope === "local" ? { locality } : {};
+  // Case-insensitive so preserved-capitalization localities still match.
+  return scope === "local" ? { locality: { equals: locality, mode: "insensitive" as const } } : {};
 }
 
 type Pinned = { lat: number | null; lng: number | null };
