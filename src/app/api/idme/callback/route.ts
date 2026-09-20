@@ -2,17 +2,18 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { decodeJwtPayload, extractSubject, idmeConfig, idmeSubjectHash } from "@/lib/idme";
+import { decodeJwtPayload, extractSubject, idmeConfig, idmeSubjectHash, publicOrigin } from "@/lib/idme";
 
 // Step 2: ID.me sends the person back with a code. Exchange it, take only a
 // stable subject id, and record { humanVerifiedAt, HMAC(subject) }. One legal
 // identity can attest for one account, enforced here before writing.
 export async function GET(request: Request) {
-  const back = (q: string) => NextResponse.redirect(new URL(`/profile?${q}`, request.url));
+  const origin = publicOrigin(request);
+  const back = (q: string) => NextResponse.redirect(new URL(`/profile?${q}`, origin));
   const cfg = idmeConfig();
   if (!cfg) return back("error=" + encodeURIComponent("ID.me is not enabled here."));
   const userId = await getSessionUserId();
-  if (!userId) return NextResponse.redirect(new URL("/login", request.url));
+  if (!userId) return NextResponse.redirect(new URL("/login", origin));
 
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -22,8 +23,15 @@ export async function GET(request: Request) {
   jar.delete("idme_oauth");
   let parsed: { state?: string; verifier?: string } = {};
   try { parsed = JSON.parse(saved ?? "{}"); } catch {}
-  if (!code || !state || !parsed.state || state !== parsed.state) {
-    return back("error=" + encodeURIComponent("The ID.me check did not complete. Nothing was recorded; try again."));
+  // Distinguish the failure modes so a retry can be diagnosed, not guessed at.
+  if (!saved) {
+    return back("error=" + encodeURIComponent("Your browser didn't return the sign-in cookie. Start and finish on the same address (the public site, not a forwarded or preview URL), and allow cookies. Nothing was recorded."));
+  }
+  if (!code || !state) {
+    return back("error=" + encodeURIComponent("ID.me didn't return a code. Nothing was recorded; try again."));
+  }
+  if (state !== parsed.state) {
+    return back("error=" + encodeURIComponent("The security check (state) didn't match. Nothing was recorded; try again."));
   }
 
   const tokenRes = await fetch(`${cfg.apiBase}/oauth/token`, {

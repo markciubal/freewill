@@ -2,14 +2,15 @@ import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/auth";
-import { idmeConfig } from "@/lib/idme";
+import { idmeConfig, publicOrigin } from "@/lib/idme";
 
 // Step 1 of the optional ID.me attestation: send the signed-in person to
 // ID.me with state + PKCE. Does nothing unless the deployment enables it.
 export async function GET(request: Request) {
+  const origin = publicOrigin(request);
   const cfg = idmeConfig();
-  if (!cfg) return NextResponse.redirect(new URL("/profile?error=" + encodeURIComponent("ID.me is not enabled here."), request.url));
-  if (!(await getSessionUserId())) return NextResponse.redirect(new URL("/login", request.url));
+  if (!cfg) return NextResponse.redirect(new URL("/profile?error=" + encodeURIComponent("ID.me is not enabled here."), origin));
+  if (!(await getSessionUserId())) return NextResponse.redirect(new URL("/login", origin));
 
   const state = randomBytes(16).toString("hex");
   const verifier = randomBytes(32).toString("base64url");

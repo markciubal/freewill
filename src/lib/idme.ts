@@ -23,6 +23,22 @@ export function idmeConfig() {
   return { clientId, clientSecret, redirectUri, apiBase, scope };
 }
 
+// The public origin the browser actually used, for building redirects back to
+// the app. In a route handler `request.url` is the internal address the dyno
+// received (on Heroku, http://localhost:$PORT), so it must never be used for a
+// browser redirect. Heroku and most proxies set x-forwarded-proto/host to the
+// real values; fall back to NEXT_PUBLIC_SITE_URL, then to request.url.
+export function publicOrigin(request: Request): string {
+  const h = request.headers;
+  const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const host = h.get("x-forwarded-host")?.split(",")[0]?.trim() || h.get("host")?.trim();
+  if (host && proto) return `${proto}://${host}`;
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (configured) return configured;
+  if (host) return `https://${host}`;
+  return new URL(request.url).origin;
+}
+
 // A stable one-way handle for "this legal identity, in this deployment".
 export function idmeSubjectHash(subject: string) {
   const secret = process.env.SESSION_SECRET;
