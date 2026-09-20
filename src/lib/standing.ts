@@ -76,7 +76,8 @@ export function computeStanding(i: {
     verified,
     score,
     tier,
-    graceLimit: verified ? 20 + Math.round(score * 1.5) : 0,
+    // Grace is stored in cents, so the credit limit is too: (20 + 1.5*score) Grace.
+    graceLimit: verified ? (20 + Math.round(score * 1.5)) * 100 : 0,
     hoursLimit: verified ? (5 + Math.round(score / 5)) * 60 : 0,
     circleAllowance: Math.max(1, 2 + Math.floor(score / 40) - i.unfounded),
   };

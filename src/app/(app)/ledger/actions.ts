@@ -26,7 +26,8 @@ export async function sendTransfer(formData: FormData) {
   const d = parsed.data;
   const to = await db.user.findUnique({ where: { username: d.to }, select: { id: true } });
   if (!to) fail("/ledger", `No one here is called @${d.to}.`);
-  const amount = d.ledger === "GRACE" ? Math.round(d.amount) : Math.round(d.amount * 60);
+  // Grace is stored in cents (hundredths), Hours in minutes.
+  const amount = d.ledger === "GRACE" ? Math.round(d.amount * 100) : Math.round(d.amount * 60);
   try {
     await transfer({ ledger: d.ledger, fromId: me.id, toId: to.id, amount, memo: d.memo });
   } catch (e) {

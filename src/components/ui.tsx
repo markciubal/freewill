@@ -112,8 +112,17 @@ export function fmtHours(minutes: number) {
   return `${sign}${h}h${r ? ` ${r}m` : ""}`;
 }
 
-export function fmtGrace(n: number) {
-  return `${n < 0 ? "-" : ""}${Math.abs(n)} GRC`;
+// Grace is stored in cents (hundredths of a Grace). These format a cent amount
+// for display: whole values show as integers, fractional ones to two places.
+export function graceDigits(cents: number) {
+  const v = Math.abs(Math.trunc(cents));
+  const whole = Math.floor(v / 100);
+  const frac = v % 100;
+  return frac === 0 ? `${whole}` : `${whole}.${String(frac).padStart(2, "0")}`;
+}
+
+export function fmtGrace(cents: number) {
+  return `${cents < 0 ? "-" : ""}${graceDigits(cents)} GRC`;
 }
 
 export function fmtDate(d: Date) {
@@ -140,11 +149,12 @@ export function ScopeToggle({ scope, base, locality, near = true }: { scope: "lo
 // A Grace amount with its mark, like "$20": the olive sprig then the number.
 // Shows a minus for negatives; callers that print their own sign pass Math.abs.
 export function Grace({ n, className = "" }: { n: number; className?: string }) {
+  // `n` is a cent amount (hundredths of a Grace).
   return (
     <span className={`inline-flex items-center gap-0.5 whitespace-nowrap tabular-nums ${className}`}>
       {n < 0 && "-"}
       <GraceMark />
-      {Math.abs(n)}
+      {graceDigits(n)}
     </span>
   );
 }

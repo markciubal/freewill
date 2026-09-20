@@ -106,6 +106,8 @@ The order is not arbitrary. Tier 0 is what a group of strangers needs in the fir
 
 Next (Phase D, not yet built): member-held Ed25519 keys for true self-custody and node-to-node signed sync; ZK anonymous credentials for ID.me-style proof without linking legal identity.
 
+**Grace decimalized to cents (done).** Grace is stored in hundredths; transfers and board prices take two decimals; cash notes are any whole denomination 1-100. Migration: `npm run migrate:grace-cents` (guarded, scales x100, re-derives the hash chain in place).
+
 **Phase D1: portable ledger checkpoints (done).** `checkpoint.ts`/`.shared.ts`: the commons signs the Merkle root; `/api/ledger/export` downloads the full signed chain; `/verify` re-derives and checks it off-server with only the public key. The foundation for node-to-node sync and public root-anchoring. **Consolidation:** Cash supersedes Vouchers; `/vouchers` is retired to redeem-only and off the nav. Still ahead: member-held keys (per-user signing), blind-signature anonymous cash, node-to-node merge.
 
 **Phase A9: seed bank & plant exchange.** Done. `SeedShare` + `SeedRequest` models and `src/lib/seeds.ts`. A grower shares a variety (form, type, open-pollinated, days to maturity, sow months); others request it, receive it (GIVEN), grow it, and return seed at harvest (RETURNED). Gift-first, locality-scoped, with a "sow this month" filter. Ties food resilience into the app.

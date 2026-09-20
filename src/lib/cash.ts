@@ -7,11 +7,19 @@ import { sha256 } from "@noble/hashes/sha2.js";
 // browser computes with WebCrypto over the identical string, so a note minted
 // in one place verifies everywhere.
 
-export const CASH_DENOMINATIONS = [1, 5, 10, 25, 50, 100] as const;
-export type Denomination = (typeof CASH_DENOMINATIONS)[number];
+// Cash notes are whole-Grace denominations: any integer from 1 to 100. The
+// underlying ledger is in cents, so a note of denomination D moves D*100 cents.
+export const CASH_MIN = 1;
+export const CASH_MAX = 100;
+export const CASH_QUICK_PICKS = [1, 5, 10, 20, 50, 100] as const;
 
-export function isDenomination(n: number): n is Denomination {
-  return (CASH_DENOMINATIONS as readonly number[]).includes(n);
+export function isDenomination(n: number): boolean {
+  return Number.isInteger(n) && n >= CASH_MIN && n <= CASH_MAX;
+}
+
+// Cents moved by a note of this whole-Grace denomination.
+export function denominationCents(denomination: number): number {
+  return denomination * 100;
 }
 
 function hex(bytes: Uint8Array): string {

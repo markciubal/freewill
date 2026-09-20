@@ -18,7 +18,7 @@ const listingSchema = z.object({
   description: z.string().trim().min(3).max(2000),
   quantity: z.string().trim().max(60).optional(),
   wantsInReturn: z.string().trim().max(200).optional(),
-  priceGrace: z.coerce.number().int().min(0).max(100000).optional(),
+  priceGrace: z.coerce.number().min(0).max(100000).optional(),
   priceHours: z.coerce.number().min(0).max(1000).optional(),
 });
 
@@ -39,7 +39,7 @@ export async function createListing(formData: FormData) {
   const listing = await db.listing.create({
     data: {
       ...d,
-      priceGrace: d.priceGrace || null,
+      priceGrace: d.priceGrace ? Math.round(d.priceGrace * 100) : null, // stored in cents
       priceHours: d.priceHours ? Math.round(d.priceHours * 60) : null,
       ownerId: me.id,
       locality: me.locality,

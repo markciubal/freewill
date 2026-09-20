@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
-import { CASH_DENOMINATIONS, commitmentOf, isCommitment, isDenomination, parseNoteToken } from "@/lib/cash";
+import { CASH_MAX, CASH_MIN, commitmentOf, denominationCents, isCommitment, isDenomination, parseNoteToken } from "@/lib/cash";
 import { db } from "@/lib/db";
 import { fail, ok, str } from "@/lib/form";
 import { appendLog } from "@/lib/hashlog";
@@ -18,19 +18,20 @@ export async function mintCash(formData: FormData): Promise<{ error?: string; id
   const me = await requireUser();
   const denomination = Number(str(formData, "denomination"));
   const commitment = str(formData, "commitment")?.toLowerCase();
-  if (!isDenomination(denomination)) return { error: `Denomination must be one of ${CASH_DENOMINATIONS.join(", ")}.` };
+  if (!isDenomination(denomination)) return { error: `Denomination must be a whole number of Grace from ${CASH_MIN} to ${CASH_MAX}.` };
   if (!commitment || !isCommitment(commitment)) return { error: "That note's commitment is malformed. Try minting again." };
 
+  const cents = denominationCents(denomination);
   const standing = await getStanding(me.id);
   try {
     const id = await db.$transaction(async (tx) => {
       const dupe = await tx.cashNote.findUnique({ where: { commitment }, select: { id: true } });
       if (dupe) throw new CashError("That note already exists. Mint a fresh one.");
       const u = await tx.user.findUniqueOrThrow({ where: { id: me.id }, select: { graceBalance: true } });
-      if (u.graceBalance - denomination < -standing.graceLimit) {
-        throw new CashError(`This note would take you to ${u.graceBalance - denomination}, below your limit of -${standing.graceLimit}. Earn standing to extend it.`);
+      if (u.graceBalance - cents < -standing.graceLimit) {
+        throw new CashError("This note would take you below your Grace limit. Earn standing to extend it.");
       }
-      await tx.user.update({ where: { id: me.id }, data: { graceBalance: { decrement: denomination } } });
+      await tx.user.update({ where: { id: me.id }, data: { graceBalance: { decrement: cents } } });
       const note = await tx.cashNote.create({ data: { minterId: me.id, ledger: "GRACE", denomination, commitment } });
       await appendLog(tx, "CASH_MINT", note.id, note as unknown as Record<string, unknown>);
       return note.id;
@@ -60,7 +61,7 @@ export async function redeemCash(formData: FormData) {
       const note = await tx.cashNote.findUnique({ where: { commitment } });
       if (!note || note.denomination !== parsed.denomination) throw new CashError("No unspent note matches that secret. It may be fake, mistyped, or already reclaimed.");
       if (note.status === "SPENT") throw new CashError("Already reclaimed. A note can only be reclaimed once.");
-      await tx.user.update({ where: { id: me.id }, data: { graceBalance: { increment: note.denomination } } });
+      await tx.user.update({ where: { id: me.id }, data: { graceBalance: { increment: denominationCents(note.denomination) } } });
       const spent = await tx.cashNote.update({ where: { id: note.id }, data: { status: "SPENT", spentById: me.id, spentAt: new Date() } });
       await appendLog(tx, "CASH_REDEEM", spent.id, spent as unknown as Record<string, unknown>);
     });

@@ -84,7 +84,7 @@ export function ThemeEditor({ initial }: { initial: Theme }) {
           <div className="flex flex-wrap gap-2"><Button type="button">Pledge</Button><Button type="button" variant="ghost">Decline</Button><Button type="button" variant="danger">Withdraw</Button></div>
           <Input placeholder="@neighbor" readOnly />
           <table className="w-full text-sm"><tbody>
-            <tr className="border-t border-border"><td className="p-2 text-muted">Aug 24</td><td className="p-2">@ada</td><td className="p-2 text-right font-mono text-accent">+<Grace n={20} /></td></tr>
+            <tr className="border-t border-border"><td className="p-2 text-muted">Aug 24</td><td className="p-2">@ada</td><td className="p-2 text-right font-mono text-accent">+<Grace n={2000} /></td></tr>
             <tr className="border-t border-border"><td className="p-2 text-muted">Aug 23</td><td className="p-2">@bo</td><td className="p-2 text-right font-mono text-danger">-1h 30m</td></tr>
           </tbody></table>
         </Card>

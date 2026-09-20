@@ -97,9 +97,9 @@ export const PROGRAMS: Program[] = [
     tier: 2,
     status: "live",
     route: "/cash",
-    summary: "Denominated bearer notes locked by a secret only the holder keeps. Your device makes and hashes the secret; the commons stores only the hash, so it can never spend a note for you.",
+    summary: "Bearer notes of any whole Grace value (1-100) locked by a secret only the holder keeps. Your device makes and hashes the secret; the commons stores only the hash, so it can never spend a note for you.",
     why: "This is the most self-custodial money here and the closest to cash. Because the system holds only a commitment, not the secret, even a seized server cannot forge redemptions of notes in the wild. You mint (which burns the value into the commitment), write the note down, and whoever reveals the secret reclaims it. Lose the paper and it is gone, exactly like cash - and exactly the fail-safe of self-custody.",
-    features: ["Secret generated and hashed in your browser, never sent until spent", "Fixed denominations bound into the hash", "Mint burns value to a commitment; reveal reclaims it", "Single-use: a copy is caught on reclaim", "Printable note with QR"],
+    features: ["Secret generated and hashed in your browser, never sent until spent", "Any whole denomination 1-100 Grace, bound into the hash", "Mint burns value to a commitment; reveal reclaims it", "Single-use: a copy is caught on reclaim", "Printable note with QR"],
   },
   {
     key: "checkpoint",

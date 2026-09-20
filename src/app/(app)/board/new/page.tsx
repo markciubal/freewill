@@ -47,7 +47,7 @@ export default async function NewListingPage({ searchParams }: { searchParams: P
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Grace ask (optional)" hint="GRC, whole units.">
-              <Input name="priceGrace" type="number" min={0} step={1} />
+              <Input name="priceGrace" type="number" min={0} step={0.01} />
             </Field>
             <Field label="Hours ask (optional)" hint="Decimal hours, e.g. 1.5">
               <Input name="priceHours" type="number" min={0} step={0.25} />

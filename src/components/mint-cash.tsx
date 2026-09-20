@@ -4,8 +4,8 @@ import QRCode from "qrcode";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { mintCash } from "@/app/(app)/cash/actions";
-import { CASH_DENOMINATIONS, commitmentInput, noteToken } from "@/lib/cash";
-import { Button, SectionTitle } from "./ui";
+import { CASH_MAX, CASH_MIN, CASH_QUICK_PICKS, commitmentInput, noteToken } from "@/lib/cash";
+import { Button, Input, SectionTitle } from "./ui";
 
 // Minting happens here, in the browser. The secret is generated with the
 // device's own randomness and hashed with WebCrypto; only the resulting
@@ -62,17 +62,34 @@ export function MintCash() {
   return (
     <div className="space-y-3">
       <SectionTitle>Mint a cash note</SectionTitle>
-      <div className="flex flex-wrap gap-2">
-        {CASH_DENOMINATIONS.map((d) => (
-          <button
-            key={d}
-            type="button"
-            onClick={() => setDenomination(d)}
-            className={`rounded-md border px-3 py-1.5 text-sm font-medium tabular-nums ${denomination === d ? "border-accent bg-accent text-accent-foreground" : "border-border hover:bg-border/40"}`}
-          >
-            {d}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="text-sm">
+          <span className="mb-1 block text-xs text-muted">Denomination (whole Grace, {CASH_MIN}–{CASH_MAX})</span>
+          <Input
+            type="number"
+            min={CASH_MIN}
+            max={CASH_MAX}
+            step={1}
+            value={denomination}
+            onChange={(e) => {
+              const v = Math.floor(Number(e.target.value));
+              if (Number.isFinite(v)) setDenomination(Math.min(CASH_MAX, Math.max(CASH_MIN, v)));
+            }}
+            className="w-28"
+          />
+        </label>
+        <div className="flex flex-wrap gap-2 pb-1">
+          {CASH_QUICK_PICKS.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setDenomination(d)}
+              className={`rounded-md border px-2.5 py-1 text-xs font-medium tabular-nums ${denomination === d ? "border-accent bg-accent text-accent-foreground" : "border-border hover:bg-border/40"}`}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
       </div>
       <Button type="button" onClick={mint} disabled={busy}>
         {busy ? "Minting..." : `Mint a ${denomination} Grace note`}

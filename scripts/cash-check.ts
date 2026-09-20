@@ -1,7 +1,7 @@
 // Cash (hash-commitment bearer notes): pure hashing + a live mint/reclaim
 // round-trip with teardown. Run: npm run smoke:cash
 import { createHash } from "node:crypto";
-import { commitmentInput, commitmentOf, isCommitment, noteToken, parseNoteToken } from "../src/lib/cash";
+import { commitmentInput, commitmentOf, denominationCents, isCommitment, noteToken, parseNoteToken } from "../src/lib/cash";
 import { db } from "../src/lib/db";
 import { appendLog, verifyLedger } from "../src/lib/hashlog";
 
@@ -32,17 +32,19 @@ async function main() {
     const vou = await db.voucher.aggregate({ where: { status: "ISSUED" }, _sum: { amount: true } });
     const cash = await db.cashNote.aggregate({ where: { status: "LOCKED" }, _sum: { denomination: true } });
     const run = await db.demurrageRun.findFirst({ orderBy: { ranAt: "desc" } });
-    return (bal._sum.graceBalance ?? 0) + (vou._sum.amount ?? 0) + (cash._sum.denomination ?? 0) + (run?.remainder ?? 0);
+    // Grace is cents; cash denominations are whole Grace, so ×100.
+    return (bal._sum.graceBalance ?? 0) + (vou._sum.amount ?? 0) + (cash._sum.denomination ?? 0) * 100 + (run?.remainder ?? 0);
   };
   assert((await sums()) === 0, "zero-sum before");
 
   const secret = "cafebabecafebabecafebabecafebabe";
-  const denom = 10;
+  const denom = 10; // whole Grace note
+  const cents = denominationCents(denom);
   const commitment = commitmentOf(denom, secret);
 
   // MINT (server only ever sees the commitment)
   const noteId = await db.$transaction(async (tx) => {
-    await tx.user.update({ where: { id: ada.id }, data: { graceBalance: { decrement: denom } } });
+    await tx.user.update({ where: { id: ada.id }, data: { graceBalance: { decrement: cents } } });
     const n = await tx.cashNote.create({ data: { minterId: ada.id, ledger: "GRACE", denomination: denom, commitment } });
     await appendLog(tx, "CASH_MINT", n.id, n as unknown as Record<string, unknown>);
     return n.id;
@@ -55,7 +57,7 @@ async function main() {
   await db.$transaction(async (tx) => {
     const n = await tx.cashNote.findUniqueOrThrow({ where: { commitment: commitmentOf(p.denomination, p.secret) } });
     assert(n.status === "LOCKED", "note is reclaimable once");
-    await tx.user.update({ where: { id: bo.id }, data: { graceBalance: { increment: n.denomination } } });
+    await tx.user.update({ where: { id: bo.id }, data: { graceBalance: { increment: denominationCents(n.denomination) } } });
     const s = await tx.cashNote.update({ where: { id: n.id }, data: { status: "SPENT", spentById: bo.id, spentAt: new Date() } });
     await appendLog(tx, "CASH_REDEEM", s.id, s as unknown as Record<string, unknown>);
   });
@@ -67,8 +69,8 @@ async function main() {
 
   // Teardown.
   await db.$transaction([
-    db.user.update({ where: { id: ada.id }, data: { graceBalance: { increment: denom } } }),
-    db.user.update({ where: { id: bo.id }, data: { graceBalance: { decrement: denom } } }),
+    db.user.update({ where: { id: ada.id }, data: { graceBalance: { increment: cents } } }),
+    db.user.update({ where: { id: bo.id }, data: { graceBalance: { decrement: cents } } }),
     db.ledgerLog.deleteMany({ where: { refId: noteId } }),
     db.cashNote.delete({ where: { id: noteId } }),
   ]);

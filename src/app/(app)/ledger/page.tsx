@@ -39,7 +39,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
     outstandingVouchers(),
     db.cashNote.aggregate({ where: { status: "LOCKED" }, _sum: { denomination: true } }),
   ]);
-  const outstandingCash = cashAgg._sum.denomination ?? 0;
+  const outstandingCash = (cashAgg._sum.denomination ?? 0) * 100; // denominations are whole Grace; ledger is cents
   const checkpoint = await signCheckpoint();
 
   type Row = { id: string; at: Date; with: string | null; memo: string; ledger: "GRACE" | "HOURS"; amount: number };
@@ -93,7 +93,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
               <Field label="Ledger">
                 <Select name="ledger" defaultValue="GRACE"><option value="GRACE">Grace</option><option value="HOURS">Hours</option></Select>
               </Field>
-              <Field label="Amount" hint="GRC units, or decimal hours."><Input name="amount" type="number" min={0.25} step={0.25} required /></Field>
+              <Field label="Amount" hint="Grace to two decimals, or decimal hours."><Input name="amount" type="number" min={0.01} step={0.01} required /></Field>
             </div>
             <Field label="For (optional)"><Input name="memo" maxLength={200} placeholder="Two loaves and the ride" /></Field>
             <SubmitButton pendingText="Sending...">Send</SubmitButton>

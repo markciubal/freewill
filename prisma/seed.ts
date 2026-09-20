@@ -45,11 +45,11 @@ async function main() {
   await db.listing.createMany({
     data: [
       { kind: "NEED", category: "MEDICAL", title: "Insulin, two weeks", description: "Type 1, eleven years old. We have four days left. Any brand.", ownerId: id["ada"], locality: "North Ridge", ...pin["ada"] },
-      { kind: "NEED", category: "ENERGY", title: "Firewood, one cord, split", description: "For the kitchen through January. Can collect with the cart.", ownerId: id["dee"], locality: "River Flats", ...pin["dee"], priceGrace: 15 },
+      { kind: "NEED", category: "ENERGY", title: "Firewood, one cord, split", description: "For the kitchen through January. Can collect with the cart.", ownerId: id["dee"], locality: "River Flats", ...pin["dee"], priceGrace: 1500 },
       { kind: "OFFER", category: "ENERGY", title: "Solar and battery repair", description: "Panels, charge controllers, inverters. Bring it to the shed or I come to you.", ownerId: id["bo"], locality: "North Ridge", ...pin["bo"], priceHours: 120, wantsInReturn: "Eggs, or diesel" },
       { kind: "OFFER", category: "FOOD", title: "Tomato and squash seedlings", description: "Forty trays. Gift. Take what you will actually plant.", ownerId: id["dee"], locality: "River Flats", ...pin["dee"], quantity: "40 trays" },
       { kind: "NEED", category: "SAFETY", title: "Night watch, two more people", description: "Route 9 crossing, 10pm to 2am, three nights a week. Paid in Hours.", ownerId: id["cy"], locality: "River Flats", ...pin["cy"], priceHours: 240 },
-      { kind: "OFFER", category: "FOOD", title: "Venison, quartered", description: "One deer a week most weeks. Salt or ammunition preferred.", ownerId: id["eli"], locality: "Old Mill", ...pin["eli"], wantsInReturn: "Salt, .30-06, or Grace", priceGrace: 40 },
+      { kind: "OFFER", category: "FOOD", title: "Venison, quartered", description: "One deer a week most weeks. Salt or ammunition preferred.", ownerId: id["eli"], locality: "Old Mill", ...pin["eli"], wantsInReturn: "Salt, .30-06, or Grace", priceGrace: 4000 },
     ],
   });
 
@@ -73,9 +73,9 @@ async function main() {
 
   // A few settled exchanges, applied to balances so the ledger sums to zero.
   const xfers: { ledger: "GRACE" | "HOURS"; from: string; to: string; amount: number; memo: string }[] = [
-    { ledger: "GRACE", from: "bo", to: "ada", amount: 20, memo: "Splint and care" },
+    { ledger: "GRACE", from: "bo", to: "ada", amount: 2000, memo: "Splint and care" },
     { ledger: "HOURS", from: "dee", to: "bo", amount: 90, memo: "Fixed the pump" },
-    { ledger: "GRACE", from: "ada", to: "dee", amount: 10, memo: "Squash and beans" },
+    { ledger: "GRACE", from: "ada", to: "dee", amount: 1000, memo: "Squash and beans" },
   ];
   for (const x of xfers) {
     const field = x.ledger === "GRACE" ? "graceBalance" : "hoursBalance";
@@ -114,6 +114,8 @@ async function main() {
     ],
   });
 
+
+  await db.migration.upsert({ where: { name: "grace-cents" }, create: { name: "grace-cents" }, update: {} });
 
   console.log("Seeded. Log in as ada / bo / cy / dee / eli with password:", PASSWORD);
 }

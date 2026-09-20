@@ -519,3 +519,12 @@ model CashNote {
   @@index([minterId])
   @@index([status])
 }
+
+// --- Migrations -----------------------------------------------------------
+
+// Records applied one-off data migrations so they never run twice.
+model Migration {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  appliedAt DateTime @default(now())
+}

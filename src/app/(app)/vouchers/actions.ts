@@ -29,7 +29,7 @@ export async function issueVoucher(formData: FormData) {
   });
   if (!parsed.success) fail("/vouchers", firstIssue(parsed.error));
   const d = parsed.data;
-  const amount = d.ledger === "GRACE" ? Math.round(d.amount) : Math.round(d.amount * 60);
+  const amount = d.ledger === "GRACE" ? Math.round(d.amount * 100) : Math.round(d.amount * 60);
   const standing = await getStanding(me.id);
   const limit = d.ledger === "GRACE" ? standing.graceLimit : standing.hoursLimit;
   const field = d.ledger === "GRACE" ? "graceBalance" : "hoursBalance";
