@@ -12,6 +12,8 @@ import { outstandingVouchers } from "@/lib/voucher";
 import { TIER_LABEL } from "@/lib/standing";
 import { getStanding } from "@/lib/standing.all";
 import { getTrustPreview, trustFlags } from "@/lib/trust";
+import { InfoDot } from "@/components/info-dot";
+
 import { Badge } from "@/components/ui";
 import { sendTransfer } from "./actions";
 
@@ -55,9 +57,9 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
       <Notice error={sp.error} ok={sp.ok} />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card><Stat label="Grace" value={<Grace n={me.graceBalance} />} sub={<>limit <Grace n={-standing.graceLimit} /></>} /></Card>
-        <Card><Stat label="Hours" value={fmtHours(me.hoursBalance)} sub={`limit -${fmtHours(standing.hoursLimit)}`} /></Card>
-        <Card><Stat label="Standing" value={TIER_LABEL[standing.tier]} sub={standing.verified ? `${standing.score} pts, verified` : `not verified: ${standing.requiredVouches} vouches needed`} /></Card>
+        <Card><Stat label={<>Grace <InfoDot term="grace" /></>} value={<Grace n={me.graceBalance} />} sub={<>limit <Grace n={-standing.graceLimit} /></>} /></Card>
+        <Card><Stat label={<>Hours <InfoDot term="hours" /></>} value={fmtHours(me.hoursBalance)} sub={`limit -${fmtHours(standing.hoursLimit)}`} /></Card>
+        <Card><Stat label={<>Standing <InfoDot term="standing" /></>} value={TIER_LABEL[standing.tier]} sub={standing.verified ? `${standing.score} pts, verified` : `not verified: ${standing.requiredVouches} vouches needed`} /></Card>
       </div>
 
       <div className="grid gap-8 md:grid-cols-2">
@@ -106,11 +108,11 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
             <li><GraceMark size="1.6em" className="text-accent" /> is the symbol for Grace, the way $ marks a dollar: an olive sprig. In plain text write GRC.</li>
             <li>Paying someone lowers your balance and raises theirs by the same amount. There is no mint and no bank.</li>
             <li>A negative balance is not debt to any one person; it just means the community has given you more than you have given back so far. Standing sets how far below zero you can go; unverified accounts cannot go below zero.</li>
-            <li>Positive Grace shrinks {Math.round(DEMURRAGE_RATE_MONTHLY * 100)}% every {DEMURRAGE_INTERVAL_DAYS} days, and the amount is paid out equally to every verified member. This keeps credit circulating instead of piling up. {run && run.days > 0 ? `Last run ${fmtDate(run.ranAt)}: ${run.totalDecayed} GRC shared among ${run.members}.` : ""} {nextRun ? `Next: ${fmtDate(nextRun)}.` : ""}</li>
+            <li><InfoDot term="demurrage" /> Positive Grace shrinks {Math.round(DEMURRAGE_RATE_MONTHLY * 100)}% every {DEMURRAGE_INTERVAL_DAYS} days, and the amount is paid out equally to every verified member. This keeps credit circulating instead of piling up. {run && run.days > 0 ? `Last run ${fmtDate(run.ranAt)}: ${run.totalDecayed} GRC shared among ${run.members}.` : ""} {nextRun ? `Next: ${fmtDate(nextRun)}.` : ""}</li>
             <li>Across all {totals._count} people, Grace balances sum to {totals._sum.graceBalance ?? 0}; add {run?.remainder ?? 0} carried from demurrage, {outstanding} reserved in unredeemed vouchers, and {outstandingCash} locked in unspent cash notes, and the total is zero, or something is wrong.</li>
             <li>Hours are for work that should not be haggled over: care, watch shifts, teaching. One hour counts the same for everyone.</li>
             <li>
-              Every entry is hash-chained. The whole history fingerprints to one root, so any later edit is evident.
+              <InfoDot term="checkpoint" /> Every entry is hash-chained. The whole history fingerprints to one root, so any later edit is evident.
               <span className="mt-1 block font-mono text-xs">{chain.count} entries · root {chain.root.slice(0, 16)}…</span>
             </li>
           </ul>

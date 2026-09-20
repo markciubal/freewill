@@ -7,6 +7,8 @@ import { requireUser } from "@/lib/auth";
 import { CATEGORIES, CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { createCommons, toggleCommons } from "./actions";
+import { InfoDot } from "@/components/info-dot";
+
 
 export default async function CommonsPage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string; scope?: string }> }) {
   const me = await requireUser();
@@ -62,7 +64,7 @@ export default async function CommonsPage({ searchParams }: { searchParams: Prom
         </section>
 
         <Card className="h-fit">
-          <SectionTitle>Add a shared resource</SectionTitle>
+          <SectionTitle>Add a shared resource <InfoDot term="commons" /></SectionTitle>
           <form action={createCommons} className="space-y-3">
             <Field label="Name"><Input name="name" required minLength={2} maxLength={80} placeholder="North well / Tool shed / Seed bank" /></Field>
             <Field label="Category">

@@ -8,6 +8,8 @@ import { applyNear, fmtDistance } from "@/lib/geo";
 import { keeperPoolSize } from "@/lib/keepers";
 import { getStanding } from "@/lib/standing.all";
 import { raiseCircle } from "./actions";
+import { InfoDot } from "@/components/info-dot";
+
 
 export default async function CirclesPage({ searchParams }: { searchParams: Promise<{ error?: string; scope?: string }> }) {
   const me = await requireUser();
@@ -60,14 +62,14 @@ export default async function CirclesPage({ searchParams }: { searchParams: Prom
         </section>
         <div className="space-y-4">
           <Card>
-            <SectionTitle>Disputes you can open</SectionTitle>
+            <SectionTitle>Disputes you can open <InfoDot term="accusation-credit" /></SectionTitle>
             <p className="text-sm">
               <span className="text-2xl font-semibold tabular-nums">{Math.max(0, standing.circleAllowance - openRaised)}</span>
               <span className="text-muted"> of {standing.circleAllowance} available</span>
             </p>
             <p className="mt-1 text-xs text-muted">
               Each open dispute you raise uses one slot until it closes. A dispute found to be unfounded costs you standing and a slot for good; higher standing earns more slots.
-              Mediators here are drawn from a pool of about {keeperPoolSize(standing.localityPopulation)} of {standing.localityPopulation} people.
+              <InfoDot term="mediator" /> Mediators here are drawn from a pool of about {keeperPoolSize(standing.localityPopulation)} of {standing.localityPopulation} people.
             </p>
           </Card>
           <Card>

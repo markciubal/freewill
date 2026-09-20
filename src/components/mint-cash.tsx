@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { mintCash } from "@/app/(app)/cash/actions";
 import { CASH_MAX, CASH_MIN, CASH_QUICK_PICKS, commitmentInput, noteToken } from "@/lib/cash";
 import { Button, Input, SectionTitle } from "./ui";
+import { InfoDot } from "./info-dot";
 
 // Minting happens here, in the browser. The secret is generated with the
 // device's own randomness and hashed with WebCrypto; only the resulting
@@ -61,7 +62,7 @@ export function MintCash() {
 
   return (
     <div className="space-y-3">
-      <SectionTitle>Mint a cash note</SectionTitle>
+      <SectionTitle>Mint a cash note <InfoDot term="cash" /></SectionTitle>
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm">
           <span className="mb-1 block text-xs text-muted">Denomination (whole Grace, {CASH_MIN}–{CASH_MAX})</span>

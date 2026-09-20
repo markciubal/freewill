@@ -10,6 +10,7 @@ import { idmeEnabled, policyLabel } from "@/lib/idme";
 import { TIER_LABEL } from "@/lib/standing";
 import { getStanding } from "@/lib/standing.all";
 import { unvouch, vouch } from "../actions";
+import { InfoDot } from "@/components/info-dot";
 
 export default async function PersonPage({ params, searchParams }: { params: Promise<{ username: string }>; searchParams: Promise<{ error?: string }> }) {
   const me = await requireUser();
@@ -41,8 +42,8 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
       <Notice error={sp.error} />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card><Stat label="Standing" value={TIER_LABEL[standing.tier]} sub={`${standing.score} pts / ${standing.verified ? "verified" : "not yet verified"}`} /></Card>
-        <Card><Stat label="Vouches" value={standing.vouchesReceived} sub={`${standing.pledgesKept} pledges kept`} /></Card>
+        <Card><Stat label={<>Standing <InfoDot term="standing" /></>} value={TIER_LABEL[standing.tier]} sub={`${standing.score} pts / ${standing.verified ? "verified" : "not yet verified"}`} /></Card>
+        <Card><Stat label={<>Vouches <InfoDot term="vouch" /></>} value={standing.vouchesReceived} sub={`${standing.pledgesKept} pledges kept`} /></Card>
         <Card><Stat label="Balances" value={<Grace n={p.graceBalance} />} sub={fmtHours(p.hoursBalance)} /></Card>
       </div>
       {idmeEnabled() && p.affiliations.length > 0 && (

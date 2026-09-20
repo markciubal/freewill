@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Badge, Card, Grace, PageTitle, SectionTitle, Stat, fmtHours } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { windDownReport } from "@/lib/jubilee";
+import { InfoDot } from "@/components/info-dot";
+
 
 export default async function WindDownPage() {
   await requireUser();
@@ -21,7 +23,7 @@ export default async function WindDownPage() {
       </Card>
 
       <Card className="space-y-3">
-        <SectionTitle>What happens on wind-down</SectionTitle>
+        <SectionTitle>What happens on wind-down <InfoDot term="jubilee" /></SectionTitle>
         <ol className="space-y-2 text-sm">
           <li><span className="font-medium">1. Every balance returns to zero.</span> No one owes anyone. Nobody is chased for a debt, because the debt was to the community, and the community is releasing it.</li>
           <li><span className="font-medium">2. Unredeemed vouchers are void.</span> {r.outstandingVouchers > 0 ? <>The <Grace n={r.outstandingVouchers} /> reserved in notes returns to the issuers, then zeroes with everyone else.</> : "None are outstanding."}</li>

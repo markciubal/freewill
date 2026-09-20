@@ -94,10 +94,10 @@ export function Empty({ children }: { children: ReactNode }) {
   return <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted">{children}</p>;
 }
 
-export function Stat({ label, value, sub }: { label: string; value: ReactNode; sub?: ReactNode }) {
+export function Stat({ label, value, sub }: { label: ReactNode; value: ReactNode; sub?: ReactNode }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-wider text-muted">{label}</div>
+      <div className="flex items-center gap-1 text-xs uppercase tracking-wider text-muted">{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
       {sub && <div className="mt-0.5 text-xs text-muted">{sub}</div>}
     </div>

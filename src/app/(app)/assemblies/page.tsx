@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { readScope, scopeWhere } from "@/lib/form";
 import { getStanding } from "@/lib/standing.all";
 import { createProposal } from "./actions";
+import { InfoDot } from "@/components/info-dot";
+
 
 export default async function AssembliesPage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string; scope?: string }> }) {
   const me = await requireUser();
@@ -56,7 +58,7 @@ export default async function AssembliesPage({ searchParams }: { searchParams: P
           )}
         </section>
         <Card className="h-fit">
-          <SectionTitle>Put a question to {me.locality}</SectionTitle>
+          <SectionTitle>Put a question to {me.locality} <InfoDot term="ranked-choice" /></SectionTitle>
           {!standing.verified ? (
             <p className="text-sm text-muted">Only verified people can propose or vote. You need {standing.requiredVouches} vouch{standing.requiredVouches === 1 ? "" : "es"} from people in {me.locality}.</p>
           ) : (

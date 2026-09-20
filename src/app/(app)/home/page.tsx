@@ -5,6 +5,8 @@ import { CATEGORY_LABEL, SURVIVAL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { findMatchesForUser } from "@/lib/matches";
 import { TIER_LABEL } from "@/lib/standing";
+import { InfoDot } from "@/components/info-dot";
+
 import { getStanding } from "@/lib/standing.all";
 
 export default async function HomePage() {
@@ -61,16 +63,16 @@ export default async function HomePage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <Stat
-            label="Standing"
+            label={<>Standing <InfoDot term="standing" /></>}
             value={TIER_LABEL[standing.tier]}
             sub={`${standing.score} pts: ${standing.vouchesReceived} vouches, ${standing.pledgesKept} kept pledges`}
           />
         </Card>
         <Card>
-          <Stat label="Grace" value={<Grace n={user.graceBalance} />} sub={<>may go to <Grace n={-standing.graceLimit} /></>} />
+          <Stat label={<>Grace <InfoDot term="grace" /></>} value={<Grace n={user.graceBalance} />} sub={<>may go to <Grace n={-standing.graceLimit} /></>} />
         </Card>
         <Card>
-          <Stat label="Hours" value={fmtHours(user.hoursBalance)} sub={`may go to -${fmtHours(standing.hoursLimit)}`} />
+          <Stat label={<>Hours <InfoDot term="hours" /></>} value={fmtHours(user.hoursBalance)} sub={`may go to -${fmtHours(standing.hoursLimit)}`} />
         </Card>
       </div>
 
