@@ -103,6 +103,18 @@ async function main() {
     },
   });
 
+  await db.seedShare.createMany({
+    data: [
+      { name: "Cherokee Purple tomato", form: "SEED", category: "VEGETABLE", description: "Dusky heirloom beefsteak, rich and sweet. Saved from the north bed for six years.", openPollinated: true, quantity: "~40 seeds", yearSaved: 2025, daysToMaturity: 80, sowMonths: [3, 4, 5], stewardId: id["dee"], locality: "River Flats", ...pin["dee"] },
+      { name: "Scarlet runner bean", form: "SEED", category: "VEGETABLE", description: "Climbs eight feet, red flowers the hummingbirds love, good dried or fresh. Take a handful.", openPollinated: true, quantity: "two cups of seed", yearSaved: 2025, daysToMaturity: 70, sowMonths: [4, 5, 6], stewardId: id["dee"], locality: "River Flats", ...pin["dee"] },
+      { name: "Waltham butternut squash", form: "SEED", category: "VEGETABLE", description: "Stores till spring in a cool room. One vine feeds a household. Cure two weeks after picking.", openPollinated: true, quantity: "~30 seeds", yearSaved: 2024, daysToMaturity: 100, sowMonths: [5, 6], stewardId: id["dee"], locality: "River Flats", ...pin["dee"] },
+      { name: "Comfrey crowns", form: "CUTTING", category: "HERB", description: "Bocking 14, sterile so it will not seed everywhere. Chop-and-drop mulch, and the bees keep it.", openPollinated: null, quantity: "5 crowns", sowMonths: [3, 4, 9, 10], stewardId: id["ada"], locality: "North Ridge", ...pin["ada"] },
+      { name: "Seed garlic, hardneck", form: "BULB", category: "VEGETABLE", description: "Music variety, big cloves, plant in fall for a summer harvest. Save your biggest bulbs to replant.", openPollinated: true, quantity: "12 heads", yearSaved: 2025, sowMonths: [10, 11], stewardId: id["cy"], locality: "River Flats", ...pin["cy"] },
+      { name: "Flint corn, Roy's Calais", form: "SEED", category: "GRAIN", description: "Short-season northern flint for cornmeal. Needs isolation from other corn to stay true.", openPollinated: true, quantity: "one ear's worth", yearSaved: 2024, daysToMaturity: 95, sowMonths: [5], stewardId: id["eli"], locality: "Old Mill", ...pin["eli"] },
+    ],
+  });
+
+
   console.log("Seeded. Log in as ada / bo / cy / dee / eli with password:", PASSWORD);
 }
 

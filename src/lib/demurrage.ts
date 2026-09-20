@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { appendLog } from "./hashlog";
 import { getStandingAll } from "./standing.all";
 
 // Demurrage: positive Grace decays a little every month, and what decays is
@@ -44,12 +45,14 @@ export async function maybeRunDemurrage(opts: { force?: boolean; days?: number }
     });
     for (const d of decays) {
       await tx.user.update({ where: { id: d.id }, data: { graceBalance: { decrement: d.amount } } });
-      await tx.ledgerAdjustment.create({ data: { userId: d.id, ledger: "GRACE", amount: -d.amount, reason: "DEMURRAGE", runId: run.id } });
+      const adj = await tx.ledgerAdjustment.create({ data: { userId: d.id, ledger: "GRACE", amount: -d.amount, reason: "DEMURRAGE", runId: run.id } });
+      await appendLog(tx, "ADJUSTMENT", adj.id, adj as unknown as Record<string, unknown>);
     }
     if (dividend > 0) {
       for (const id of verified) {
         await tx.user.update({ where: { id }, data: { graceBalance: { increment: dividend } } });
-        await tx.ledgerAdjustment.create({ data: { userId: id, ledger: "GRACE", amount: dividend, reason: "DIVIDEND", runId: run.id } });
+        const adj = await tx.ledgerAdjustment.create({ data: { userId: id, ledger: "GRACE", amount: dividend, reason: "DIVIDEND", runId: run.id } });
+        await appendLog(tx, "ADJUSTMENT", adj.id, adj as unknown as Record<string, unknown>);
       }
     }
     return run;

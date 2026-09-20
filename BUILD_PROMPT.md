@@ -97,6 +97,19 @@ The order is not arbitrary. Tier 0 is what a group of strangers needs in the fir
 
 **Phase A: skeleton.** Done. Auth, schema, all Tier 0 and Tier 1 flows end to end, seed data, this document.
 
+**Phase B (offline & integrity, built together):**
+- **B1 Trust preview** (`src/lib/trust.ts`): see what someone owes before you extend credit, on the ledger page.
+- **B2 Tamper-evident ledger** (`src/lib/hashlog.ts`, `LedgerLog`): sha256 hash chain over every economic event, appended in-transaction; root shown on the ledger; `verifyLedger` re-derives it; backfill script for history.
+- **B3 Offline vouchers** (`Voucher`, `src/lib/voucher.ts` + `.shared.ts`): Ed25519-signed bearer notes (commons key from SESSION_SECRET), issue/redeem/void, single-use nonce, QR print page, zero-sum extended to include reserved vouchers. This is "signed monopoly money": a signature, not a bare hash, makes it verifiable offline and double-spend detectable.
+- **B4 Jubilee / wind-down** (`src/lib/jubilee.ts`, `/wind-down`): a mirror proving dissolution returns everyone to zero and seizes nothing.
+- **B5 Cash / hash-commitment notes** (`CashNote`, `src/lib/cash.ts`, `/cash`): the self-custody step. The holder's browser makes a secret and hashes it; the server stores only the commitment and can never spend the note. Mint burns value to the commitment; revealing the secret reclaims it; single-use, denomination bound into the hash. This is "write down a hash, destroy it in the system, reclaim it" - and the honest answer to server-held voucher keys.
+
+Next (Phase D, not yet built): member-held Ed25519 keys for true self-custody and node-to-node signed sync; ZK anonymous credentials for ID.me-style proof without linking legal identity.
+
+**Phase D1: portable ledger checkpoints (done).** `checkpoint.ts`/`.shared.ts`: the commons signs the Merkle root; `/api/ledger/export` downloads the full signed chain; `/verify` re-derives and checks it off-server with only the public key. The foundation for node-to-node sync and public root-anchoring. **Consolidation:** Cash supersedes Vouchers; `/vouchers` is retired to redeem-only and off the nav. Still ahead: member-held keys (per-user signing), blind-signature anonymous cash, node-to-node merge.
+
+**Phase A9: seed bank & plant exchange.** Done. `SeedShare` + `SeedRequest` models and `src/lib/seeds.ts`. A grower shares a variety (form, type, open-pollinated, days to maturity, sow months); others request it, receive it (GIVEN), grow it, and return seed at harvest (RETURNED). Gift-first, locality-scoped, with a "sow this month" filter. Ties food resilience into the app.
+
 **Phase A8: verifiable mediator lottery.** Done. Draws seed from the drand public randomness beacon: seed = sha256(disputeId + ":" + round randomness), deterministic draw over a deterministically ordered pool, all logged on the dispute (source, round, seed, pool, result) and shown on the dispute page. Falls back to a local seed only when the beacon is unreachable, and the log says so.
 
 **Phase A7: optional ID.me affiliation verification.** Done, off by default (IDME_ENABLED). OIDC/OAuth code flow with PKCE; a person proves any enabled affiliation (nurse, responder, teacher, government, military - IDME_POLICIES); stores a date, an HMAC of the subject (one identity per account), and the confirmed affiliation handles. Affiliations are badges on profile and searchable in People, feeding the responder registry; the only standing effect is one extra counted vouch. The UI states the trade plainly.

@@ -48,6 +48,8 @@ await db.$transaction([
   db.user.update({ where: { id: eli.id }, data: { graceBalance: { decrement: 5 } } }),
   db.transfer.delete({ where: { id: t.id } }),
 ]);
+// append-only in real use; the smoke transfer is the chain tail, so drop its log entry too
+await db.ledgerLog.deleteMany({ where: { refId: t.id } });
 const after = await sums();
 assert(after.grace === 0 && after.hours === 0, "ledgers sum to zero after cleanup");
 await db.$disconnect();

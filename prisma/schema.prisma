@@ -41,20 +41,26 @@ model User {
   affiliations       String[]  @default([])
   createdAt          DateTime  @default(now())
 
-  vouchesGiven    Vouch[]            @relation("VouchFrom")
-  vouchesReceived Vouch[]            @relation("VouchTo")
-  listings        Listing[]
-  pledges         Pledge[]
-  transfersOut    Transfer[]         @relation("TransferFrom")
-  transfersIn     Transfer[]         @relation("TransferTo")
-  stewardships    Commons[]
-  circlesRaised   Circle[]           @relation("CircleRaisedBy")
-  circlesAbout    Circle[]           @relation("CircleAbout")
-  bulletins       Bulletin[]
-  reflections     Reflection[]
-  adjustments     LedgerAdjustment[]
-  proposals       Proposal[]
-  ballots         Ballot[]
+  vouchesGiven     Vouch[]            @relation("VouchFrom")
+  vouchesReceived  Vouch[]            @relation("VouchTo")
+  listings         Listing[]
+  pledges          Pledge[]
+  transfersOut     Transfer[]         @relation("TransferFrom")
+  transfersIn      Transfer[]         @relation("TransferTo")
+  stewardships     Commons[]
+  circlesRaised    Circle[]           @relation("CircleRaisedBy")
+  circlesAbout     Circle[]           @relation("CircleAbout")
+  bulletins        Bulletin[]
+  reflections      Reflection[]
+  seedShares       SeedShare[]
+  seedRequests     SeedRequest[]
+  vouchersIssued   Voucher[]          @relation("VoucherIssuer")
+  vouchersRedeemed Voucher[]          @relation("VoucherRedeemer")
+  cashMinted       CashNote[]         @relation("CashMinter")
+  cashSpent        CashNote[]         @relation("CashSpender")
+  adjustments      LedgerAdjustment[]
+  proposals        Proposal[]
+  ballots          Ballot[]
 }
 
 // A vouch is the atom of trust. Standing is derived from the web of vouches,
@@ -352,4 +358,164 @@ model Reflection {
 
   @@unique([listingId, userId])
   @@index([createdAt])
+}
+
+// --- Seed bank & plant exchange --------------------------------------------
+
+// Food security starts with locally-saved, open-pollinated seed. A seed share
+// is one variety a grower offers to the community, gift-first, with the old
+// ethic: take what you will plant, return seed at harvest so the bank grows.
+
+enum SeedForm {
+  SEED
+  SEEDLING
+  CUTTING
+  TUBER
+  BULB
+  SCION
+}
+
+enum SeedCategory {
+  VEGETABLE
+  HERB
+  FRUIT
+  GRAIN
+  FLOWER
+  TREE
+  COVER_CROP
+  OTHER
+}
+
+model SeedShare {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  name           String // "Cherokee Purple tomato", "Scarlet runner bean"
+  form           SeedForm     @default(SEED)
+  category       SeedCategory
+  description    String
+  openPollinated Boolean? // true = saveable/heirloom, false = hybrid, null = unknown
+  quantity       String? // "about 40 seeds", "3 seedlings"
+  yearSaved      Int?
+  daysToMaturity Int?
+  sowMonths      Int[]        @default([]) // 1-12: when to sow locally
+  locality       String?
+  lat            Float?
+  lng            Float?
+  available      Boolean      @default(true)
+  stewardId      String       @db.ObjectId
+  createdAt      DateTime     @default(now())
+
+  steward  User          @relation(fields: [stewardId], references: [id])
+  requests SeedRequest[]
+
+  @@index([category, available])
+  @@index([stewardId])
+}
+
+enum SeedRequestStatus {
+  REQUESTED // asked for seed
+  GIVEN // handed over, now growing
+  RETURNED // seed brought back at harvest - the bank grew
+  DECLINED
+}
+
+model SeedRequest {
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  seedShareId String            @db.ObjectId
+  userId      String            @db.ObjectId
+  message     String?
+  status      SeedRequestStatus @default(REQUESTED)
+  createdAt   DateTime          @default(now())
+  returnedAt  DateTime?
+
+  seedShare SeedShare @relation(fields: [seedShareId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([seedShareId])
+  @@index([userId])
+}
+
+// --- Tamper-evident ledger ------------------------------------------------
+
+// An append-only hash chain over every economic event (transfers, demurrage
+// adjustments, voucher issue/redeem). Each entry commits to the one before it,
+// so editing any past record breaks every hash after it and changes the root.
+// Anyone can recompute the chain from the underlying records and check it.
+model LedgerLog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  kind        String // TRANSFER | ADJUSTMENT | VOUCHER_ISSUE | VOUCHER_REDEEM
+  refId       String   @db.ObjectId
+  payloadHash String // sha256 of the canonical event
+  prevHash    String // hash of the previous entry (or the genesis constant)
+  hash        String // sha256(prevHash + payloadHash)
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt, id])
+  @@index([refId])
+}
+
+// --- Offline vouchers (signed bearer notes) --------------------------------
+
+// A voucher is the digital-and-printable "monopoly money with a signature": an
+// offline bearer note the commons signs for a set amount, debited from the
+// issuer up front. Anyone can verify the signature against the commons public
+// key without a network. It is single-use: the nonce is consumed on redemption,
+// so a photocopy is caught the second time. Double-spend is thus detectable,
+// not prevented - the honest ceiling for offline value.
+enum VoucherStatus {
+  ISSUED
+  REDEEMED
+  VOIDED
+}
+
+model Voucher {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  issuerId     String        @db.ObjectId
+  ledger       Ledger
+  amount       Int
+  nonce        String        @unique
+  memo         String?
+  signature    String // commons signature over the canonical token
+  status       VoucherStatus @default(ISSUED)
+  redeemedById String?       @db.ObjectId
+  redeemedAt   DateTime?
+  createdAt    DateTime      @default(now())
+
+  issuer   User  @relation("VoucherIssuer", fields: [issuerId], references: [id])
+  redeemer User? @relation("VoucherRedeemer", fields: [redeemedById], references: [id])
+
+  @@index([issuerId])
+  @@index([status])
+}
+
+// --- Cash: hash-commitment bearer notes ------------------------------------
+
+// The most cash-like instrument here, and the most self-custodial. To mint a
+// note the holder picks a secret in their own browser, hashes it with the
+// denomination, and sends only the hash (commitment). The value is debited and
+// "burned" into that commitment: locked, out of circulation. The holder writes
+// the denomination and secret on paper. Whoever later reveals a secret whose
+// hash matches an unspent commitment reclaims the value; the note is then spent
+// and a copy is refused. Because the system only ever stores the hash, it
+// cannot spend the note for anyone - not even a seized server can.
+enum CashStatus {
+  LOCKED
+  SPENT
+}
+
+model CashNote {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  minterId     String     @db.ObjectId
+  ledger       Ledger     @default(GRACE)
+  denomination Int
+  commitment   String     @unique // sha256("N1:" + denomination + ":" + secret)
+  status       CashStatus @default(LOCKED)
+  spentById    String?    @db.ObjectId
+  spentAt      DateTime?
+  createdAt    DateTime   @default(now())
+
+  minter  User  @relation("CashMinter", fields: [minterId], references: [id])
+  spender User? @relation("CashSpender", fields: [spentById], references: [id])
+
+  @@index([minterId])
+  @@index([status])
 }

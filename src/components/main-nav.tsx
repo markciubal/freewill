@@ -20,6 +20,8 @@ const GROUPS: Group[] = [
       { href: "/board", label: "Board", hint: "Needs & offers" },
       { href: "/ledger", label: "Ledger", hint: "Grace & Hours" },
       { href: "/commons", label: "Commons", hint: "Shared resources" },
+      { href: "/seeds", label: "Seed bank", hint: "Seeds & plant exchange" },
+      { href: "/cash", label: "Cash", hint: "Offline bearer notes" },
     ],
   },
   {
@@ -46,6 +48,8 @@ const ACCOUNT: Item[] = [
   { href: "/profile", label: "Profile", hint: "You & your pin" },
   { href: "/theme", label: "Theme", hint: "Colors, type, shape" },
   { href: "/programs", label: "Programs", hint: "What this is" },
+  { href: "/verify", label: "Verify ledger", hint: "Check the history yourself" },
+  { href: "/wind-down", label: "Wind-down", hint: "The fail-safe, checked" },
 ];
 
 function Chevron({ open }: { open: boolean }) {

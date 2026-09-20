@@ -1,6 +1,7 @@
 import type { Ledger } from "@prisma/client";
 import { db } from "./db";
 import { maybeRunDemurrage } from "./demurrage";
+import { appendLog } from "./hashlog";
 import { getStanding } from "./standing.all";
 
 // Mutual credit. There is no mint. A transfer simultaneously credits the payee
@@ -48,6 +49,8 @@ export async function transfer(opts: {
     const field = ledger === "GRACE" ? "graceBalance" : "hoursBalance";
     await tx.user.update({ where: { id: fromId }, data: { [field]: { decrement: amount } } });
     await tx.user.update({ where: { id: toId }, data: { [field]: { increment: amount } } });
-    return tx.transfer.create({ data: { ledger, fromId, toId, amount, memo, listingId } });
+    const t = await tx.transfer.create({ data: { ledger, fromId, toId, amount, memo, listingId } });
+    await appendLog(tx, "TRANSFER", t.id, t as unknown as Record<string, unknown>);
+    return t;
   });
 }
