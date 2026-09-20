@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { TILE_ATTRIBUTION, TILE_URL } from "@/lib/geo";
+import { addBasemap } from "./basemap";
 
 // A map you click to place one pin. No search box, no geocoder, no automatic
 // GPS. The pin can also be typed in by hand, so this works with no map tiles.
@@ -21,7 +21,7 @@ export function LocationPicker({ initial, readOnly = false }: { initial?: { lat:
       const L = (await import("leaflet")).default;
       if (cancelled || !mapRef.current || map.current) return;
       const m = L.map(mapRef.current, { worldCopyJump: true }).setView(initial ? [initial.lat, initial.lng] : [20, 0], initial ? 12 : 2);
-      L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(m);
+      await addBasemap(L, m);
       const place = (lat: number, lng: number) => {
         if (!marker.current) {
           marker.current = L.circleMarker([lat, lng], { radius: 9, color: "#3f6b3a", fillColor: "#7fb377", fillOpacity: 0.9, weight: 2 }).addTo(m);

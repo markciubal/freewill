@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { readScope, scopeWhere } from "@/lib/form";
-import { applyNear, fmtDistance } from "@/lib/geo";
+import { applyNear, fmtDistance, mapDataSource } from "@/lib/geo";
 
 const HAZARD_RADIUS_M = { INFO: 0, HAZARD: 1000, URGENT: 3000 } as const;
 
@@ -12,6 +12,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
   const me = await requireUser();
   const sp = await searchParams;
   const scope = readScope(sp.scope ?? "near");
+  const mapSource = mapDataSource();
   const now = new Date();
   const [listings, commons, bulletins, circles] = await Promise.all([
     db.listing.findMany({ where: { status: { in: ["OPEN", "MATCHED"] }, lat: { not: null }, ...scopeWhere(scope, me.locality) }, take: 300, include: { owner: { select: { username: true } } } }),
@@ -53,7 +54,13 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
         <span>{points.length} things shown</span>
       </div>
       <MapView center={{ lat: me.lat, lng: me.lng }} points={points} zoom={scope === "all" ? 6 : 12} />
-      <p className="text-xs text-muted">Map tiles come from OpenStreetMap over the internet. Set NEXT_PUBLIC_TILE_URL to a local tile server when the network is gone.</p>
+      <p className="text-xs text-muted">
+        {mapSource.kind === "self-hosted"
+          ? "This map is drawn on your device from data hosted here, in your own theme colors. It works with no internet beyond this server. Change the map colors under Theme."
+          : mapSource.isOsmPublic
+            ? "Map pictures come from OpenStreetMap over the internet. For a map that works offline and follows your theme, the community can host its own map data (docs/maps.md)."
+            : "Map pictures come from this community's tile server. For a map drawn in your own theme colors, see docs/maps.md."}
+      </p>
     </div>
   );
 }

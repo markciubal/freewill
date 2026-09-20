@@ -43,3 +43,6 @@ next-env.d.ts
 # project-local mongod data (npm run db:local)
 .mongo/
 !.env.example
+
+# self-hosted map data (see docs/maps.md); each deployment keeps its own
+/public/map/*.pmtiles

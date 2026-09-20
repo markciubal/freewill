@@ -66,5 +66,20 @@ export function applyNear<T extends Pinned>(items: T[], me: LatLng, scope: Scope
   return out.filter((i) => i.distanceKm !== null && i.distanceKm <= NEAR_KM).sort((a, b) => a.distanceKm! - b.distanceKm!);
 }
 
+// Two ways to draw the base map. Preferred: a self-hosted vector map file
+// (PMTiles) drawn as outlines in the person's own theme colors; it works with
+// no internet once the file is on this server. Fallback: raster picture tiles
+// from a tile server, by default OpenStreetMap's public one, whose usage
+// policy does not allow a busy app.
+export const PMTILES_URL = process.env.NEXT_PUBLIC_PMTILES_URL ?? "";
 export const TILE_URL = process.env.NEXT_PUBLIC_TILE_URL ?? "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const TILE_ATTRIBUTION = "&copy; OpenStreetMap contributors";
+export const PMTILES_ATTRIBUTION = '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="https://protomaps.com">Protomaps</a>';
+
+export type MapDataSource = { kind: "self-hosted"; url: string } | { kind: "tiles"; url: string; isOsmPublic: boolean };
+
+// Where this deployment's map comes from, for the note under the map.
+export function mapDataSource(): MapDataSource {
+  if (PMTILES_URL) return { kind: "self-hosted", url: PMTILES_URL };
+  return { kind: "tiles", url: TILE_URL, isOsmPublic: TILE_URL.includes("tile.openstreetmap.org") };
+}

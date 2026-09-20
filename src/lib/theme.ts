@@ -32,6 +32,14 @@ export const TOKENS: TokenDef[] = [
   { name: "accent-foreground", label: "Text on accent", kind: "color", hint: "Text on accent buttons.", light: "#ffffff", dark: "#0f1a0e" },
   { name: "danger", label: "Danger", kind: "color", hint: "Needs, urgent alerts, errors, harm.", light: "#a33a2a", dark: "#e0715f" },
   { name: "warn", label: "Warning", kind: "color", hint: "Hazards, matched listings, gathering circles.", light: "#b7791f", dark: "#e2b04a" },
+
+  // Map colors apply when the community hosts its own map data (docs/maps.md);
+  // the map is then drawn as outlines in these colors instead of photographs
+  // of someone else's tiles. Text, borders and accent are reused for labels,
+  // buildings and parks.
+  { name: "map-land", label: "Map land", kind: "color", hint: "Ground on the map, when the map is drawn from self-hosted data.", light: "#efece4", dark: "#191813" },
+  { name: "map-water", label: "Map water", kind: "color", hint: "Rivers, lakes, sea.", light: "#c8d8e4", dark: "#1d2833" },
+  { name: "map-road", label: "Map roads", kind: "color", hint: "Roads and paths, drawn as lines.", light: "#8c877c", dark: "#6f6a5f" },
 ];
 
 export const SHARED_TOKENS = TOKENS.filter((t) => t.value !== undefined);

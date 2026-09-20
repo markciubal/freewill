@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type * as Leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { TILE_ATTRIBUTION, TILE_URL } from "@/lib/geo";
+import { addBasemap } from "./basemap";
 
 export type MapPoint = {
   id: string;
@@ -37,7 +37,7 @@ export function MapView({ center, points, zoom = 12, height = "h-[70vh]" }: { ce
       const L = (await import("leaflet")).default;
       if (cancelled || !ref.current || map.current) return;
       const m = L.map(ref.current).setView([center.lat, center.lng], zoom);
-      L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(m);
+      await addBasemap(L, m);
       // "You are about here": a soft ring, not a pin, at the viewer's rounded location.
       L.circle([center.lat, center.lng], { radius: 150, color: "#3f6b3a", weight: 1, fillOpacity: 0.08, dashArray: "4 4" }).addTo(m);
       for (const p of points) {
