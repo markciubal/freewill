@@ -118,7 +118,7 @@ Next (Phase D, not yet built): member-held Ed25519 keys for true self-custody an
 
 **The critic (done).** `/sabul` runs six self-audit findings over live data (trust concentration, hoarding, vouch rings, channel capture, lottery skew, signature coverage) in Sabul's voice. Each finding ends with what one member can do about it, linked to the page where they do it (after Jemisin's "The Ones Who Stay and Fight": the utopia is maintenance, and the cost is borne by everyone who chooses to). The mechanism from that story is refused: there are no social workers, no role that acts on findings or removes people.
 
-**Infrastructure funding (done, deliberately narrow).** `/support` is a tip jar (SUPPORT_URL) kept entirely apart from Grace. A "buy Grace / 1% fee" payments API was declined: it would be unlicensed money transmission, create a seizable reserve, let wealth buy influence, and require KYC that contradicts the privacy design.
+**Infrastructure funding (done, deliberately narrow).** `/support` is a tip jar (SUPPORT_URL) kept entirely apart from Grace. After a completed transfer the ledger shows one quiet line linking to it. A "buy Grace / 1% fee" payments API was declined: it would be unlicensed money transmission, create a seizable reserve, let wealth buy influence, and require KYC that contradicts the privacy design.
 
 **Phase D1: portable ledger checkpoints (done).** `checkpoint.ts`/`.shared.ts`: the commons signs the Merkle root; `/api/ledger/export` downloads the full signed chain; `/verify` re-derives and checks it off-server with only the public key. The foundation for node-to-node sync and public root-anchoring. **Consolidation:** Cash supersedes Vouchers; `/vouchers` is retired to redeem-only and off the nav. Still ahead: member-held keys (per-user signing), blind-signature anonymous cash, node-to-node merge.
 
@@ -143,6 +143,23 @@ Next (Phase D, not yet built): member-held Ed25519 keys for true self-custody an
 **Phase C: deepen Tier 1.** Vouch weighting by voucher standing. Standing decay. Commons borrow log. Listing-linked settlement audit on the ledger page. Done when: the sum of all balances is asserted zero by a test, and a vouch ring of three fresh accounts cannot reach Neighbor tier.
 
 **Phase D: survive the network.** Every record gets an author signature. Export the whole database to a signed bundle; import and merge one. Then node-to-node sync over LAN. Done when: two laptops with no internet can merge a week of divergent boards and ledgers without losing a transfer.
+
+**Phase D3: federation (next; the merge rules, decided 2026-09-20).** Many small nodes, one per community, instead of one server: the cost floor becomes free tiers and the single point of seizure goes away. A node exports a signed bundle (what `/api/ledger/export` and `/api/trust/export` already emit, plus boards, bulletins, commons, seeds) and imports another node's. The merge rule per record type, chosen so a later local-first client can use the same rules:
+
+| Record | Identity | Merge rule | Conflict |
+|---|---|---|---|
+| Member (public key, username, locality) | public key | union; a username is scoped to its home node (`ada@north-ridge`) | none: two nodes never own the same key |
+| Vouch | (from key, to key) | union; a vouch is valid only with the voucher's signature | unsigned vouches do not travel |
+| Listing, bulletin, commons, seed share | author key + record id | union, last-writer-wins on the author's own edits only | edits by anyone but the author are dropped |
+| Transfer | both parties' signatures | union; each party's balance is recomputed from their own signed history | a payer whose signed transfers exceed their limit is flagged on both nodes and their standing takes the harm |
+| Demurrage run | node id + date | never merged; each node melts its own members | none |
+| Cash note | commitment | union; first valid reveal wins across nodes after sync | a double reveal is a dispute, capped at one note's denomination |
+| Dispute, assembly | home node | never merged; visible read-only elsewhere | none |
+| Standing | computed | never transferred; recomputed on each node from merged vouches, scoped to the member's home locality | none |
+
+Prerequisites, in order: (1) member-signed transfers (both parties sign the canonical transfer token, stored beside the record, verified on import); (2) a node identity (a node key derived like the commons key, published in the bundle) so records carry their origin; (3) `import` with the table above, idempotent, refusing anything unsigned; (4) a `/nodes` page listing peers and the last bundle exchanged. Done when: two nodes exchange bundles by file, each verifies the other's, a transfer signed on node A is credited on node B, and a forged transfer in a bundle is refused with its reason.
+
+Refused, on purpose: a global ledger. Grace does not cross localities as a currency; it is a promise between people who can find each other. What federates is trust and information, and the bounded credit of members who chose to trade across nodes.
 
 **Phase E: Tier 2.** Rotas, assemblies, library, apprenticeships, in that order.
 

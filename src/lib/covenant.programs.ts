@@ -139,7 +139,7 @@ export const PROGRAMS: Program[] = [
     route: "/support",
     summary: "A tip jar for the infrastructure bill, kept entirely apart from Grace. Money here buys no credit, standing, or influence, and no fee is taken from anyone's trades.",
     why: "Selling Grace for money would create a reserve to seize and let wealth buy influence, the two things the design exists to prevent. Keeping the server tip jar and the credit system completely separate is what keeps Grace trustworthy.",
-    features: ["Configurable donation link (SUPPORT_URL)", "No fee on the credit system", "No way to buy Grace, on purpose", "Self-hosting encouraged"],
+    features: ["Configurable donation link (SUPPORT_URL)", "One quiet nudge after a completed trade, nowhere else", "No fee on the credit system", "No way to buy Grace, on purpose", "Self-hosting encouraged"],
   },
   {
     key: "checkpoint",

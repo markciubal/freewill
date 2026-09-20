@@ -55,6 +55,13 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
     <div className="space-y-8">
       <PageTitle title="Ledger" subtitle="Community credit with no bank behind it. Grace prices things by value; Hours count everyone's time equally. Both are created by giving and settled by giving back." />
       <Notice error={sp.error} ok={sp.ok} />
+      {sp.ok && process.env.SUPPORT_URL?.trim() && (
+        // The one moment a nudge is fair: right after the thing worked. Money here
+        // pays for the server only; it buys no Grace and no standing.
+        <p className="text-xs text-muted">
+          That ran on a server someone pays for. <Link href="/support" className="text-accent hover:underline">Chip in for hosting</Link> if you can; it changes nothing about your credit.
+        </p>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><Stat label={<>Grace <InfoDot term="grace" /></>} value={<Grace n={me.graceBalance} />} sub={<>limit <Grace n={-standing.graceLimit} /></>} /></Card>
