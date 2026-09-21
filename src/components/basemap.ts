@@ -2,21 +2,25 @@
 
 import type * as Leaflet from "leaflet";
 import { PMTILES_ATTRIBUTION, PMTILES_URL, TILE_ATTRIBUTION, TILE_URL } from "@/lib/geo";
-import { PLACE_CLASSES, ROAD_CLASSES, paletteFromTokens, type MapPalette } from "@/lib/map-theme";
+import { PLACE_CLASSES, ROAD_CLASSES, paletteFromTokens, pickerPalette, type BasemapPurpose, type MapPalette } from "@/lib/map-theme";
 
 // Adds the base map to a Leaflet map. With a self-hosted map file configured,
-// the base map is drawn on the device from vector data, as lines, in the
-// person's map colors, with an optional glow. Without one, it falls back to
-// picture tiles with the theme's filter applied so they lean the same way.
-// Both maps in the app (the overview and the pin picker) call this, so they
-// look the same and change together.
+// the base map is drawn on the device from vector data, as lines. Without one,
+// it falls back to picture tiles. Both maps in the app call this.
+//
+// For browsing ("view", the /map page and the theme preview) it follows the
+// person's chosen map look, including the filter that pushes picture tiles
+// toward it. For placing a pin ("pick", the join and profile pages) it always
+// uses the plainest, most legible map: see pickerPalette in map-theme.ts.
 
-export function readPalette(): MapPalette {
-  return paletteFromTokens((tokenName) => getComputedStyle(document.documentElement).getPropertyValue(`--${tokenName}`));
+const readPageToken = (tokenName: string) => getComputedStyle(document.documentElement).getPropertyValue(`--${tokenName}`);
+
+export function readPalette(purpose: BasemapPurpose = "view"): MapPalette {
+  return purpose === "pick" ? pickerPalette(readPageToken) : paletteFromTokens(readPageToken);
 }
 
-export async function addBasemap(L: typeof Leaflet, map: Leaflet.Map): Promise<void> {
-  const palette = readPalette();
+export async function addBasemap(L: typeof Leaflet, map: Leaflet.Map, purpose: BasemapPurpose = "view"): Promise<void> {
+  const palette = readPalette(purpose);
   const container = map.getContainer();
   container.style.background = palette.land;
 

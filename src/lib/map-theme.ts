@@ -12,7 +12,7 @@
 // whatever can answer "what is --token right now": in the browser that is
 // getComputedStyle on the document element; in a test it is a plain object.
 
-import { DEFAULT_MAP_PRESET } from "./theme";
+import { DEFAULT_MAP_PRESET, MAP_PRESETS } from "./theme";
 
 export type MapPalette = {
   land: string;
@@ -69,6 +69,21 @@ export function paletteFromTokens(read: TokenReader): MapPalette {
     // of the stack are dropped and the first concrete family is used.
     fontFamily: concreteFontStack(readOr(read, "font-sans")),
   };
+}
+
+// Placing a pin is a task, not browsing: a stranger finding their home on a
+// world map with no search box. A dark or stylised look crushes a world-scale
+// map to black silhouettes with no borders or names, so the picker always uses
+// the plainest map there is, whatever look the person chose for /map. Picture
+// tiles are shown unfiltered, exactly as OpenStreetMap draws them for
+// legibility; a self-hosted map is drawn in the light Paper colors. The
+// person's accent and font still apply.
+export type BasemapPurpose = "view" | "pick";
+
+export function pickerPalette(readPage: TokenReader): MapPalette {
+  const paper = MAP_PRESETS.find((preset) => preset.key === "paper")!.light;
+  const legible: Record<string, string> = { ...paper, "map-filter": "none", "map-glow": "0px" };
+  return paletteFromTokens((tokenName) => legible[tokenName] ?? readPage(tokenName));
 }
 
 // "6px" -> 6; anything unreadable -> 0 (crisp lines).

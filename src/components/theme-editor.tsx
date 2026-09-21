@@ -112,7 +112,8 @@ export function ThemeEditor({ initial, mapCenter }: { initial: Theme; mapCenter:
         <Card className="space-y-3">
           <SectionTitle>Map</SectionTitle>
           <p className="text-xs text-muted">
-            Pick a look, then change any color. On a self-hosted map the lines are drawn in these colors; on picture tiles the filter below approximates them.
+            Pick a look, then change any color. On a self-hosted map the lines are drawn in these colors; on picture tiles the filter below approximates them. The small map for
+            placing your pin always stays plain, so it is easy to find your way on it.
           </p>
           <div className="flex flex-wrap gap-2">
             {MAP_PRESETS.map((preset) => (

@@ -21,7 +21,7 @@ export function LocationPicker({ initial, readOnly = false }: { initial?: { lat:
       const L = (await import("leaflet")).default;
       if (cancelled || !mapRef.current || map.current) return;
       const m = L.map(mapRef.current, { worldCopyJump: true }).setView(initial ? [initial.lat, initial.lng] : [20, 0], initial ? 12 : 2);
-      await addBasemap(L, m);
+      await addBasemap(L, m, "pick");
       const place = (lat: number, lng: number) => {
         if (!marker.current) {
           marker.current = L.circleMarker([lat, lng], { radius: 9, color: "#3f6b3a", fillColor: "#7fb377", fillOpacity: 0.9, weight: 2 }).addTo(m);

@@ -3,9 +3,9 @@
 // public demo planet, when reachable) really carries those layers.
 // Run: npm run smoke:map
 import { PMTiles } from "pmtiles";
-import { PLACE_CLASSES, ROAD_CLASSES, concreteFontStack, paletteFromTokens, pixels } from "../src/lib/map-theme";
+import { PLACE_CLASSES, ROAD_CLASSES, concreteFontStack, paletteFromTokens, pickerPalette, pixels } from "../src/lib/map-theme";
 import { originOfUrlTemplate } from "../src/lib/security";
-import { DEFAULT_THEME, isValidValue, sanitizeTheme } from "../src/lib/theme";
+import { DEFAULT_THEME, MAP_PRESETS, isValidValue, sanitizeTheme } from "../src/lib/theme";
 import { cssToTheme, themeToCss } from "../src/lib/theme.css";
 
 function assert(condition: unknown, message: string) {
@@ -33,6 +33,22 @@ async function main() {
   assert(isValidValue("color", fromEmpty.water) && fromEmpty.fontFamily.length > 0, "with no theme readable, the palette falls back to defaults");
   assert(pixels("6px") === 6 && pixels("0px") === 0 && pixels("nonsense") === 0 && pixels("99px") === 24, "glow is read in pixels, off when unreadable, capped at 24");
   assert(concreteFontStack("var(--font-geist-sans), system-ui, sans-serif") === "system-ui, sans-serif", "canvas fonts drop var() parts the canvas cannot resolve");
+
+  // The pin picker is for finding your home, so it is always legible. Whatever
+  // look a person picked for browsing (here Cypherpunk, the default, and a
+  // made-up all-magenta one), the picker ignores it.
+  const paper = MAP_PRESETS.find((preset) => preset.key === "paper")!.light;
+  for (const [name, chosen] of [
+    ["the Cypherpunk default", { ...DEFAULT_THEME.shared, ...DEFAULT_THEME.light }],
+    ["a person's own magenta look", { ...DEFAULT_THEME.shared, ...DEFAULT_THEME.light, "map-land": "#ff00ff", "map-road": "#ff00ff", "map-filter": "invert(1)", "map-glow": "12px" }],
+  ] as const) {
+    const picker = pickerPalette((token) => (chosen as Record<string, string>)[token] ?? "");
+    assert(picker.tileFilter === "none" && picker.glowPx === 0, `with ${name}, the picker shows picture tiles unfiltered and draws no glow`);
+    assert(picker.land === paper["map-land"] && picker.water === paper["map-water"] && picker.label === paper["map-label"], `with ${name}, a self-hosted map in the picker is drawn in the light Paper colors`);
+  }
+  const browsing = paletteFromTokens((token) => ({ ...DEFAULT_THEME.shared, ...DEFAULT_THEME.light } as Record<string, string>)[token] ?? "");
+  assert(browsing.tileFilter.startsWith("invert(1)"), "browsing the map (not picking a pin) still follows the chosen look");
+  assert(pickerPalette(() => "").fontFamily.length > 0 && isValidValue("color", pickerPalette(() => "").park), "the picker still takes the page's font and accent");
 
   // The new map tokens survive the theme editor's CSS round trip and the sanitizer.
   const custom = sanitizeTheme({ ...DEFAULT_THEME, light: { ...DEFAULT_THEME.light, "map-water": "#1e90ff" } });
