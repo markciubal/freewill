@@ -73,6 +73,12 @@ const SOURCES = {
     title: "Hash commitments (commit-and-reveal)",
     informs: "Cash notes: a secret is hashed on the member's device and only the commitment reaches the server; revealing the secret redeems the note, and the first reveal wins.",
   },
+  typesafe: {
+    title: "TypeSafe AI: System One models (Jev)",
+    url: "https://docs.typesafe.ai/introduction",
+    informs:
+      "The claim audit. Questions whose permitted answers are fixed in advance, answered against supplied state and returning calibrated probabilities with confidence, which is the right shape for auditing prose: it cannot wander off into generated text, and its uncertainty is a number rather than a tone.",
+  },
   osm: {
     title: "OpenStreetMap",
     url: "https://www.openstreetmap.org/copyright",
@@ -350,6 +356,24 @@ const manifest: Manifest = {
       sources: [],
     },
     {
+      key: "claim-audit",
+      name: "An audit of this page's own claims",
+      status: "partial",
+      does: "Every claim on this page is checked two ways. First the checks it names are run, which proves the mechanical part. Then the claim and that evidence go to a model answering fixed-answer questions about the prose: are these limitations a real disclosure or marketing, does this answer oversell, is a limitation a careful reader would expect missing, does the provenance say plainly that an AI wrote the code. Answers are probabilities with confidence; anything the model is unsure of goes to a person rather than into the report as fact.",
+      doesNot: [
+        "The judgment half is not proof. It is a probability from a second reader about prose, and it can be wrong in both directions: it can miss a real evasion, and it can flag honest writing.",
+        "The audit questions were written by the same author as the claims they audit. A different reader answers them, but the questions themselves carry that author's blind spots, which is the same limitation the testing section admits one level up.",
+        "It judges the text, not the running system. A capability could describe itself perfectly and still behave differently; only the deterministic checks speak to behaviour.",
+        "The judgment half needs an external service and an API key, so it runs when a maintainer runs it, not continuously. The evidence-gathering half needs neither and runs offline.",
+        "Nothing in the running app consults any of it. A model that could gate anything here would be the authority this design exists without.",
+      ],
+      verifiedBy: [
+        { kind: "script", ref: "smoke:audit", what: "Every claim is covered, every question is well formed, and every question has a reading that can fail." },
+        { kind: "file", ref: "src/lib/audit.questions.ts", what: "The questions themselves, and the thresholds at which an answer becomes a finding." },
+      ],
+      sources: [SOURCES.typesafe],
+    },
+    {
       key: "federation",
       name: "Many nodes instead of one server",
       status: "planned",
@@ -434,6 +458,7 @@ const manifest: Manifest = {
         "The automated checks were written by the same author as the code. They show the code does what its author intended, not that the intent was correct.",
         "The cryptography uses well-regarded libraries, but nobody qualified has reviewed how they are assembled here.",
         "It is young software. If a community depends on it for food or water coordination, keep a paper copy.",
+        "Even the audit of this page is partly the author's own work: a different reader answers the questions, but the questions were written here.",
       ],
       liveState: ["capabilityCount", "checkCount"],
       seeAlso: [
