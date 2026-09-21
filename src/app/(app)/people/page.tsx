@@ -3,7 +3,7 @@ import { Badge, Empty, Field, Input, PageTitle, ScopeToggle } from "@/components
 import { requireUser } from "@/lib/auth";
 import { readScope, scopeWhere } from "@/lib/form";
 import { applyNear, fmtDistance } from "@/lib/geo";
-import { idmeEnabled, policyLabel } from "@/lib/idme";
+import { idmeEnabled, knownAffiliations, policyLabel } from "@/lib/idme";
 import { SubmitButton } from "@/components/submit-button";
 import { db } from "@/lib/db";
 
@@ -22,7 +22,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
             { displayName: { contains: term, mode: "insensitive" } },
             { locality: { contains: term, mode: "insensitive" } },
             { skills: { has: term } },
-            { affiliations: { has: term } },
+            // Only badges the app still recognizes can be searched for.
+            ...(knownAffiliations([term]).length ? [{ affiliations: { has: term } }] : []),
           ],
         }
         : {}),
@@ -56,7 +57,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
                 <div className="font-medium">{p.displayName ?? `@${p.username}`}</div>
                 <div className="text-xs text-muted">@{p.username} / {p.locality}{p.id !== me.id && p.distanceKm !== null ? ` / ${fmtDistance(p.distanceKm)} away` : ""}</div>
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {idmeEnabled() && p.affiliations.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
+                  {idmeEnabled() && knownAffiliations(p.affiliations).map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
                   {p.skills.slice(0, 6).map((s) => <Badge key={s}>{s}</Badge>)}
                 </div>
                 <div className="mt-2 text-xs text-muted">

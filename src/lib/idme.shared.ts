@@ -12,13 +12,25 @@ export function idmeEnabled() {
 // IDME_POLICIES; these are the ones this app's ID.me registration supports.
 export type Policy = { handle: string; label: string; hint: string };
 
+// Military is deliberately not here, and IDME_POLICIES cannot add it back:
+// only handles in this list are ever offered, stored or shown. This app is for
+// the weeks after a government turns on its people. In a seized database, a
+// searchable list of soldiers, veterans and their families is a target list;
+// in the hands of a would-be strongman it is a recruiting list. Neither helps
+// anyone find a nurse. Badges stored before it was dropped are hidden by
+// knownAffiliations and fall away on the next ID.me verification.
 export const IDME_ALL_POLICIES: Policy[] = [
   { handle: "nurse", label: "Nurse", hint: "Licensed nurses, nursing assistants, and nurse practitioners" },
   { handle: "responder", label: "First responder", hint: "EMTs, firefighters, law enforcement, and dispatchers" },
   { handle: "teacher", label: "Teacher", hint: "PreK-12 and higher-education faculty" },
   { handle: "government", label: "Government worker", hint: "Federal, state, and local government employees" },
-  { handle: "military", label: "Military", hint: "Active duty, retirees, veterans, and military family" },
 ];
+
+// The stored affiliations this app still recognizes, in their stored order.
+// Everything that shows, searches or keeps a badge goes through this.
+export function knownAffiliations(handles: string[]): string[] {
+  return handles.filter((handle) => IDME_ALL_POLICIES.some((policy) => policy.handle === handle));
+}
 
 export function idmePolicies(): Policy[] {
   const raw = process.env.IDME_POLICIES?.trim();

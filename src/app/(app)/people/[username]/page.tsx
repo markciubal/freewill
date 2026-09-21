@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { fmtDistance, haversineKm } from "@/lib/geo";
-import { idmeEnabled, policyLabel } from "@/lib/idme";
+import { idmeEnabled, knownAffiliations, policyLabel } from "@/lib/idme";
 import { TIER_LABEL } from "@/lib/standing";
 import { getStanding } from "@/lib/standing.all";
 import { unvouch } from "../actions";
@@ -48,9 +48,9 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
         <Card><Stat label={<>Vouches <InfoDot term="vouch" /></>} value={standing.vouchesReceived} sub={`${standing.pledgesKept} pledges kept`} /></Card>
         <Card><Stat label={<>Balances <InfoDot term="grace" /></>} value={<Grace n={p.graceBalance} />} sub={fmtHours(p.hoursBalance)} /></Card>
       </div>
-      {idmeEnabled() && p.affiliations.length > 0 && (
+      {idmeEnabled() && knownAffiliations(p.affiliations).length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          {p.affiliations.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
+          {knownAffiliations(p.affiliations).map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
           <span className="text-xs text-muted">verified via ID.me{p.humanVerifiedAt ? ` since ${fmtDate(p.humanVerifiedAt)}` : ""}</span>
           <InfoDot term="affiliation" />
         </div>

@@ -5,7 +5,7 @@ import { InfoDot } from "@/components/info-dot";
 import { LocationPicker } from "@/components/location-picker";
 import { requireUser } from "@/lib/auth";
 import { Badge, Button } from "@/components/ui";
-import { idmeEnabled, idmePolicies, policyLabel } from "@/lib/idme";
+import { idmeEnabled, idmePolicies, knownAffiliations, policyLabel } from "@/lib/idme";
 import { fmtDate } from "@/components/ui";
 import { PASSWORD_MIN_LENGTH } from "@/lib/security";
 import { PasswordKeeping } from "@/components/password-keeping";
@@ -14,6 +14,8 @@ import { changePassword, logoutEverywhere, unlinkIdme, updateProfile } from "./a
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string }> }) {
   const me = await requireUser();
   const sp = await searchParams;
+  // Only badges the app still recognizes; a dropped one (military) is not shown.
+  const badges = knownAffiliations(me.affiliations);
   return (
     <div className="mx-auto max-w-xl">
       <PageTitle
@@ -42,23 +44,23 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       {idmeEnabled() && (
         <Card className="mt-6 space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
-            Verified affiliations <InfoDot term="affiliation" /> <Badge tone={me.affiliations.length ? "accent" : "neutral"}>{me.affiliations.length ? `${me.affiliations.length} verified` : "optional"}</Badge>
+            Verified affiliations <InfoDot term="affiliation" /> <Badge tone={badges.length ? "accent" : "neutral"}>{badges.length ? `${badges.length} verified` : "optional"}</Badge>
           </div>
           <p className="text-sm text-muted">
             Optional: prove an affiliation through ID.me. Each becomes a badge on your profile and helps people find responders. It counts as one extra vouch toward verification and gates nothing.
             Plain trade-off: ID.me checks you with official records and keeps a record linking your legal identity to this community. We store only the date, an anonymous code, and which affiliations were confirmed, never your name or documents. Vouches from neighbors work without any of this.
           </p>
 
-          {me.affiliations.length > 0 && (
+          {badges.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              {me.affiliations.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
+              {badges.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
               {me.humanVerifiedAt && <span className="text-xs text-muted">since {fmtDate(me.humanVerifiedAt)}</span>}
             </div>
           )}
 
           <div className="flex flex-wrap gap-2">
             {idmePolicies().map((p) => {
-              const has = me.affiliations.includes(p.handle);
+              const has = badges.includes(p.handle);
               return (
                 <a
                   key={p.handle}
@@ -72,7 +74,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             })}
           </div>
 
-          {me.affiliations.length > 0 && (
+          {(me.humanVerifiedAt || me.affiliations.length > 0) && (
             <form action={unlinkIdme}>
               <Button variant="ghost" type="submit">Remove all ID.me verifications</Button>
             </form>

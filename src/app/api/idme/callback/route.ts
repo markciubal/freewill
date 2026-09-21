@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { decodeJwtPayload, extractAffiliations, extractSubject, idmeConfig, idmePolicies, idmeSubjectHash, policyLabel, publicOrigin } from "@/lib/idme";
+import { decodeJwtPayload, extractAffiliations, extractSubject, idmeConfig, idmePolicies, idmeSubjectHash, knownAffiliations, policyLabel, publicOrigin } from "@/lib/idme";
 
 // Step 2: ID.me sends the person back with a code. Exchange it, take only a
 // stable subject id, and record { humanVerifiedAt, HMAC(subject) }. One legal
@@ -81,7 +81,8 @@ export async function GET(request: Request) {
   if (confirmed.size === 0) return back("error=" + encodeURIComponent("ID.me confirmed no affiliation this deployment offers. Nothing was recorded."));
 
   const current = await db.user.findUnique({ where: { id: userId }, select: { affiliations: true, humanVerifiedAt: true } });
-  const merged = [...new Set([...(current?.affiliations ?? []), ...confirmed])];
+  // Badges this app no longer recognizes (military) fall away here.
+  const merged = [...new Set([...knownAffiliations(current?.affiliations ?? []), ...confirmed])];
   await db.user.update({
     where: { id: userId },
     data: { humanVerifiedAt: current?.humanVerifiedAt ?? new Date(), idmeHash: hash, affiliations: merged },

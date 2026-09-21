@@ -49,7 +49,7 @@ export const PROGRAMS: Program[] = [
     route: "/people",
     summary: "Who can set a bone, purify water, fix a generator, deliver a baby: self-listed skills plus optional ID.me-verified affiliations.",
     why: "In an emergency the question is never what we have, but who knows how. Skills are on every profile and searchable.",
-    features: ["Skills on profile", "Search people by skill or verified affiliation", "Optional ID.me affiliation badges (nurse, first responder, teacher, government, military)", "Locality filter"],
+    features: ["Skills on profile", "Search people by skill or verified affiliation", "Optional ID.me affiliation badges (nurse, first responder, teacher, government)", "Locality filter"],
   },
   {
     key: "grace",
