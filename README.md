@@ -23,6 +23,9 @@ Read [BUILD_PROMPT.md](BUILD_PROMPT.md) for what this is and why. This file is h
 
 ## Setup
 
+If Heroku says "npm lockfile is not in sync", run `npm run lock:check`. npm on Windows drops lockfile entries that only Linux-side optional packages need; `npm run lock:fix` puts them back without changing any versions. Details in AGENTS.md.
+
+
 Requirements: Node 20+, and MongoDB running **as a replica set** (Prisma needs one for transactions; the ledger uses them).
 
 ```sh
