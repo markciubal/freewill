@@ -39,6 +39,7 @@ doubt, this is how to find the claim's source.
 | Ranked-choice decisions | `src/lib/rcv.ts` | `tallyIRV` | `smoke:rcv` |
 | What the app claims about itself, with limits and sources | `src/lib/manifest.ts` | `MANIFEST` (shape in `manifest.schema.ts`) | `smoke:about` |
 | Whether the claims are honest, audited by a second reader | `src/lib/audit.questions.ts` | `buildClaimAudits`, `readAnswer` | `smoke:audit` |
+| Usual prices shown, high survival asks noted, nobody setting prices | `src/lib/pricing.ts` | `referenceFrom`, `askSignal`, `defaultSettlementFor` | `smoke:pricing` |
 | The wind-down costs no one anything | `src/lib/jubilee.ts` | `windDownReport` | `smoke:jubilee` |
 
 ## How to read one of these files

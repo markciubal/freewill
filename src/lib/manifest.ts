@@ -221,6 +221,25 @@ const manifest: Manifest = {
       sources: [],
     },
     {
+      key: "fair-prices",
+      name: "Usual prices, with nobody setting them",
+      status: "live",
+      route: "/board",
+      does: "When water is short, a market left alone gives the last jug to whoever can pay most. Nothing here can cap a price, so the app removes what overcharging depends on: not knowing what is normal. It shows what each kind of thing has recently settled for near you, puts a plain note on any offer of a survival good asking more than twice that, and starts survival listings as a gift and care listings in Hours. The ledger page shows which kinds of exchange people say helped them most beside what those usually cost.",
+      doesNot: [
+        "It does not stop anyone charging anything. The note is a fact on the page for a conversation between two people, and the seller can post regardless.",
+        "A usual price appears only after three settled exchanges nearby in ninety days. In a new community, or in the first days of a shortage, there is no figure and so no note, which is exactly when it would matter most.",
+        "The usual price is the middle of what was paid, not a judgment of what is fair. If everyone overcharges, the middle moves with them.",
+        "It only sees exchanges settled in Grace on the board. Barter, gifts, Hours and anything agreed off the board are invisible to it, and someone who wants to avoid the note can ask in barter.",
+        "A need offering to pay far above the usual is never flagged, on purpose: that is someone desperate, not someone overcharging. It also means a seller can wait for desperate needs rather than post a high offer.",
+      ],
+      verifiedBy: [
+        { kind: "script", ref: "smoke:pricing", what: "The median resists one exploitative sale, small samples show nothing, and only survival offers well above the usual are noted." },
+        { kind: "file", ref: "src/lib/pricing.ts", what: "The rules and their thresholds, in one short file." },
+      ],
+      sources: [SOURCES.ostrom],
+    },
+    {
       key: "cash",
       name: "Cash notes for trading offline",
       status: "live",

@@ -6,6 +6,9 @@ import { requireUser } from "@/lib/auth";
 import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { isObjectId } from "@/lib/form";
+import { HighAskNote } from "@/components/pricing-views";
+import { askSignal } from "@/lib/pricing";
+import { getReferencePrices } from "@/lib/pricing.data";
 import { DELTAS, DELTA_LABEL, canReflect } from "@/lib/pulse";
 import { completeListing, pledge, recordReflection, respondToPledge, withdrawListing } from "../actions";
 
@@ -24,6 +27,11 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
     },
   });
   if (!l) notFound();
+
+  // What this category has recently settled for near the person looking, and
+  // whether this ask stands far enough above it to say so. A note, never a block.
+  const reference = (await getReferencePrices(me))[l.category];
+  const highAsk = askSignal({ kind: l.kind, category: l.category, ask: l.priceGrace }, reference.grace);
 
   const mine = l.ownerId === me.id;
   const open = l.status === "OPEN" || l.status === "MATCHED";
@@ -58,7 +66,14 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
           {l.wantsInReturn && <div className="col-span-2"><dt className="text-xs text-muted">Would take in return</dt><dd>{l.wantsInReturn}</dd></div>}
           {hasPrice && <div><dt className="text-xs text-muted">Ask</dt><dd>{l.priceGrace ? <Grace n={l.priceGrace} /> : null}{l.priceGrace && l.priceHours ? " + " : ""}{l.priceHours ? fmtHours(l.priceHours) : null}</dd></div>}
           {!hasPrice && !l.wantsInReturn && <div><dt className="text-xs text-muted">Terms</dt><dd>Gift</dd></div>}
+          {l.priceGrace && reference.grace && (
+            <div className="col-span-2">
+              <dt className="text-xs text-muted">Usually, near you</dt>
+              <dd><Grace n={reference.grace.median} /> <span className="text-xs text-muted">(the middle of {reference.grace.exchanges} recent {CATEGORY_LABEL[l.category].toLowerCase()} exchanges)</span></dd>
+            </div>
+          )}
         </dl>
+        {highAsk && open && <HighAskNote signal={highAsk} category={l.category} />}
         {mine && open && (
           <form action={withdrawListing.bind(null, l.id)}>
             <Button variant="danger" type="submit">Withdraw</Button>

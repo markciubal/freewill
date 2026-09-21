@@ -40,7 +40,8 @@
     "lock:fix": "node scripts/lock-fix.cjs",
     "smoke:about": "tsx --env-file=.env scripts/about-check.ts",
     "audit:claims": "tsx --env-file-if-exists=.env scripts/audit-claims.ts",
-    "smoke:audit": "tsx --env-file-if-exists=.env scripts/audit-check.ts"
+    "smoke:audit": "tsx --env-file-if-exists=.env scripts/audit-check.ts",
+    "smoke:pricing": "tsx --env-file=.env scripts/pricing-check.ts"
   },
   "dependencies": {
     "@emnapi/core": "1.11.3",

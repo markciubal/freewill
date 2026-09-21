@@ -6,6 +6,8 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { DEMURRAGE_INTERVAL_DAYS, DEMURRAGE_RATE_MONTHLY, latestRun, maybeRunDemurrage } from "@/lib/demurrage";
 import { fmtSigned, getPulse } from "@/lib/pulse";
+import { getPulseByCategory } from "@/lib/pricing.data";
+import { PulseByCategory } from "@/components/pricing-views";
 import { ledgerRoot } from "@/lib/hashlog";
 import { signCheckpoint } from "@/lib/checkpoint";
 import { outstandingVouchers } from "@/lib/voucher";
@@ -22,7 +24,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   await maybeRunDemurrage();
   const preview = sp.to ? await getTrustPreview(sp.to) : null;
-  const [me, standing, transfers, adjustments, totals, run, pulse] = await Promise.all([
+  const [me, standing, transfers, adjustments, totals, run, pulse, pulseByCategory] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: me0.id }, select: { graceBalance: true, hoursBalance: true } }),
     getStanding(me0.id),
     db.transfer.findMany({
@@ -35,6 +37,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
     db.user.aggregate({ _sum: { graceBalance: true, hoursBalance: true }, _count: true }),
     latestRun(),
     getPulse(),
+    getPulseByCategory(),
   ]);
   const [chain, outstanding, cashAgg] = await Promise.all([
     ledgerRoot(),
@@ -154,6 +157,8 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
             exchange{pulse.last30.settled === 1 ? "" : "s"}.
           </p>
         )}
+
+        <PulseByCategory rows={pulseByCategory} />
       </Card>
 
       <section>
