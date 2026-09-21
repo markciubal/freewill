@@ -18,7 +18,7 @@ export default async function AssembliesPage({ searchParams }: { searchParams: P
       where: scopeWhere(scope, me.locality),
       orderBy: { closesAt: "desc" },
       take: 100,
-      include: { author: { select: { username: true } }, _count: { select: { ballots: true } } },
+      include: { author: { select: { username: true } }, commons: { select: { name: true } }, _count: { select: { ballots: true } } },
     }),
     getStanding(me.id),
   ]);
@@ -46,6 +46,7 @@ export default async function AssembliesPage({ searchParams }: { searchParams: P
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge tone={open ? "accent" : "neutral"}>{open ? "open" : "closed"}</Badge>
                         <span className="font-medium">{p.title}</span>
+                        {p.commons && <Badge tone="warn">decided by the users of {p.commons.name}</Badge>}
                       </div>
                       <div className="mt-1 text-xs text-muted">
                         @{p.author.username} / {p.locality} / {p.options.length} options / {p._count.ballots} ballot{p._count.ballots === 1 ? "" : "s"} / {open ? "closes" : "closed"} {fmtDateTime(p.closesAt)}

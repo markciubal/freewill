@@ -1,3 +1,4 @@
+import { commonsHealth, type Entry } from "./commons";
 import { db } from "./db";
 import { verifyMessage, vouchToken } from "./keys";
 import { getStandingAll } from "./standing.all";
@@ -37,13 +38,14 @@ function shareHeldByTop(values: number[], topCount: number): number {
 const percent = (fraction: number) => `${Math.round(fraction * 100)}%`;
 
 export async function critique(): Promise<{ findings: Finding[]; members: number }> {
-  const [standings, vouches, members, bulletinsByAuthor, commonsBySteward, resolvedCircles] = await Promise.all([
+  const [standings, vouches, members, bulletinsByAuthor, commonsBySteward, resolvedCircles, sharedThings] = await Promise.all([
     getStandingAll(),
     db.vouch.findMany({ include: { from: { select: { publicKey: true } } } }),
     db.user.findMany({ select: { id: true, username: true, graceBalance: true } }),
     db.bulletin.groupBy({ by: ["authorId"], _count: { _all: true } }),
     db.commons.groupBy({ by: ["stewardId"], _count: { _all: true } }),
     db.circle.findMany({ where: { status: "RESOLVED" }, select: { keeperIds: true } }),
+    db.commons.findMany({ select: { stewardId: true, createdAt: true, entries: { select: { id: true, userId: true, kind: true, createdAt: true } } } }),
   ]);
   const memberCount = members.length;
   const topTenth = Math.max(1, Math.ceil(memberCount * 0.1));
@@ -140,6 +142,31 @@ export async function critique(): Promise<{ findings: Finding[]; members: number
     detail: `${signedVouches} of ${vouches.length} vouches are signed with the voucher's identity key (${percent(signedShare)}). Unsigned vouches rest on trusting this server; signed ones can be verified anywhere, by anyone. The more that are signed, the less a server — or a Sabul — can forge.`,
     sabul: mostlyUnsigned ? "Most endorsements are just the server's word. Control the server and I write whoever's trust I please." : "Nearly every vouch carries its own signature. I cannot forge what I did not sign.",
     action: { text: "Add an identity key, then open each person you have vouched for and update the vouch so it carries your signature.", href: "/keys", label: "Add a key" },
+  });
+
+  // 7. Shared things left to the tragedy: a steward gone quiet, nothing
+  // recorded in months, or one person doing most of the recorded taking. No
+  // names here: this finding is about the things, not about anyone.
+  const health = sharedThings.map((thing) => commonsHealth(thing, thing.entries as Entry[]));
+  const quietStewards = health.filter((state) => state.stewardSilent).length;
+  const dormant = health.filter((state) => state.dormant).length;
+  const concentrated = health.filter((state) => state.concentrated).length;
+  const untended = quietStewards > 0;
+  const drifting = dormant > 0 || concentrated > 0;
+  findings.push({
+    id: "commons-untended",
+    title: "Shared things nobody is watching",
+    severity: untended ? "warn" : drifting ? "watch" : "ok",
+    detail:
+      sharedThings.length === 0
+        ? "Nothing is held in common yet, so there is nothing to check."
+        : `Of ${sharedThings.length} shared thing${sharedThings.length === 1 ? "" : "s"}: ${quietStewards} ${quietStewards === 1 ? "has a steward who has" : "have stewards who have"} gone quiet, ${dormant} ${dormant === 1 ? "has" : "have"} no use recorded in months, and in ${concentrated} one person does most of the recorded taking. A shared thing is ruined when nobody can see it being used up; the record is the only defence, and it only works if people write in it.`,
+    sabul: untended
+      ? "A well with no keeper. I need only start looking after it, and soon it is mine in everything but name."
+      : drifting
+        ? "Nobody is writing down what they take. What is not counted cannot be missed."
+        : "Every shared thing has eyes on it. I would be noticed.",
+    action: { text: "Write your use in the record of what you share. If a steward has gone quiet, ask its users who tends it now.", href: "/commons", label: "See shared things" },
   });
 
   return { findings, members: memberCount };

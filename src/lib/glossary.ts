@@ -53,7 +53,7 @@ export const GLOSSARY = {
   commons: {
     label: "Commons",
     short: "Things held by everyone and kept by a steward: wells, tool libraries, seed banks, kitchens. Not owned, but cared for.",
-    more: "Each commons has a named steward accountable through standing, and rules its users agreed to. Availability is a simple toggle. This is neither private hoarding nor state ownership, but the arrangement by which commons have actually survived for centuries.",
+    more: "Each has a steward who keeps it usable, and a record where anyone who takes, uses, returns or tends it says so. Nobody approves the record and nobody rations the thing: a shared thing is ruined when no one can see it being used up, so the record is the protection. The people in the record decide its rules, and choose who tends it if a steward goes quiet for sixty days.",
   },
   steward: {
     label: "Steward",

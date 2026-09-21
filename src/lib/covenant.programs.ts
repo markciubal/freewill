@@ -139,7 +139,7 @@ export const PROGRAMS: Program[] = [
     route: "/sabul",
     summary: "A self-audit that asks, of the live data, where power could still creep in: concentration of trust, hoarding, vouch rings, channel capture, lottery skew, and how much trust is unforgeable.",
     why: "A society is stateless only as long as no one quietly becomes the state. Le Guin's Sabul is the model of how that happens without any office. Turned into a critic, he is an inspection light on the rails the design relies on.",
-    features: ["Six findings with plain detail and a critic's remark", "Reads live data, judges nothing", "Each finding says what one person can do, and where", "No one is assigned to act on it; that is the point", "Signature-coverage tracks how forgeable the web of trust is"],
+    features: ["Seven findings with plain detail and a critic's remark", "Reads live data, judges nothing", "Each finding says what one person can do, and where", "No one is assigned to act on it; that is the point", "Signature-coverage tracks how forgeable the web of trust is"],
   },
   {
     key: "support",
@@ -209,7 +209,7 @@ export const PROGRAMS: Program[] = [
     route: "/commons",
     summary: "Wells, tool libraries, seed banks, clinics, kitchens. Stewards, not owners.",
     why: "Private hoarding and state ownership both fail under collapse. A named steward accountable to users, with rules those users agreed to, is how commons have actually survived for centuries.",
-    features: ["Register a commons with rules", "Steward accountable via standing", "Availability toggle"],
+    features: ["A record anyone who uses it writes in, with no approval", "Its users decide its rules; the result carries itself out", "Hand over to someone who accepts; users choose a new steward after sixty days of silence", "One public word about an entry before any dispute, at no cost to standing", "Register a commons with rules", "Steward accountable via standing", "Availability toggle"],
   },
   {
     key: "circles",

@@ -8,6 +8,7 @@ import { TIER_LABEL } from "@/lib/standing";
 import { InfoDot } from "@/components/info-dot";
 
 import { getStanding } from "@/lib/standing.all";
+import { stillCurrent } from "@/lib/where";
 
 export default async function HomePage() {
   const user = await requireUser();
@@ -21,7 +22,7 @@ export default async function HomePage() {
       include: { owner: { select: { username: true } } },
     }),
     db.bulletin.findMany({
-      where: { level: { in: ["HAZARD", "URGENT"] }, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+      where: { level: { in: ["HAZARD", "URGENT"] }, ...stillCurrent() },
       orderBy: { createdAt: "desc" },
       take: 5,
       include: { author: { select: { username: true } } },

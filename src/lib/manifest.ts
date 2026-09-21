@@ -289,9 +289,18 @@ const manifest: Manifest = {
       name: "Shared resources",
       status: "live",
       route: "/commons",
-      does: "A well, a tool library, a clinic tent: things held in common with a named steward and rules the users agreed to, rather than an owner or an authority.",
-      doesNot: ["It does not enforce the rules or track who has what. A steward who behaves badly is answered through a dispute and their standing, not by removal."],
-      verifiedBy: [{ kind: "file", ref: "src/app/(app)/commons/actions.ts", what: "Stewards are named members with no special powers elsewhere." }],
+      does: "A well, a tool library, a clinic tent: held in common with a steward, not an owner. Each has a record where anyone who takes, uses, returns or tends it says so, with no approval, so use is visible to the people who share it. Its users, not the steward alone, decide its rules by ranked choice, and the result is carried out when voting closes. A steward can hand it to someone who accepts; if a steward writes nothing for sixty days, its users choose who tends it now. Anyone can leave one public word about an entry, which costs nobody standing: the step before a dispute.",
+      doesNot: [
+        "It does not ration, count stock, or decide what fair use is. It makes use visible; what people do about what they see is up to them.",
+        "The record is only what people choose to write. Someone who takes without writing it down leaves no trace, and the app cannot know.",
+        "An active steward cannot be voted out. A steward doing the job badly is answered by a word, then a dispute, not by a recall, because a recall vote is also how a clique would seize something a person built.",
+        "Members can read that you used a thing and on which day. Near a pinned place, that says roughly where you were that day. It is your choice to write it, and you should know that it does.",
+        "A result needs a third of its users, at least two, to vote. A shared thing whose users have drifted away can get stuck with a silent steward and too few voters to replace them.",
+      ],
+      verifiedBy: [
+        { kind: "script", ref: "smoke:commons", what: "Who counts as a user, when a steward is silent, the quorum, and a real question carried out against the database, including an outsider's ballot being ignored." },
+        { kind: "file", ref: "src/lib/commons.ts", what: "The rules and their thresholds, in one short file." },
+      ],
       sources: [SOURCES.ostrom],
     },
     {
@@ -358,7 +367,7 @@ const manifest: Manifest = {
         "It has no power at all. It does not restrict anyone, and nobody is assigned to act on it; that is deliberate, because a role that acts on findings would be the authority this design exists without.",
         "Its thresholds are judgment calls, written in the source, not discoveries.",
       ],
-      verifiedBy: [{ kind: "file", ref: "src/lib/sabul.ts", what: "The six measurements and the thresholds they are judged against." }],
+      verifiedBy: [{ kind: "file", ref: "src/lib/sabul.ts", what: "The seven measurements and the thresholds they are judged against." }],
       sources: [SOURCES.dispossessed, SOURCES.stayAndFight],
     },
     {

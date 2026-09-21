@@ -5,6 +5,7 @@ import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { readScope, scopeWhere } from "@/lib/form";
 import { applyNear, fmtDistance, mapDataSource } from "@/lib/geo";
+import { stillCurrent } from "@/lib/where";
 
 const HAZARD_RADIUS_M = { INFO: 0, HAZARD: 1000, URGENT: 3000 } as const;
 
@@ -17,7 +18,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
   const [listings, commons, bulletins, circles] = await Promise.all([
     db.listing.findMany({ where: { status: { in: ["OPEN", "MATCHED"] }, lat: { not: null }, ...scopeWhere(scope, me.locality) }, take: 300, include: { owner: { select: { username: true } } } }),
     db.commons.findMany({ where: { lat: { not: null }, ...scopeWhere(scope, me.locality) }, take: 300 }),
-    db.bulletin.findMany({ where: { lat: { not: null }, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }], ...scopeWhere(scope, me.locality) }, take: 300 }),
+    db.bulletin.findMany({ where: { lat: { not: null }, ...stillCurrent(now), ...scopeWhere(scope, me.locality) }, take: 300 }),
     db.circle.findMany({ where: { lat: { not: null }, status: { in: ["OPEN", "GATHERING"] }, ...scopeWhere(scope, me.locality) }, take: 100 }),
   ]);
 

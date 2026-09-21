@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { Badge, Button, Card, Empty, Field, Input, Notice, PageTitle, ScopeToggle, SectionTitle, Select, Textarea } from "@/components/ui";
+import { Badge, Card, Empty, Field, Input, Notice, PageTitle, ScopeToggle, SectionTitle, Select, Textarea } from "@/components/ui";
 import { readScope, scopeWhere } from "@/lib/form";
 import { applyNear, fmtDistance } from "@/lib/geo";
 import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/lib/auth";
 import { CATEGORIES, CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
-import { createCommons, toggleCommons } from "./actions";
+import { DORMANT_DAYS, commonsHealth, type Entry } from "@/lib/commons";
+import { createCommons } from "./actions";
 import { InfoDot } from "@/components/info-dot";
 
 
@@ -14,13 +15,13 @@ export default async function CommonsPage({ searchParams }: { searchParams: Prom
   const me = await requireUser();
   const sp = await searchParams;
   const scope = readScope(sp.scope);
-  const commons = applyNear(await db.commons.findMany({ where: scopeWhere(scope, me.locality), orderBy: { createdAt: "desc" }, include: { steward: { select: { username: true } } } }), me, scope);
+  const commons = applyNear(await db.commons.findMany({ where: scopeWhere(scope, me.locality), orderBy: { createdAt: "desc" }, include: { steward: { select: { username: true } }, entries: { select: { id: true, userId: true, kind: true, createdAt: true } } } }), me, scope);
 
   return (
     <div className="space-y-8">
       <PageTitle
         title="Commons"
-        subtitle="Shared resources: wells, tool libraries, seed banks, kitchens, clinics, radios. Each has a steward who keeps it usable, and rules its users agreed to."
+        subtitle="Shared resources: wells, tool libraries, seed banks, kitchens, clinics, radios. Each has a steward who keeps it usable, rules its users decide, and a record where anyone who uses it says so."
         action={<ScopeToggle scope={scope} base="/commons" locality={me.locality} />}
       />
       <Notice error={sp.error} ok={sp.ok} />
@@ -35,9 +36,10 @@ export default async function CommonsPage({ searchParams }: { searchParams: Prom
                 <li key={c.id}>
                   <Card className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{c.name}</span>
+                      <Link href={`/commons/${c.id}`} className="font-medium text-accent hover:underline">{c.name}</Link>
                       <Badge>{CATEGORY_LABEL[c.category]}</Badge>
                       <Badge tone={c.available ? "accent" : "danger"}>{c.available ? "available" : "unavailable"}</Badge>
+                      {commonsHealth(c, c.entries as Entry[]).stewardSilent && <Badge tone="danger">steward quiet</Badge>}
                     </div>
                     <p className="text-sm text-muted">{c.description}</p>
                     {c.rules && (
@@ -50,11 +52,8 @@ export default async function CommonsPage({ searchParams }: { searchParams: Prom
                       <span>Steward <Link href={`/people/${c.steward.username}`} className="hover:underline">@{c.steward.username}</Link></span>
                       {c.locality && <span>{c.locality}</span>}
                       {c.distanceKm !== null && <span>{fmtDistance(c.distanceKm)} away</span>}
-                      {c.stewardId === me.id && (
-                        <form action={toggleCommons.bind(null, c.id)}>
-                          <Button variant="ghost" type="submit">{c.available ? "Mark unavailable" : "Mark available"}</Button>
-                        </form>
-                      )}
+                      <span>{commonsHealth(c, c.entries as Entry[]).usesInWindow} use{commonsHealth(c, c.entries as Entry[]).usesInWindow === 1 ? "" : "s"} recorded in {DORMANT_DAYS} days</span>
+                      <Link href={`/commons/${c.id}`} className="text-accent hover:underline">Open its record</Link>
                     </div>
                   </Card>
                 </li>

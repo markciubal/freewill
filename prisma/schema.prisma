@@ -57,6 +57,7 @@ model User {
   transfersOut     Transfer[]         @relation("TransferFrom")
   transfersIn      Transfer[]         @relation("TransferTo")
   stewardships     Commons[]
+  commonsEntries   CommonsEntry[]
   circlesRaised    Circle[]           @relation("CircleRaisedBy")
   circlesAbout     Circle[]           @relation("CircleAbout")
   bulletins        Bulletin[]
@@ -210,21 +211,57 @@ model Transfer {
 
 // Shared things with a steward, not an owner: a well, a tool library, a seed bank.
 model Commons {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String
-  category    Category
-  rules       String? // how to use it well, agreed by those who use it
-  locality    String?
-  lat         Float?
-  lng         Float?
-  available   Boolean  @default(true)
-  stewardId   String   @db.ObjectId
-  createdAt   DateTime @default(now())
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  description       String
+  category          Category
+  rules             String? // how to use it well, agreed by those who use it
+  locality          String?
+  lat               Float?
+  lng               Float?
+  available         Boolean   @default(true)
+  stewardId         String    @db.ObjectId
+  // A steward may offer the role to another verified member, who must accept.
+  // Nobody can be handed a responsibility they did not agree to.
+  handoverToId      String?   @db.ObjectId
+  handoverOfferedAt DateTime?
+  createdAt         DateTime  @default(now())
 
-  steward User @relation(fields: [stewardId], references: [id])
+  steward   User           @relation(fields: [stewardId], references: [id])
+  entries   CommonsEntry[]
+  decisions Proposal[]
 
   @@index([category])
+}
+
+// The record of a shared thing: who took, returned, used or tended it, in
+// their own words, with no approval step. This is how a commons avoids the
+// tragedy: not by rationing, but by making use visible to the people who
+// share it. A NOTE about another entry is a word before a dispute: public,
+// signed, and with no effect on anyone's standing.
+enum CommonsEntryKind {
+  TOOK
+  RETURNED
+  USED
+  TENDED // upkeep, a check, a repair: mostly the steward, but anyone may
+  NOTE
+}
+
+model CommonsEntry {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  commonsId    String           @db.ObjectId
+  userId       String           @db.ObjectId
+  kind         CommonsEntryKind
+  quantity     String? // "20 L", "the long saw", "an afternoon"
+  note         String?
+  aboutEntryId String?          @db.ObjectId // a NOTE about another entry
+  createdAt    DateTime         @default(now())
+
+  commons Commons @relation(fields: [commonsId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([commonsId, createdAt])
+  @@index([userId])
 }
 
 // --- Circles: restorative process ------------------------------------------
@@ -336,19 +373,31 @@ model LedgerAdjustment {
 // --- Assemblies: ranked-choice decisions ----------------------------------
 
 model Proposal {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  body      String
-  options   String[] // at least two
-  locality  String
-  authorId  String   @db.ObjectId
-  createdAt DateTime @default(now())
-  closesAt  DateTime
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  body          String
+  options       String[] // at least two
+  locality      String
+  authorId      String    @db.ObjectId
+  createdAt     DateTime  @default(now())
+  closesAt      DateTime
+  // A question about one shared thing, decided by the people in its record
+  // rather than by the whole locality, and applied by the software itself when
+  // voting closes (there is no one else to apply it). RULES replaces the
+  // rules with proposedRules; STEWARD makes the winning candidate steward.
+  commonsId     String?   @db.ObjectId
+  commonsAction String? // "RULES" | "STEWARD"
+  proposedRules String?
+  candidateIds  String[]  @default([]) // STEWARD: candidateIds[i] stands behind options[i]; "" for "leave it as it is"
+  appliedAt     DateTime?
+  appliedNote   String? // what happened when it closed, in plain words
 
   author  User     @relation(fields: [authorId], references: [id])
+  commons Commons? @relation(fields: [commonsId], references: [id])
   ballots Ballot[]
 
   @@index([locality, closesAt])
+  @@index([commonsId])
 }
 
 model Ballot {

@@ -6,6 +6,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { postBulletin } from "./actions";
+import { postedEverywhere, stillCurrent } from "@/lib/where";
 
 export default async function BulletinsPage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string; scope?: string }> }) {
   const me = await requireUser();
@@ -14,8 +15,8 @@ export default async function BulletinsPage({ searchParams }: { searchParams: Pr
   const bulletins = await db.bulletin.findMany({
     where: {
       AND: [
-        { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
-        scope === "local" ? { OR: [{ locality: { equals: me.locality, mode: "insensitive" as const } }, { locality: null }] } : {},
+        stillCurrent(),
+        scope === "local" ? { OR: [{ locality: { equals: me.locality, mode: "insensitive" as const } }, ...postedEverywhere] } : {},
       ],
     },
     orderBy: [{ createdAt: "desc" }],

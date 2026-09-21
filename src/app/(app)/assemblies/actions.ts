@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fail, firstIssue, isObjectId, ok, str } from "@/lib/form";
+import { eligibleVoterIds } from "@/lib/commons.data";
 import { getStanding } from "@/lib/standing.all";
 
 const proposalSchema = z.object({
@@ -39,12 +40,19 @@ export async function castBallot(proposalId: string, formData: FormData) {
   const me = await requireUser();
   if (!isObjectId(proposalId)) redirect("/assemblies");
   const path = `/assemblies/${proposalId}`;
-  const p = await db.proposal.findUnique({ where: { id: proposalId } });
+  const p = await db.proposal.findUnique({ where: { id: proposalId }, include: { commons: { select: { id: true, stewardId: true } } } });
   if (!p) redirect("/assemblies");
   if (p.closesAt <= new Date()) fail(path, "Voting has closed.");
-  if (p.locality !== me.locality) fail(path, `Only people in ${p.locality} vote on this.`);
-  const standing = await getStanding(me.id);
-  if (!standing.verified) fail(path, `Only verified people vote. You need ${standing.requiredVouches} vouch${standing.requiredVouches === 1 ? "" : "es"} from people in ${me.locality}.`);
+  if (p.commons) {
+    // A question about one shared thing belongs to the people who use it, as
+    // of the moment it was asked, wherever they live.
+    const eligible = await eligibleVoterIds(p.commons, p.createdAt);
+    if (!eligible.has(me.id)) fail(path, "Only verified people who were already using it when this was asked vote on it.");
+  } else {
+    if (p.locality !== me.locality) fail(path, `Only people in ${p.locality} vote on this.`);
+    const standing = await getStanding(me.id);
+    if (!standing.verified) fail(path, `Only verified people vote. You need ${standing.requiredVouches} vouch${standing.requiredVouches === 1 ? "" : "es"} from people in ${me.locality}.`);
+  }
 
   const ranked: { i: number; rank: number }[] = [];
   for (let i = 0; i < p.options.length; i++) {

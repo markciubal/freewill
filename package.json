@@ -41,7 +41,9 @@
     "smoke:about": "tsx --env-file=.env scripts/about-check.ts",
     "audit:claims": "tsx --env-file-if-exists=.env scripts/audit-claims.ts",
     "smoke:audit": "tsx --env-file-if-exists=.env scripts/audit-check.ts",
-    "smoke:pricing": "tsx --env-file=.env scripts/pricing-check.ts"
+    "smoke:pricing": "tsx --env-file=.env scripts/pricing-check.ts",
+    "smoke:commons": "tsx --env-file=.env scripts/commons-check.ts",
+    "smoke:where": "tsx --env-file=.env scripts/where-check.ts"
   },
   "dependencies": {
     "@emnapi/core": "1.11.3",

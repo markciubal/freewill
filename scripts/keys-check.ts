@@ -42,8 +42,8 @@ async function main() {
   try {
     const c = await critique();
     const cov = c.findings.find((f) => f.id === "signature-coverage");
-    assert(c.findings.length === 6 && !!cov, `Sabul critiques live data (${c.findings.length} findings, ${c.members} members)`);
-    const routes = new Set(["/people", "/board", "/bulletins", "/circles", "/keys"]);
+    assert(c.findings.length === 7 && !!cov, `Sabul critiques live data (${c.findings.length} findings, ${c.members} members)`);
+    const routes = new Set(["/people", "/board", "/bulletins", "/circles", "/keys", "/commons"]);
     assert(c.findings.every((f) => f.action.text.length > 20 && f.action.label && routes.has(f.action.href)), "every finding says what one person can do, linked to a real page");
     await db.$disconnect();
   } catch {

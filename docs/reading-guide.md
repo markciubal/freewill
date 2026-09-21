@@ -15,7 +15,7 @@ doubt, this is how to find the claim's source.
 2. **Verify ledger** (`/verify`): re-derives the whole hash chain of economic
    events. If any past transfer was edited, the chain breaks at that point and
    the page says where.
-3. **The critic** (`/sabul`): six measurements of where power could be
+3. **The critic** (`/sabul`): seven measurements of where power could be
    pooling, with the thresholds printed in `src/lib/sabul.ts`.
 
 ## Where each ground rule lives
@@ -40,6 +40,7 @@ doubt, this is how to find the claim's source.
 | What the app claims about itself, with limits and sources | `src/lib/manifest.ts` | `MANIFEST` (shape in `manifest.schema.ts`) | `smoke:about` |
 | Whether the claims are honest, audited by a second reader | `src/lib/audit.questions.ts` | `buildClaimAudits`, `readAnswer` | `smoke:audit` |
 | Usual prices shown, high survival asks noted, nobody setting prices | `src/lib/pricing.ts` | `referenceFrom`, `askSignal`, `defaultSettlementFor` | `smoke:pricing` |
+| A shared thing is run by its record and its users, with nobody rationing it | `src/lib/commons.ts`, `src/lib/commons.data.ts` | `commonsUsers`, `stewardIsSilent`, `decideOutcome`, `settleCommonsDecisions` | `smoke:commons` |
 | The wind-down costs no one anything | `src/lib/jubilee.ts` | `windDownReport` | `smoke:jubilee` |
 
 ## How to read one of these files
