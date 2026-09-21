@@ -72,9 +72,21 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
+// The mobile panel is as tall as the screen allows below the header and
+// scrolls inside itself. It hangs from a sticky header, so without its own
+// scroll anything below the bottom of the screen could never be reached: the
+// panel moves with the page instead of letting the page move under it.
+// Measured once when it opens; 100dvh then tracks the phone's browser bars
+// showing and hiding.
+function fitToScreen(panel: HTMLElement | null) {
+  if (panel) panel.style.maxHeight = `calc(100dvh - ${Math.round(panel.getBoundingClientRect().top)}px)`;
+}
+
 export function MainNav({ username }: { username: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
+  // Which sections of the mobile menu are open. Several may be open at once.
+  const [expanded, setExpanded] = useState<string[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,11 +107,13 @@ export function MainNav({ username }: { username: string }) {
   const groupActive = (g: Group) => g.items.some((i) => isActive(i.href));
   const accountActive = ACCOUNT.some((i) => isActive(i.href));
 
-  const itemLink = (i: Item) => (
+  // The desktop dropdowns are menus; the mobile panel is a list of links in
+  // collapsible sections, which is not a menu, so its links carry no role.
+  const itemLink = (i: Item, asMenuItem = true) => (
     <Link
       key={i.href}
       href={i.href}
-      role="menuitem"
+      role={asMenuItem ? "menuitem" : undefined}
       onClick={() => setOpen(null)}
       className={`flex flex-col rounded px-3 py-2 outline-none hover:bg-border/50 focus-visible:bg-border/50 ${isActive(i.href) ? "text-accent" : "text-foreground"}`}
     >
@@ -107,6 +121,22 @@ export function MainNav({ username }: { username: string }) {
       <span className="text-xs text-muted">{i.hint}</span>
     </Link>
   );
+
+  // The mobile menu's sections: the four groups, then the account.
+  const mobileSections = [
+    ...GROUPS.map((group) => ({ id: group.id, label: group.label, items: group.items, active: groupActive(group) })),
+    { id: "account", label: `@${username}`, items: ACCOUNT, active: accountActive },
+  ];
+
+  // Opening the menu opens the section holding the page you are on, so where
+  // you are and what sits next to it are one tap away; the rest stay folded.
+  const openMobileMenu = () => {
+    if (open === "mobile") return setOpen(null);
+    setExpanded(mobileSections.filter((section) => section.active).map((section) => section.id));
+    setOpen("mobile");
+  };
+  const toggleSection = (id: string) =>
+    setExpanded((current) => (current.includes(id) ? current.filter((sectionId) => sectionId !== id) : [...current, id]));
 
   const trigger = (id: string, label: string, active: boolean, extra = "") => (
     <button
@@ -123,14 +153,16 @@ export function MainNav({ username }: { username: string }) {
 
   return (
     <div ref={rootRef} className="flex flex-1 items-center">
-      {/* Desktop: three group menus, account menu on the right */}
+      {/* Desktop: one dropdown per group, account menu on the right. The dropdowns are
+          solid: a translucent, blurred panel inside the (itself blurred) header lets
+          the page text show through sharply in Chromium. */}
       <nav className="hidden items-center gap-1 md:flex">
         {GROUPS.map((g) => (
           <div key={g.id} className="relative">
             {trigger(g.id, g.label, groupActive(g))}
             {open === g.id && (
-              <div role="menu" className="absolute left-0 top-full z-30 mt-1 min-w-60 rounded-lg border border-border/70 bg-card/95 p-1 shadow-menu backdrop-blur-md">
-                {g.items.map(itemLink)}
+              <div role="menu" className="absolute left-0 top-full z-30 mt-1 min-w-60 rounded-lg border border-border/70 bg-card p-1 shadow-menu">
+                {g.items.map((item) => itemLink(item))}
               </div>
             )}
           </div>
@@ -140,8 +172,8 @@ export function MainNav({ username }: { username: string }) {
       <div className="relative ml-auto hidden md:block">
         {trigger("account", `@${username}`, accountActive)}
         {open === "account" && (
-          <div role="menu" className="absolute right-0 top-full z-30 mt-1 min-w-56 rounded-lg border border-border/70 bg-card/95 p-1 shadow-menu backdrop-blur-md">
-            {ACCOUNT.map(itemLink)}
+          <div role="menu" className="absolute right-0 top-full z-30 mt-1 min-w-56 rounded-lg border border-border/70 bg-card p-1 shadow-menu">
+            {ACCOUNT.map((item) => itemLink(item))}
             <div className="my-1 border-t border-border" />
             <form action={logout}>
               <button type="submit" className="w-full rounded px-3 py-2 text-left text-sm text-muted outline-none hover:bg-border/50 focus-visible:bg-border/50">
@@ -152,13 +184,13 @@ export function MainNav({ username }: { username: string }) {
         )}
       </div>
 
-      {/* Mobile: one menu holding every group plus the account items */}
+      {/* Mobile: one button opening every section as an accordion */}
       <div className="ml-auto md:hidden">
         <button
           type="button"
-          aria-haspopup="menu"
           aria-expanded={open === "mobile"}
-          onClick={() => setOpen(open === "mobile" ? null : "mobile")}
+          aria-controls="mobile-menu"
+          onClick={openMobileMenu}
           className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted outline-none hover:text-foreground focus-visible:bg-border/50"
         >
           <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
@@ -168,23 +200,55 @@ export function MainNav({ username }: { username: string }) {
         </button>
       </div>
       {open === "mobile" && (
-        <div role="menu" className="absolute inset-x-0 top-full z-30 mt-px border-t border-border/70 bg-card/95 p-2 shadow-menu backdrop-blur-md md:hidden">
-          {GROUPS.map((g) => (
-            <div key={g.id} className="py-1">
-              <div className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted">{g.label}</div>
-              {g.items.map(itemLink)}
-            </div>
-          ))}
-          <div className="mt-1 border-t border-border py-1">
-            <div className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wider text-muted">@{username}</div>
-            {ACCOUNT.map(itemLink)}
-            <form action={logout}>
-              <button type="submit" className="w-full rounded px-3 py-2 text-left text-sm text-muted outline-none hover:bg-border/50 focus-visible:bg-border/50">
-                Log out
-              </button>
-            </form>
-          </div>
-        </div>
+        <nav
+          id="mobile-menu"
+          aria-label="Menu"
+          ref={fitToScreen}
+          className="absolute inset-x-0 top-full z-30 mt-px overflow-y-auto overscroll-contain border-t border-border/70 bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 shadow-menu md:hidden"
+        >
+          {mobileSections.map((section) => {
+            const isOpen = expanded.includes(section.id);
+            const panelId = `mobile-menu-${section.id}`;
+            return (
+              <div key={section.id} className="border-b border-border/60 last:border-b-0">
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => toggleSection(section.id)}
+                  className={`flex min-h-12 w-full items-center justify-between rounded px-3 text-left text-sm outline-none focus-visible:bg-border/50 ${section.active ? "font-semibold text-foreground" : "font-medium text-muted"}`}
+                >
+                  <span className="flex items-center gap-2">
+                    {section.label}
+                    {section.active && <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-label="(you are here)" />}
+                  </span>
+                  <Chevron open={isOpen} />
+                </button>
+                {/* Collapsing by grid rows animates the height without measuring
+                    it; `inert` keeps the links of a closed section out of reach
+                    of the keyboard and screen readers while they are hidden. */}
+                <div
+                  id={panelId}
+                  inert={!isOpen}
+                  className={`grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="pb-2">
+                      {section.items.map((item) => itemLink(item, false))}
+                      {section.id === "account" && (
+                        <form action={logout}>
+                          <button type="submit" className="w-full rounded px-3 py-2 text-left text-sm text-muted outline-none hover:bg-border/50 focus-visible:bg-border/50">
+                            Log out
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </nav>
       )}
     </div>
   );
