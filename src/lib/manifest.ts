@@ -137,6 +137,18 @@ const manifest: Manifest = {
       ],
     },
     {
+      key: "real-figures",
+      statement: "Every figure you see counts something that happened. Nothing on a live server is seeded, simulated or made up.",
+      because:
+        "People decide whom to trust, and whether this is worth joining, by what they see: how many neighbors, how many trades, whether the books balance. Demo neighbors or test trades on the live server would be a false sense of use. The guards stop accidents, not a determined operator: whoever holds the production connection string can still write to it directly, which is why the ledger is hash-chained and its checkpoints can be written down.",
+      brokenIf:
+        "The live database holds the demo seed or a test record, a page shows a count that was not read from the database, or an example on a page names someone who could be a real member.",
+      enforcedBy: [
+        { kind: "script", ref: "smoke:prod", what: "The seed and every test refuse the production database before connecting, nothing in build or deploy runs them, no page quotes the seed, and Grace cannot be scaled to hundredths twice." },
+        { kind: "file", ref: "scripts/not-production.ts", what: "The guard every data-making script imports first. It has no override." },
+      ],
+    },
+    {
       key: "survive-seizure",
       statement: "Assume the server will be taken. Nothing important may live only here.",
       because:

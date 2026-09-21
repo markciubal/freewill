@@ -2,6 +2,7 @@
 // category: the app's answer to pricing survival goods when they are scarce,
 // with no price-setter. Pure rules first, then a read-only look at live data.
 // Run: npm run smoke:pricing
+import "./not-production";
 import type { Category } from "@prisma/client";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";

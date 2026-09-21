@@ -2,6 +2,7 @@
 // users are, when a steward counts as gone, how many must vote, and what a
 // closed question means. Pure rules, then a read-only look at live data.
 // Run: npm run smoke:commons
+import "./not-production";
 import {
   ADOPT_RULES,
   CONCENTRATION_MINIMUM_ENTRIES,

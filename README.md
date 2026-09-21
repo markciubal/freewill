@@ -57,6 +57,8 @@ Atlas clusters are replica sets already. Use the `mongodb+srv://` connection str
 
 `.env` holds two connection strings: `DATABASE_URL_DEV` (used by `next dev`) and `DATABASE_URL_PROD` (used by `next build` / `next start`). The app chooses by `NODE_ENV` in [src/lib/db.ts](src/lib/db.ts). The Prisma CLI reads plain `DATABASE_URL`, which you keep pointed at dev; `npm run db:push:prod` and `npm run db:studio:prod` run the CLI against the prod URL. There is deliberately no `db:seed:prod`: the seed is demo data.
 
+Demo and test data never reach production, because on a live server they would show people activity that never happened. The seed and every `smoke:*` script start by importing [scripts/not-production.ts](scripts/not-production.ts), which stops before connecting when `NODE_ENV=production` or when the database it would use is the one `DATABASE_URL_PROD` names (same hosts and database, whatever the credentials). It has no override. `npm run smoke:prod` checks this without touching any database, and runs the seed against a made-up production URL to prove it refuses. `migrate:grace-cents` refuses a database that already recorded Grace in hundredths, so real balances can never be multiplied by 100.
+
 ## Scripts
 
 | Script | What |

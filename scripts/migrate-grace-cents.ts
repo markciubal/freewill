@@ -2,7 +2,14 @@
 // stored Grace amount by 100 and re-derives the ledger hash chain in place so
 // nothing is lost and the chain stays valid. Idempotent: guarded by a Migration
 // record. Run once per database:  npx tsx --env-file=.env scripts/migrate-grace-cents.ts
+//
+// It refuses a database that already recorded Grace in hundredths (anything
+// created since the change; see src/lib/grace-cents.ts), because scaling that
+// again would multiply real balances by 100. For such a database, record the
+// migration as done without touching any amount:
+//   npx tsx --env-file=.env scripts/migrate-grace-cents.ts --mark-applied
 import { db } from "../src/lib/db";
+import { GRACE_IN_HUNDREDTHS_SINCE, whyNotScale } from "../src/lib/grace-cents";
 import { GENESIS, entryHash, payloadHashOf, type LogKind } from "../src/lib/hashlog";
 
 const NAME = "grace-cents";
@@ -21,6 +28,32 @@ async function main() {
     console.log(`Migration "${NAME}" already applied ${already.appliedAt.toISOString()}; nothing to do.`);
     await db.$disconnect();
     return;
+  }
+
+  // Only a database whose Grace was all written in whole units may be scaled.
+  const since = { gte: GRACE_IN_HUNDREDTHS_SINCE };
+  const reason = whyNotScale({
+    transfers: await db.transfer.count({ where: { ledger: "GRACE", createdAt: since } }),
+    adjustments: await db.ledgerAdjustment.count({ where: { ledger: "GRACE", createdAt: since } }),
+    vouchers: await db.voucher.count({ where: { ledger: "GRACE", createdAt: since } }),
+    cashNotes: await db.cashNote.count({ where: { createdAt: since } }),
+    listingsWithGraceAsk: await db.listing.count({ where: { priceGrace: { gt: 0 }, createdAt: since } }),
+    demurrageRunsThatMelted: await db.demurrageRun.count({ where: { totalDecayed: { gt: 0 }, ranAt: since } }),
+  });
+  if (process.argv.includes("--mark-applied")) {
+    if (!reason) {
+      console.error("Refusing --mark-applied: nothing here was written in hundredths yet, so this database may still hold whole Grace. Run the migration without the flag.");
+      process.exit(1);
+    }
+    await db.migration.create({ data: { name: NAME } });
+    console.log(`Recorded "${NAME}" as applied without changing any amount: ${reason}.`);
+    await db.$disconnect();
+    return;
+  }
+  if (reason) {
+    console.error(`Refusing to scale: ${reason}.`);
+    console.error("If every amount here is already in hundredths, record the migration as done with --mark-applied. If the database holds a mix, a person has to look before anything is changed.");
+    process.exit(1);
   }
 
   // Scale every Grace amount by 100. Cash denominations stay whole Grace.

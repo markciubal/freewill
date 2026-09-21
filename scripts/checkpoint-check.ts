@@ -1,5 +1,6 @@
 // Portable ledger checkpoints: sign, export, verify off the underlying DB, and
 // detect tampering in the bundle. Run: npm run smoke:checkpoint
+import "./not-production";
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { checkpointString, verifyExportedBundle, type LedgerBundle } from "../src/lib/checkpoint.shared";

@@ -149,14 +149,18 @@ export function ThemeEditor({ initial, mapCenter }: { initial: Theme; mapCenter:
       <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
         <Card className="space-y-3">
           <SectionTitle>Preview</SectionTitle>
-          <h3 className="text-xl font-semibold">Insulin, two weeks</h3>
-          <p className="text-sm text-muted">Type 1, eleven years old. We have four days left. Any brand.</p>
+          {/* Made-up, and says so. Nothing here may look like a real post or
+              payment: the names below contain a hyphen, which no username can,
+              so they can never be mistaken for a real neighbor. */}
+          <p className="text-xs text-muted">Made-up examples, to show how your colors read. Nothing here is a real post or payment.</p>
+          <h3 className="text-xl font-semibold">An example need</h3>
+          <p className="text-sm text-muted">The words of a post sit here, in the quieter color, under its title.</p>
           <div className="flex flex-wrap gap-2"><Badge tone="danger">NEED</Badge><Badge tone="warn">MATCHED</Badge><Badge tone="accent">OFFER</Badge><Badge>Medical</Badge></div>
           <div className="flex flex-wrap gap-2"><Button type="button">Pledge</Button><Button type="button" variant="ghost">Decline</Button><Button type="button" variant="danger">Withdraw</Button></div>
           <Input placeholder="@neighbor" readOnly />
           <table className="w-full text-sm"><tbody>
-            <tr className="border-t border-border"><td className="p-2 text-muted">Aug 24</td><td className="p-2">@ada</td><td className="p-2 text-right font-mono text-accent">+<Grace n={2000} /></td></tr>
-            <tr className="border-t border-border"><td className="p-2 text-muted">Aug 23</td><td className="p-2">@bo</td><td className="p-2 text-right font-mono text-danger">-1h 30m</td></tr>
+            <tr className="border-t border-border"><td className="p-2 text-muted">example</td><td className="p-2">@a-neighbor</td><td className="p-2 text-right font-mono text-accent">+<Grace n={2000} /></td></tr>
+            <tr className="border-t border-border"><td className="p-2 text-muted">example</td><td className="p-2">@another-neighbor</td><td className="p-2 text-right font-mono text-danger">-1h 30m</td></tr>
           </tbody></table>
         </Card>
         <Card className="space-y-2">

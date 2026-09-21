@@ -1,5 +1,6 @@
 // Tamper-evidence checks for the ledger hash chain. Uses the live dev DB
 // read-only, then simulates tampering in memory. Run: npm run smoke:hashlog
+import "./not-production";
 import { db } from "../src/lib/db";
 import { GENESIS, entryHash, payloadHashOf, verifyLedger } from "../src/lib/hashlog";
 

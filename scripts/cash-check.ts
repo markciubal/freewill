@@ -1,5 +1,6 @@
 // Cash (hash-commitment bearer notes): pure hashing + a live mint/reclaim
 // round-trip with teardown. Run: npm run smoke:cash
+import "./not-production";
 import { createHash } from "node:crypto";
 import { commitmentInput, commitmentOf, denominationCents, isCommitment, noteToken, parseNoteToken } from "../src/lib/cash";
 import { db } from "../src/lib/db";

@@ -2,6 +2,7 @@
 // reads when a form is wrong, how the mediator pool is described at every
 // size, and whether the arithmetic "Show the work" prints is true as printed.
 // Run: npm run smoke:copy
+import "./not-production";
 import { z } from "zod";
 import { explainDemurrageRun, explainZeroSum } from "../src/lib/explain";
 import { firstIssue } from "../src/lib/form";

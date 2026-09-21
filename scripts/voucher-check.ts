@@ -1,5 +1,6 @@
 // Voucher crypto (pure) plus a live economics round-trip against the dev DB
 // that cleans up after itself. Run: npm run smoke:voucher
+import "./not-production";
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { db } from "../src/lib/db";

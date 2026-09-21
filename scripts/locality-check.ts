@@ -1,5 +1,6 @@
 // Locality normalization and case-insensitive matching. Guards the bug where
 // the normalizer stripped letters and forced lowercase. Run: npm run smoke:locality
+import "./not-production";
 import { db } from "../src/lib/db";
 import { localityKey, normalizeLocality } from "../src/lib/form";
 import { getStandingAll } from "../src/lib/standing.all";

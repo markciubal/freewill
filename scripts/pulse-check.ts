@@ -1,5 +1,6 @@
 // Checks for the trade pulse: eligibility logic (pure), then a read-only
 // aggregate query if the dev DB is reachable. Run: npm run smoke:pulse
+import "./not-production";
 import { canReflect, DELTAS, DELTA_LABEL } from "../src/lib/pulse";
 
 function assert(cond: unknown, msg: string) {

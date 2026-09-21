@@ -1,5 +1,6 @@
 // Exercises the mutual-credit ledger against the real DB: zero-sum, limits, rejection.
 // Run: npx tsx --env-file=.env scripts/ledger-smoke.ts   (needs seed data)
+import "./not-production";
 import { db } from "../src/lib/db";
 import { LedgerError, transfer } from "../src/lib/ledger";
 import { latestRun, maybeRunDemurrage } from "../src/lib/demurrage";

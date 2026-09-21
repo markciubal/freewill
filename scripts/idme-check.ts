@@ -1,5 +1,6 @@
 // Pure checks for ID.me affiliation extraction and policy config. No network.
 // Run: npm run smoke:idme
+import "./not-production";
 import { IDME_ALL_POLICIES, extractAffiliations, idmePolicies, policyLabel } from "../src/lib/idme.shared";
 
 function assert(c: unknown, m: string) { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok:", m); }

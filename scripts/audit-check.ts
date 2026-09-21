@@ -3,6 +3,7 @@
 // TypeSafe API requires, and every question with a defined reading, because a
 // question nobody knows how to read is a question that quietly always passes.
 // Run: npm run smoke:audit
+import "./not-production";
 import {
   ACCEPTABLE_CHOICE,
   CONFIDENCE,

@@ -1,6 +1,7 @@
 // Unit checks for the match finder (pure logic; no database writes), then a
 // read-only spot check against the dev DB if it is reachable.
 // Run: npm run smoke:matches
+import "./not-production";
 import { computeMatches, type OpenListing } from "../src/lib/matches";
 
 function assert(cond: unknown, msg: string) {

@@ -1,5 +1,6 @@
 // Seed a small valley so the skeleton has something to show.
 // Everyone's password is "freewill123". Run: npm run db:seed
+import "../scripts/not-production";
 import bcrypt from "bcryptjs";
 import { db } from "../src/lib/db";
 const PASSWORD = "freewill123";

@@ -1,4 +1,5 @@
 // Sanity checks for the instant-runoff tally and the keeper lot. Run: npx tsx --env-file=.env scripts/rcv-check.ts
+import "./not-production";
 import { db } from "../src/lib/db";
 import { drawSeed, seededDraw } from "../src/lib/beacon";
 import { keeperPool, keeperPoolSize } from "../src/lib/keepers";

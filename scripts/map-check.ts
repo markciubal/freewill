@@ -2,6 +2,7 @@
 // exist in the Protomaps basemap schema, and the configured map file (or the
 // public demo planet, when reachable) really carries those layers.
 // Run: npm run smoke:map
+import "./not-production";
 import { PMTiles } from "pmtiles";
 import { PLACE_CLASSES, ROAD_CLASSES, concreteFontStack, paletteFromTokens, pickerPalette, pixels } from "../src/lib/map-theme";
 import { originOfUrlTemplate } from "../src/lib/security";

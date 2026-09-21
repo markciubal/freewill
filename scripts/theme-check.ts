@@ -1,4 +1,5 @@
 // Theme serialization round-trips, and bad input is rejected. Run: npm run smoke:theme
+import "./not-production";
 import { DEFAULT_MAP_PRESET, DEFAULT_THEME, MAP_PRESETS, applyMapPreset, isValidValue, matchingMapPreset, sanitizeTheme } from "../src/lib/theme";
 import { cssToTheme, themeToCss } from "../src/lib/theme.css";
 

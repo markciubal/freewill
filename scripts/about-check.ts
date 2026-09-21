@@ -2,6 +2,7 @@
 // page, every check must name a real script or file, every live-state key must
 // resolve, and every claim must carry the limits the schema demands.
 // Run: npm run smoke:about
+import "./not-production";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { db } from "../src/lib/db";

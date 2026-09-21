@@ -3,6 +3,7 @@
 // "See ..." link goes to a real page, and the words read as plain sentences
 // without the code's own names leaking through.
 // Run: npm run smoke:glossary
+import "./not-production";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { STEWARD_SILENT_DAYS } from "../src/lib/commons";

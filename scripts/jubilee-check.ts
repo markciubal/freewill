@@ -1,4 +1,5 @@
 // Wind-down report math against the live dev DB (read-only). Run: npm run smoke:jubilee
+import "./not-production";
 import { db } from "../src/lib/db";
 import { windDownReport } from "../src/lib/jubilee";
 

@@ -1,6 +1,7 @@
 // Member identity keys: signing, verification, forgery detection, and
 // off-server verification of a trust bundle. Pure crypto plus a live check of
 // the critic. Run: npm run smoke:keys
+import "./not-production";
 import { db } from "../src/lib/db";
 import { generateIdentity, keyFingerprint, publicKeyOf, signMessage, verifyMessage, verifyTrustBundle, vouchToken, type TrustBundle } from "../src/lib/keys";
 import { critique } from "../src/lib/sabul";

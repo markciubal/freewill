@@ -1,6 +1,7 @@
 // Security rules: password policy, rate limiting, session revocation, and the
 // response headers. Pure checks first, then a live check of attempt counting
 // against the dev database. Run: npm run smoke:security
+import "./not-production";
 import { SignJWT, jwtVerify } from "jose";
 import { db } from "../src/lib/db";
 import {

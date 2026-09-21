@@ -2,6 +2,7 @@
 // result, for standing (pure), for every demurrage run on record (live), and
 // for the zero-sum check that the wind-down page also relies on (live).
 // Run: npm run smoke:explain
+import "./not-production";
 import { db } from "../src/lib/db";
 import { explainDemurrageRun, explainKeeperPool, explainZeroSum, zeroSumParts } from "../src/lib/explain";
 import { windDownReport } from "../src/lib/jubilee";

@@ -1,4 +1,5 @@
 // Pure checks for the seed-bank seasonal helpers. Run: npm run smoke:seeds
+import "./not-production";
 import { formatSowMonths, parseSowMonths, sowableIn } from "../src/lib/seeds";
 
 function assert(c: unknown, m: string) { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok:", m); }

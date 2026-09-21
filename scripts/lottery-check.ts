@@ -1,5 +1,6 @@
 // Checks for the verifiable lottery and the attestation vouch.
 // Run: npm run smoke:lottery
+import "./not-production";
 import { drawSeed, seededDraw } from "../src/lib/beacon";
 import { computeStanding } from "../src/lib/standing";
 

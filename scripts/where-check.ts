@@ -5,6 +5,7 @@
 // "appliedAt: null" never finds a question waiting to be carried out.
 // These checks hold the shared filters to the real database, read-only.
 // Run: npm run smoke:where
+import "./not-production";
 import { NOT_YET_APPLIED } from "../src/lib/commons.data";
 import { db } from "../src/lib/db";
 import { postedEverywhere, stillCurrent } from "../src/lib/where";
