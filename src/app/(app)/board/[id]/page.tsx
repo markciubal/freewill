@@ -7,6 +7,7 @@ import { CATEGORY_LABEL } from "@/lib/covenant";
 import { db } from "@/lib/db";
 import { isObjectId } from "@/lib/form";
 import { HighAskNote } from "@/components/pricing-views";
+import { InfoDot } from "@/components/info-dot";
 import { askSignal } from "@/lib/pricing";
 import { getReferencePrices } from "@/lib/pricing.data";
 import { DELTAS, DELTA_LABEL, canReflect } from "@/lib/pulse";
@@ -68,7 +69,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
           {!hasPrice && !l.wantsInReturn && <div><dt className="text-xs text-muted">Terms</dt><dd>Gift</dd></div>}
           {l.priceGrace && reference.grace && (
             <div className="col-span-2">
-              <dt className="text-xs text-muted">Usually, near you</dt>
+              <dt className="text-xs text-muted">Usually, near you <InfoDot term="usual-price" /></dt>
               <dd><Grace n={reference.grace.median} /> <span className="text-xs text-muted">(the middle of {reference.grace.exchanges} recent {CATEGORY_LABEL[l.category].toLowerCase()} exchanges)</span></dd>
             </div>
           )}
@@ -94,7 +95,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
       )}
 
       <section>
-        <SectionTitle>Pledges</SectionTitle>
+        <SectionTitle>Pledges <InfoDot term="pledge" /></SectionTitle>
         {l.pledges.length === 0 ? (
           <Empty>No pledges yet.</Empty>
         ) : (
@@ -140,7 +141,7 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
         const mine = l.reflections.find((r) => r.userId === me.id);
         return (
           <Card>
-            <SectionTitle>One question</SectionTitle>
+            <SectionTitle>One question <InfoDot term="trade-pulse" /></SectionTitle>
             <p className="mb-3 text-sm text-muted">
               {mine
                 ? `You answered: ${DELTA_LABEL[mine.delta].toLowerCase()}. You can change it.`

@@ -1,6 +1,7 @@
 import { CATEGORY_LABEL, SURVIVAL } from "@/lib/covenant";
 import { HIGH_ASK_FACTOR, PULSE_MINIMUM_ANSWERS, fmtTimes, type AskSignal, type CategoryPulse } from "@/lib/pricing";
 import type { Category } from "@prisma/client";
+import { InfoDot } from "./info-dot";
 import { Grace } from "./ui";
 
 // The two places the community's own numbers are shown back to it. Both take
@@ -15,7 +16,7 @@ export function HighAskNote({ signal, category }: { signal: AskSignal; category:
   return (
     <p className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm">
       This asks about {fmtTimes(signal.timesUsual)} times what {CATEGORY_LABEL[category].toLowerCase()} has recently settled for near you (<Grace n={signal.usual} />, the middle of{" "}
-      {signal.exchanges} exchanges). There can be good reasons: it may be harder to get now, or a better kind. Ask before you decide. Nobody sets prices here; this note appears on any
+      {signal.exchanges} exchanges) <InfoDot term="usual-price" />. There can be good reasons: it may be harder to get now, or a better kind. Ask before you decide. Nobody sets prices here; this note appears on any
       survival offer more than {HIGH_ASK_FACTOR} times the usual.
     </p>
   );
@@ -35,7 +36,7 @@ export function PulseByCategory({ rows }: { rows: CategoryPulse[] }) {
             <tr className="text-left text-xs text-muted">
               <th className="p-2 font-medium">Kind of exchange</th>
               <th className="p-2 font-medium">How much better off people said they were</th>
-              <th className="p-2 text-right font-medium">Usually settles for</th>
+              <th className="p-2 text-right font-medium">Usually settles for <InfoDot term="usual-price" /></th>
             </tr>
           </thead>
           <tbody>

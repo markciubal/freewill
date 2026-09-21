@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, Field, Input, Notice, PageTitle, Textarea } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
+import { InfoDot } from "@/components/info-dot";
 import { LocationPicker } from "@/components/location-picker";
 import { requireUser } from "@/lib/auth";
 import { Badge, Button } from "@/components/ui";
@@ -25,7 +26,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <form action={updateProfile} className="space-y-4">
           <Field label="Username"><Input value={`@${me.username}`} disabled /></Field>
           <Field label="Display name"><Input name="displayName" maxLength={60} defaultValue={me.displayName ?? ""} /></Field>
-          <Field label="Locality" hint="Where you are now. Change it when you move; matching ignores capitalization, and verification counts vouches from people in the locality you name."><Input name="locality" required minLength={2} maxLength={80} defaultValue={me.locality} /></Field>
+          <Field label="Locality" info="locality" hint="Where you are now. Change it when you move; matching ignores capitalization, and verification counts vouches from people in the locality you name."><Input name="locality" required minLength={2} maxLength={80} defaultValue={me.locality} /></Field>
           <div className="text-sm">
             <span className="mb-1 block font-medium">Your pin</span>
             <p className="mb-2 text-xs text-muted">Click the map to move it if you have moved. Nearby is enough, not your door. It is rounded to about a hundred meters and others only ever see a distance, never this point. Things you already published keep the pin they were published with. Currently ({me.lat}, {me.lng}).</p>
@@ -41,7 +42,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       {idmeEnabled() && (
         <Card className="mt-6 space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
-            Verified affiliations <Badge tone={me.affiliations.length ? "accent" : "neutral"}>{me.affiliations.length ? `${me.affiliations.length} verified` : "optional"}</Badge>
+            Verified affiliations <InfoDot term="affiliation" /> <Badge tone={me.affiliations.length ? "accent" : "neutral"}>{me.affiliations.length ? `${me.affiliations.length} verified` : "optional"}</Badge>
           </div>
           <p className="text-sm text-muted">
             Optional: prove an affiliation through ID.me. Each becomes a badge on your profile and helps people find responders. It counts as one extra vouch toward verification and gates nothing.

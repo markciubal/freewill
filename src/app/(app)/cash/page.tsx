@@ -1,5 +1,6 @@
 import { Badge, Card, Empty, Field, Grace, Notice, PageTitle, SectionTitle, Stat, Textarea, fmtDate } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
+import { InfoDot } from "@/components/info-dot";
 import { MintCash } from "@/components/mint-cash";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -28,7 +29,7 @@ export default async function CashPage({ searchParams }: { searchParams: Promise
       <Notice error={sp.error} ok={sp.ok} />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card><Stat label="Grace" value={<Grace n={meBal.graceBalance} />} sub={<>limit <Grace n={-standing.graceLimit} /></>} /></Card>
+        <Card><Stat label={<>Grace <InfoDot term="grace" /></>} value={<Grace n={meBal.graceBalance} />} sub={<>limit <Grace n={-standing.graceLimit} /></>} /></Card>
         <Card><Stat label="Locked in your notes" value={<Grace n={lockedCents} />} sub="reclaimable with the secret" /></Card>
         <Card><Stat label="All unspent notes" value={<Grace n={outstandingCents} />} sub="across the commons" /></Card>
       </div>
@@ -53,22 +54,27 @@ export default async function CashPage({ searchParams }: { searchParams: Promise
         {mine.length === 0 ? (
           <Empty>You have not minted any cash notes.</Empty>
         ) : (
-          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {mine.map((n) => (
-              <li key={n.id}>
-                <div className="rounded-lg border border-border bg-card p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium tabular-nums"><Grace n={n.denomination * 100} /></span>
-                    <Badge tone={n.status === "LOCKED" ? "warn" : "accent"}>{n.status === "LOCKED" ? "unspent" : "reclaimed"}</Badge>
+          <>
+            <p className="mb-2 text-xs text-muted">
+              Each note shows the start of its commitment <InfoDot term="commitment" />: the fingerprint the app keeps instead of the secret.
+            </p>
+            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {mine.map((n) => (
+                <li key={n.id}>
+                  <div className="rounded-lg border border-border bg-card p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium tabular-nums"><Grace n={n.denomination * 100} /></span>
+                      <Badge tone={n.status === "LOCKED" ? "warn" : "accent"}>{n.status === "LOCKED" ? "unspent" : "reclaimed"}</Badge>
+                    </div>
+                    <div className="mt-1 font-mono text-[10px] text-muted">#{n.commitment.slice(0, 12)}…</div>
+                    <div className="mt-1 text-xs text-muted">
+                      {fmtDate(n.createdAt)}{n.spender ? ` · by @${n.spender.username}` : ""}
+                    </div>
                   </div>
-                  <div className="mt-1 font-mono text-[10px] text-muted">#{n.commitment.slice(0, 12)}…</div>
-                  <div className="mt-1 text-xs text-muted">
-                    {fmtDate(n.createdAt)}{n.spender ? ` · by @${n.spender.username}` : ""}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </section>
     </div>

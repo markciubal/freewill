@@ -1,12 +1,18 @@
 import { GraceMark } from "./grace-mark";
+import { InfoDot } from "./info-dot";
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import type { Term } from "@/lib/glossary";
 
-export function PageTitle({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
+// `info` puts an (i) beside the title, explaining the word the page is about.
+export function PageTitle({ title, subtitle, action, info }: { title: string; subtitle?: string; action?: ReactNode; info?: Term }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {title}
+          {info && <> <InfoDot term={info} className="align-middle" /></>}
+        </h1>
         {subtitle && <p className="mt-1 max-w-2xl text-sm text-muted">{subtitle}</p>}
       </div>
       {action}
@@ -64,7 +70,26 @@ export function LinkButton({ href, children, variant = "primary", className = ""
   );
 }
 
-export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+export function Field({ label, children, hint, info }: { label: string; children: ReactNode; hint?: string; info?: Term }) {
+  // An (i) cannot sit inside a <label>: a label hands its clicks and its name
+  // to the first control inside it, which would be the (i) instead of the
+  // input. So with an (i), the visible name and its (i) sit just above, and
+  // the label still names the input for screen readers.
+  if (info) {
+    return (
+      <div className="text-sm">
+        <div className="mb-1 flex items-center gap-1 font-medium">
+          <span aria-hidden="true">{label}</span>
+          <InfoDot term={info} />
+        </div>
+        <label className="block">
+          <span className="sr-only">{label}</span>
+          {children}
+          {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
+        </label>
+      </div>
+    );
+  }
   return (
     <label className="block text-sm">
       <span className="mb-1 block font-medium">{label}</span>

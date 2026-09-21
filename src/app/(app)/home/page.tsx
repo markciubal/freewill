@@ -52,11 +52,11 @@ export default async function HomePage() {
 
       {standing.verified ? (
         <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
-          You are verified in {user.locality}: {standing.vouchesReceived} vouch{standing.vouchesReceived === 1 ? "" : "es"}, and {standing.requiredVouches} {standing.requiredVouches === 1 ? "is" : "are"} needed here. You can use credit, vouch for others, mediate disputes, and vote.
+          You are verified <InfoDot term="verified" /> in {user.locality}: {standing.vouchesReceived} vouch{standing.vouchesReceived === 1 ? "" : "es"}, and {standing.requiredVouches} {standing.requiredVouches === 1 ? "is" : "are"} needed here. You can use credit, vouch for others, mediate disputes, and vote.
         </p>
       ) : (
         <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm">
-          Not verified yet. You need {standing.requiredVouches} vouch{standing.requiredVouches === 1 ? "" : "es"} from people in {user.locality} ({standing.vouchesReceived} so far). Until then you can post, pledge, and earn, but not use credit, vouch, mediate, or vote.
+          Not verified <InfoDot term="verified" /> yet. You need {standing.requiredVouches} vouch{standing.requiredVouches === 1 ? "" : "es"} from people in {user.locality} ({standing.vouchesReceived} so far). Until then you can post, pledge, and earn, but not use credit, vouch, mediate, or vote.
           Start in the <Link href="/people" className="text-accent hover:underline">People</Link> directory.
         </p>
       )}
@@ -135,7 +135,7 @@ export default async function HomePage() {
 
         <section className="space-y-6">
           <div>
-            <SectionTitle>Pledges waiting on you</SectionTitle>
+            <SectionTitle>Pledges waiting on you <InfoDot term="pledge" /></SectionTitle>
             {awaitingMe.length === 0 ? (
               <Empty>Nothing waiting on you.</Empty>
             ) : (

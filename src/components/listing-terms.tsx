@@ -13,6 +13,7 @@ import {
   type Reference,
   type Settlement,
 } from "@/lib/pricing";
+import { InfoDot } from "./info-dot";
 import { Field, Input, Select, fmtGrace, fmtHours } from "./ui";
 
 // The part of the new-listing form that depends on the category: what kind of
@@ -99,6 +100,7 @@ export function ListingTerms({ initialKind, references }: { initialKind: "NEED" 
           {showGrace && (
             <Field
               label="Grace ask"
+              info="grace"
               hint={
                 reference.grace
                   ? `${CATEGORY_LABEL[category]} has recently settled for about ${fmtGrace(reference.grace.median)} near you (the middle of ${reference.grace.exchanges} exchanges).`
@@ -111,6 +113,7 @@ export function ListingTerms({ initialKind, references }: { initialKind: "NEED" 
           {showHours && (
             <Field
               label="Hours ask"
+              info="hours"
               hint={reference.hours ? `Usually about ${fmtHours(reference.hours.median)} near you (${reference.hours.exchanges} exchanges). Decimal hours, e.g. 1.5` : "Decimal hours, e.g. 1.5"}
             >
               <Input name="priceHours" type="number" min={0} step={0.25} />
@@ -122,7 +125,7 @@ export function ListingTerms({ initialKind, references }: { initialKind: "NEED" 
       {signal && (
         <p className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm">
           That is about {fmtTimes(signal.timesUsual)} times what {CATEGORY_LABEL[category].toLowerCase()} has recently settled for near you ({fmtGrace(signal.usual)}, the middle of{" "}
-          {signal.exchanges} exchanges). You can still post it. Anything over {HIGH_ASK_FACTOR} times the usual will carry a note saying so, so people can ask you why.
+          {signal.exchanges} exchanges) <InfoDot term="usual-price" />. You can still post it. Anything over {HIGH_ASK_FACTOR} times the usual will carry a note saying so, so people can ask you why.
         </p>
       )}
     </>

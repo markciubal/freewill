@@ -46,12 +46,13 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><Stat label={<>Standing <InfoDot term="standing" /></>} value={TIER_LABEL[standing.tier]} sub={`${standing.score} pts / ${standing.verified ? "verified" : "not yet verified"}`} /></Card>
         <Card><Stat label={<>Vouches <InfoDot term="vouch" /></>} value={standing.vouchesReceived} sub={`${standing.pledgesKept} pledges kept`} /></Card>
-        <Card><Stat label="Balances" value={<Grace n={p.graceBalance} />} sub={fmtHours(p.hoursBalance)} /></Card>
+        <Card><Stat label={<>Balances <InfoDot term="grace" /></>} value={<Grace n={p.graceBalance} />} sub={fmtHours(p.hoursBalance)} /></Card>
       </div>
       {idmeEnabled() && p.affiliations.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           {p.affiliations.map((h) => <Badge key={h} tone="accent">{policyLabel(h)}</Badge>)}
           <span className="text-xs text-muted">verified via ID.me{p.humanVerifiedAt ? ` since ${fmtDate(p.humanVerifiedAt)}` : ""}</span>
+          <InfoDot term="affiliation" />
         </div>
       )}
       {standing.harms > 0 && (
@@ -105,7 +106,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
 
       {p.stewardships.length > 0 && (
         <section>
-          <SectionTitle>Steward of</SectionTitle>
+          <SectionTitle>Steward of <InfoDot term="steward" /></SectionTitle>
           <ul className="text-sm">{p.stewardships.map((c) => <li key={c.id}><Link href="/commons" className="hover:underline">{c.name}</Link></li>)}</ul>
         </section>
       )}

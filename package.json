@@ -44,7 +44,8 @@
     "smoke:pricing": "tsx --env-file=.env scripts/pricing-check.ts",
     "smoke:commons": "tsx --env-file=.env scripts/commons-check.ts",
     "smoke:where": "tsx --env-file=.env scripts/where-check.ts",
-    "smoke:copy": "tsx --env-file=.env scripts/copy-check.ts"
+    "smoke:copy": "tsx --env-file=.env scripts/copy-check.ts",
+    "smoke:glossary": "tsx --env-file-if-exists=.env scripts/glossary-check.ts"
   },
   "dependencies": {
     "@emnapi/core": "1.11.3",

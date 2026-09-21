@@ -8,6 +8,7 @@ export default async function KeysPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <PageTitle
         title="Identity key"
+        info="identity-key"
         subtitle="An optional key that lives only on your device and lets you sign your vouches, so no one can forge or claim your endorsement, and other communities can verify your web of trust without trusting this server. The server never sees the private half."
       />
       <Card>

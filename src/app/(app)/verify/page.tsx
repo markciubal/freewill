@@ -11,6 +11,7 @@ export default function VerifyPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <PageTitle
         title="Verify the ledger"
+        info="checkpoint"
         subtitle="Download the ledger from the Ledger page, then check it here or on any other machine. This re-derives the whole hash chain from the exported bundle and confirms it matches the commons-signed root. It trusts nothing but the public key inside the file."
       />
       <Card>

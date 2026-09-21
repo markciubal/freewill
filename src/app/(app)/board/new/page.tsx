@@ -29,7 +29,7 @@ export default async function NewListingPage({ searchParams }: { searchParams: P
             <Field label="Quantity (optional)">
               <Input name="quantity" maxLength={60} placeholder="3 jars / 2 hrs a week / one room" />
             </Field>
-            <Field label="Locality"><Input value={me.locality} disabled /></Field>
+            <Field label="Locality" info="locality"><Input value={me.locality} disabled /></Field>
           </div>
           <SubmitButton pendingText="Posting...">Post</SubmitButton>
         </form>

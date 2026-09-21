@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Button, Card, Field, Notice, PageTitle, SectionTitle, Select, Textarea, fmtDate } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
+import { InfoDot } from "@/components/info-dot";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isObjectId } from "@/lib/form";
@@ -54,7 +55,7 @@ export default async function CirclePage({ params, searchParams }: { params: Pro
       </Card>
 
       <Card className="space-y-3">
-        <SectionTitle>Mediators ({keepers.length} of {c.keepersNeeded}, drawn at random)</SectionTitle>
+        <SectionTitle>Mediators ({keepers.length} of {c.keepersNeeded}, drawn at random) <InfoDot term="mediator" /></SectionTitle>
         {keepers.length === 0 ? (
           <p className="text-sm text-muted">No mediators yet. They are drawn at random from the most trusted verified people in {c.locality}; they hear everyone and record what is agreed.</p>
         ) : (

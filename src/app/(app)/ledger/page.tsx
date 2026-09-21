@@ -146,7 +146,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
       </div>
 
       <Card>
-        <SectionTitle>Trade pulse</SectionTitle>
+        <SectionTitle>Trade pulse <InfoDot term="trade-pulse" /></SectionTitle>
         <p className="text-sm text-muted">
           The ledger sums to zero by design. Wellbeing does not: after each settled exchange, both people are asked
           whether it left them better off.

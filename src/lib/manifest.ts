@@ -371,6 +371,19 @@ const manifest: Manifest = {
       sources: [SOURCES.dispossessed, SOURCES.stayAndFight],
     },
     {
+      key: "glossary",
+      name: "The app's words, explained where they appear",
+      status: "live",
+      does: "An (i) beside each word the app uses in its own sense (Grace, Hours, vouch, standing, verified, demurrage, dispute, mediator, steward, commitment, checkpoint and more) opens one plain sentence, with a fuller explanation folded underneath and a link to the page where you can see the thing for yourself. It opens by hover, by tap, or by keyboard, and stays on screen.",
+      doesNot: [
+        "The explanations are written by hand, not generated from the rules. The numbers in them are checked against the code's constants, but the prose around those numbers is only as accurate as whoever last wrote it. Show the Work is the page computed from the rules themselves.",
+        "It explains a word, not your situation. Your own numbers are on the page each explanation links to.",
+        "Only the words chosen for the glossary have one. A word the app uses that nobody added has no (i).",
+      ],
+      verifiedBy: [{ kind: "script", ref: "smoke:glossary", what: "Every term is shown on a page, every link goes to a real page, each explanation reads as a sentence, and every number in them matches the rule it describes." }],
+      sources: [],
+    },
+    {
       key: "accounts",
       name: "Accounts without email",
       status: "live",

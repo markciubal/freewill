@@ -33,6 +33,7 @@ export default async function CirclesPage({ searchParams }: { searchParams: Prom
     <div className="space-y-8">
       <PageTitle
         title="Disputes"
+        info="dispute"
         subtitle="When someone has been wronged, they open a dispute. Mediators are drawn at random from trusted people nearby, everyone is heard, and what is agreed is written down publicly. The goal is repairing the harm, not punishing anyone."
         action={<ScopeToggle scope={scope} base="/circles" locality={me.locality} />}
       />

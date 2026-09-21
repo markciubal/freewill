@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Button, Card, Notice, PageTitle, SectionTitle, Select, fmtDateTime } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
+import { InfoDot } from "@/components/info-dot";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isObjectId } from "@/lib/form";
@@ -62,7 +63,7 @@ export default async function ProposalPage({ params, searchParams }: { params: P
 
       {open && (
         <Card>
-          <SectionTitle>{mine ? "Your ballot (you can change it)" : "Your ballot"}</SectionTitle>
+          <SectionTitle>{mine ? "Your ballot (you can change it)" : "Your ballot"} <InfoDot term="ranked-choice" /></SectionTitle>
           {!canVote ? (
             <p className="text-sm text-muted">
               {p.commons
@@ -94,7 +95,7 @@ export default async function ProposalPage({ params, searchParams }: { params: P
 
       {!open && tally && (
         <Card className="space-y-3">
-          <SectionTitle>Result</SectionTitle>
+          <SectionTitle>Result <InfoDot term="ranked-choice" /></SectionTitle>
           {tally.winner === null ? (
             <p className="text-sm">{tally.ballots === 0 ? "Nobody voted, so nothing was decided." : "No option reached a majority, so nothing was decided."}</p>
           ) : (

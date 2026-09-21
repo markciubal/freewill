@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Button, Card, Empty, Field, Input, Notice, PageTitle, SectionTitle, Select, Textarea, fmtDate } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
+import { InfoDot } from "@/components/info-dot";
 import { requireUser } from "@/lib/auth";
 import { DECISION_DAYS, DORMANT_DAYS, ENTRY_HINT, ENTRY_LABEL, STEWARD_SILENT_DAYS, commonsHealth, commonsUsers, daysSince, stewardLastActive, type Entry } from "@/lib/commons";
 import { settleCommonsDecisions } from "@/lib/commons.data";
@@ -130,7 +131,7 @@ export default async function CommonsDetailPage({ params, searchParams }: { para
       </Card>
 
       <section>
-        <SectionTitle>The record</SectionTitle>
+        <SectionTitle>The record <InfoDot term="commons" /></SectionTitle>
         {record.length === 0 ? (
           <Empty>Nothing written yet. If you use it, be the first to say so.</Empty>
         ) : (
@@ -180,7 +181,7 @@ export default async function CommonsDetailPage({ params, searchParams }: { para
       </section>
 
       <Card className="space-y-4">
-        <SectionTitle>Its rules and its steward</SectionTitle>
+        <SectionTitle>Its rules and its steward <InfoDot term="steward" /></SectionTitle>
         <details>
           <summary className="cursor-pointer text-sm font-medium">Propose new rules</summary>
           {amUser ? (

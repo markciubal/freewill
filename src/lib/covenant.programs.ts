@@ -119,7 +119,7 @@ export const PROGRAMS: Program[] = [
     route: "/explain",
     summary: "Every number the app decides about you, and the two numbers the whole ledger rests on, walked through step by step with your real inputs.",
     why: "A rule nobody can check is an authority wearing a costume. The steps are produced by the same code that makes the decision, in the same pass, so the explanation cannot drift from the decision. Anyone can redo the arithmetic and hold the app to the ground rules.",
-    features: ["Your standing, vouch threshold, credit limits, and dispute allowance", "The last demurrage run re-derived from its recorded totals", "The zero-sum check with the carry, vouchers, and locked cash", "Mediator pool size for your locality", "Source file named on every card"],
+    features: ["Your standing, vouch threshold, credit limits, and dispute allowance", "The last demurrage run re-derived from its recorded totals", "The zero-sum check with the carry, vouchers, and locked cash", "Mediator pool size for your locality", "Source file named on every card", "An (i) beside the app's own words, with more folded underneath and a link to see it for yourself"],
   },
   {
     key: "identity",

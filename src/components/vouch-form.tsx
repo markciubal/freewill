@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { vouch } from "@/app/(app)/people/actions";
 import { signMessage, vouchToken } from "@/lib/keys";
+import { InfoDot } from "./info-dot";
 import { useLocalIdentity } from "./use-local-identity";
 import { Field, Input } from "./ui";
 import { SubmitButton } from "./submit-button";
@@ -29,11 +30,11 @@ export function VouchForm({ username, fromId, toId, hasKey, defaultNote, isUpdat
       </div>
       <p className="text-xs text-muted">
         {signature ? (
-          "This vouch will be signed with your identity key."
+          <>This vouch will be signed with your identity key <InfoDot term="identity-key" />.</>
         ) : hasKey ? (
-          <>Your identity key is not on this device, so this vouch will be unsigned. <Link href="/keys" className="text-accent hover:underline">Load your key</Link> to sign.</>
+          <>Your identity key <InfoDot term="identity-key" /> is not on this device, so this vouch will be unsigned. <Link href="/keys" className="text-accent hover:underline">Load your key</Link> to sign.</>
         ) : (
-          <><Link href="/keys" className="text-accent hover:underline">Add an identity key</Link> to sign your vouches so no one can forge them.</>
+          <><Link href="/keys" className="text-accent hover:underline">Add an identity key</Link> <InfoDot term="identity-key" /> to sign your vouches so no one can forge them.</>
         )}
       </p>
     </form>
