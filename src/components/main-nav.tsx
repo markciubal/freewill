@@ -46,7 +46,8 @@ const GROUPS: Group[] = [
     id: "system",
     label: "How it works",
     items: [
-      { href: "/programs", label: "Programs", hint: "What this is" },
+      { href: "/about", label: "About", hint: "Mission, limits, sources" },
+      { href: "/programs", label: "Programs", hint: "Every feature, and why" },
       { href: "/explain", label: "Show the work", hint: "Your numbers, step by step" },
       { href: "/verify", label: "Verify ledger", hint: "Check the history yourself" },
       { href: "/sabul", label: "The critic", hint: "How power could still creep in" },

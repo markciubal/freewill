@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </header>
       <main className="mx-auto w-full max-w-(--content-width) flex-1 px-4 py-8">{children}</main>
       <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted">
-        Run by its members, owned by no one.
+        Run by its members, owned by no one. <Link href="/about" className="text-accent hover:underline">What this is, and what it cannot do</Link>.
       </footer>
     </div>
   );

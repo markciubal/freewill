@@ -102,6 +102,16 @@ export const PROGRAMS: Program[] = [
     features: ["Secret generated and hashed in your browser, never sent until spent", "Any whole denomination 1-100 Grace, bound into the hash", "Mint burns value to a commitment; reveal reclaims it", "Single-use: a copy is caught on reclaim", "Printable note with QR"],
   },
   {
+    key: "about",
+    name: "What This Is",
+    tier: 2,
+    status: "live",
+    route: "/about",
+    summary: "The mission, the principles and what would show each one had been abandoned, every capability paired with what it cannot do, who wrote the code, and where every idea came from. Served as JSON too, so another community or a researcher can read the claims and check them.",
+    why: "A project that tells its members to check rather than trust cannot be vague about itself. The page is generated from one typed description whose schema refuses a capability without a stated limitation and an answer without its limits, so an honest self-description is not a matter of anyone remembering to be honest.",
+    features: ["Mission and a plain statement of what this is not", "Principles, each with what would falsify it", "Every capability with what it does not do", "Answers that quote live aggregate figures", "Who wrote the code, what is tested, what is unreviewed", "Sources from Le Guin to Ostrom to drand", "JSON at /api/about"],
+  },
+  {
     key: "explain",
     name: "Show the Work",
     tier: 2,

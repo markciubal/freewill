@@ -9,7 +9,11 @@ function assert(cond: unknown, msg: string) {
 const css = themeToCss(DEFAULT_THEME);
 assert(JSON.stringify(cssToTheme(css, DEFAULT_THEME)) === JSON.stringify(DEFAULT_THEME), "default theme round-trips through CSS");
 
-const edited = css.replace("--accent: #3f6b3a;", "--accent: #aa2266;").replace("--radius: 8px;", "--radius: 0px;");
+// Built from the current defaults rather than literals, so changing a default
+// value cannot quietly stop this test from testing anything.
+const edited = css
+  .replace(`--accent: ${DEFAULT_THEME.light.accent};`, "--accent: #aa2266;")
+  .replace(`--radius: ${DEFAULT_THEME.shared.radius};`, "--radius: 0px;");
 const t = cssToTheme(edited, DEFAULT_THEME);
 assert(t.light.accent === "#aa2266" && t.dark.accent === DEFAULT_THEME.dark.accent, "editing a light color changes only light");
 assert(t.shared.radius === "0px", "shared token edited from CSS");
@@ -17,7 +21,9 @@ assert(t.shared.radius === "0px", "shared token edited from CSS");
 const darkEdited = css.replace(/\/\* @dark \*\/[\s\S]*$/, `/* @dark */\n:root[data-theme="dark"] {\n  --background: hsl(20 10% 8%);\n}\n`);
 assert(cssToTheme(darkEdited, DEFAULT_THEME).dark.background === "hsl(20 10% 8%)", "dark block parsed, hsl accepted");
 
-const hostile = css.replace("--accent: #3f6b3a;", '--accent: url("https://evil/x");').replace("--font-sans: var(--font-geist-sans), system-ui, sans-serif;", "--font-sans: expression(alert(1));");
+const hostile = css
+  .replace(`--accent: ${DEFAULT_THEME.light.accent};`, '--accent: url("https://evil/x");')
+  .replace(`--font-sans: ${DEFAULT_THEME.shared["font-sans"]};`, "--font-sans: expression(alert(1));");
 const h = cssToTheme(hostile, DEFAULT_THEME);
 assert(h.light.accent === DEFAULT_THEME.light.accent && h.shared["font-sans"] === DEFAULT_THEME.shared["font-sans"], "url() and expression() are rejected");
 assert(!themeToCss(h, false).includes("url(") && !themeToCss(h, false).includes("expression"), "applied CSS never contains hostile values");

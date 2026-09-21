@@ -37,7 +37,8 @@
     "smoke:map": "tsx --env-file=.env scripts/map-check.ts",
     "smoke:explain": "tsx --env-file=.env scripts/explain-check.ts",
     "lock:check": "node scripts/lock-check.cjs",
-    "lock:fix": "node scripts/lock-fix.cjs"
+    "lock:fix": "node scripts/lock-fix.cjs",
+    "smoke:about": "tsx --env-file=.env scripts/about-check.ts"
   },
   "dependencies": {
     "@emnapi/core": "1.11.3",

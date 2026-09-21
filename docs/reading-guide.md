@@ -37,6 +37,7 @@ doubt, this is how to find the claim's source.
 | Passwords, throttles, sessions, browser security headers | `src/lib/security.ts` | `passwordProblem`, `rateLimitAllows`, `sessionIsCurrent`, `buildContentSecurityPolicy` | `smoke:security` |
 | The map is drawn from data the community hosts, in your colors | `src/lib/map-theme.ts`, `src/components/basemap.ts` | `paletteFromTokens`, `addBasemap` | `smoke:map` |
 | Ranked-choice decisions | `src/lib/rcv.ts` | `tallyIRV` | `smoke:rcv` |
+| What the app claims about itself, with limits and sources | `src/lib/manifest.ts` | `MANIFEST` (shape in `manifest.schema.ts`) | `smoke:about` |
 | The wind-down costs no one anything | `src/lib/jubilee.ts` | `windDownReport` | `smoke:jubilee` |
 
 ## How to read one of these files
