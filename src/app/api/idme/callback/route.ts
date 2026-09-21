@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   // Distinguish the failure modes so a retry can be diagnosed, not guessed at.
   if (err) {
     // ID.me told us why it sent no code (e.g. access_denied, invalid_scope).
-    return back("error=" + encodeURIComponent(`ID.me declined: ${err}${errDesc ? ` - ${decodeURIComponent(errDesc)}` : ""}. Nothing was recorded.`));
+    return back("error=" + encodeURIComponent(`ID.me declined (${err}${errDesc ? `: ${decodeURIComponent(errDesc)}` : ""}). Nothing was recorded.`));
   }
   if (!saved) {
     return back("error=" + encodeURIComponent("Your browser didn't return the sign-in cookie. Start and finish on the same address (the public site, not a forwarded or preview URL), and allow cookies. Nothing was recorded."));

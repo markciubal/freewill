@@ -142,12 +142,12 @@ export function computeStandingWithWork(input: StandingInput): { standing: Stand
   );
 
   // --- What the score is allowed to buy ---------------------------------------
-  const graceLimit = work.step(
+  const graceLimit = work.graceStep(
     "Grace credit limit (how far below zero you may go)",
     { verified, score, baseGrace: rules.graceLimit.baseGrace, gracePerPoint: rules.graceLimit.gracePerPoint },
-    verified ? `(${rules.graceLimit.baseGrace} + round(${score} × ${rules.graceLimit.gracePerPoint})) Grace, stored as cents` : "0 until verified",
+    verified ? `${rules.graceLimit.baseGrace} + round(${score} × ${rules.graceLimit.gracePerPoint}) Grace` : "0 until verified",
     verified ? (rules.graceLimit.baseGrace + Math.round(score * rules.graceLimit.gracePerPoint)) * 100 : 0,
-    "Credit is the one thing standing controls. Grace is stored in hundredths, so the limit is too.",
+    "Credit is the one thing standing controls.",
   );
   const hoursLimit = work.step(
     "Hours credit limit, in minutes",

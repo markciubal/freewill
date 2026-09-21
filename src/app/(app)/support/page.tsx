@@ -22,7 +22,8 @@ export default async function SupportPage() {
       <Card className="space-y-3">
         <SectionTitle>What your money does and does not do</SectionTitle>
         <ul className="space-y-2 text-sm text-muted">
-          <li><span className="font-medium text-foreground">Does:</span> pay for the infrastructure — {note}</li>
+          <li><span className="font-medium text-foreground">Does:</span> pay for running the server.</li>
+          <li><span className="font-medium text-foreground">What that covers here:</span> {note}</li>
           <li><span className="font-medium text-foreground">Does not:</span> buy you Grace, Hours, standing, credit, a vote, or any advantage. There is no way to purchase those, on purpose.</li>
           <li>No cut is taken from anyone&apos;s trades. There is no fee on the credit system, and there is no treasury holding value that could be seized.</li>
         </ul>

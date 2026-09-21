@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createSession, destroySession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { normalizeLocality } from "@/lib/form";
+import { firstIssue, normalizeLocality } from "@/lib/form";
 import { isValidLatLng, roundPin } from "@/lib/geo";
 import { DUMMY_HASH, hashPassword, verifyPassword } from "@/lib/password";
 import { RATE_LIMITS, clientAddressKey, rateLimitPermits, recordAttempt, usernameKey } from "@/lib/ratelimit";
@@ -51,7 +51,7 @@ export async function join(_prev: AuthState, formData: FormData): Promise<AuthSt
       lng: formData.get("lng") || undefined,
       covenant: formData.get("covenant"),
     });
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!parsed.success) return { error: firstIssue(parsed.error) };
 
   const d = parsed.data;
   const weakPassword = passwordProblem(d.password, d.username);
@@ -89,7 +89,7 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
   const parsed = z
     .object({ username, password: z.string().min(1, "Password is required") })
     .safeParse({ username: formData.get("username"), password: formData.get("password") });
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!parsed.success) return { error: firstIssue(parsed.error) };
 
   // Two throttles: the address (someone trying many names) and the username
   // (many addresses trying one name). Only failures are recorded below, so a

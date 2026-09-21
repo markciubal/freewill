@@ -31,7 +31,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             <p className="mb-2 text-xs text-muted">Click the map to move it if you have moved. Nearby is enough, not your door. It is rounded to about a hundred meters and others only ever see a distance, never this point. Things you already published keep the pin they were published with. Currently ({me.lat}, {me.lng}).</p>
             <LocationPicker initial={{ lat: me.lat, lng: me.lng }} />
           </div>
-          <Field label="Skills" hint="Comma-separated. e.g. first aid, welding, water purification, midwifery, ham radio, carpentry">
+          <Field label="Skills" hint="Separate them with commas: first aid, welding, water purification, midwifery, ham radio, carpentry.">
             <Textarea name="skills" rows={3} maxLength={500} defaultValue={me.skills.join(", ")} />
           </Field>
           <Field label="About you"><Textarea name="bio" maxLength={1000} defaultValue={me.bio ?? ""} /></Field>

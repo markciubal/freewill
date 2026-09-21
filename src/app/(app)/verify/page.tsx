@@ -28,7 +28,7 @@ export default function VerifyPage() {
         <Card className="space-y-2">
           <div className="flex items-center gap-2">
             <Badge tone={r.ok ? "accent" : "danger"}>{r.ok ? "verified" : "failed"}</Badge>
-            <span className="text-sm">{r.ok ? "The bundle is internally consistent and signed by the commons." : r.reason}</span>
+            <span className="text-sm">{r.ok ? "The bundle is internally consistent and signed by the commons." : `This bundle does not verify: ${r.reason ?? "it could not be checked"}.`}</span>
           </div>
           <dl className="grid grid-cols-2 gap-2 text-sm">
             <div><dt className="text-xs text-muted">Entries</dt><dd className="tabular-nums">{r.count}</dd></div>

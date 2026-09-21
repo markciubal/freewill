@@ -36,21 +36,24 @@ export type DemurrageRunLike = { ranAt: Date; days: number; rateMonthly: number;
 // against every run in the database.
 export function explainDemurrageRun(run: DemurrageRunLike, carriedRemainder: number): Worked {
   const work = new Work();
-  const pot = work.step(
+  // Every amount below is written in Grace so a person can redo it with a
+  // pencil; the recorded results stay in hundredths so they can be compared
+  // with the run exactly.
+  const pot = work.graceStep(
     "The pot to share out",
-    { grace: fmtCentsForWork(run.totalDecayed), carriedFromLastRun: fmtCentsForWork(carriedRemainder) },
+    { meltedThisRun: fmtCentsForWork(run.totalDecayed), carriedFromLastRun: fmtCentsForWork(carriedRemainder) },
     `${fmtCentsForWork(run.totalDecayed)} melted off positive balances this run + ${fmtCentsForWork(carriedRemainder)} left over from last time`,
     run.totalDecayed + carriedRemainder,
-    `Each positive balance lost floor(balance × ${run.rateMonthly} × ${run.days}/30). Nothing is taken from anyone at or below zero.`,
+    `Each positive balance lost ${Math.round(run.rateMonthly * 100)}% for ${run.days} days, rounded down to the cent. Nothing is taken from anyone at or below zero.`,
   );
-  const dividend = work.step(
+  const dividend = work.graceStep(
     "Each verified member's share",
     { pot: fmtCentsForWork(pot), verifiedMembers: run.members },
-    run.members ? `floor(${fmtCentsForWork(pot)} / ${run.members})` : "no verified members: nothing is paid out",
+    run.members ? `${fmtCentsForWork(pot)} ÷ ${run.members} = ${(pot / 100 / run.members).toFixed(4)}, rounded down to the cent` : "no verified members: nothing is paid out",
     run.members ? Math.floor(pot / run.members) : 0,
     "Every verified member gets the same share, whether they held nothing or a lot. Hoarding funds everyone.",
   );
-  const remainder = work.step(
+  const remainder = work.graceStep(
     "Carried to the next run",
     { pot: fmtCentsForWork(pot), paidOut: fmtCentsForWork(dividend * run.members) },
     `${fmtCentsForWork(pot)} − ${fmtCentsForWork(dividend)} × ${run.members}`,
@@ -100,7 +103,7 @@ export async function zeroSumParts(): Promise<ZeroSumParts> {
 
 export function explainZeroSum(parts: ZeroSumParts): Worked & { balances: boolean } {
   const work = new Work();
-  const graceTotal = work.step(
+  const graceTotal = work.graceStep(
     "Grace, everything counted",
     {
       allBalances: fmtCentsForWork(parts.graceBalances),

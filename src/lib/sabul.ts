@@ -160,7 +160,7 @@ export async function critique(): Promise<{ findings: Finding[]; members: number
     detail:
       sharedThings.length === 0
         ? "Nothing is held in common yet, so there is nothing to check."
-        : `Of ${sharedThings.length} shared thing${sharedThings.length === 1 ? "" : "s"}: ${quietStewards} ${quietStewards === 1 ? "has a steward who has" : "have stewards who have"} gone quiet, ${dormant} ${dormant === 1 ? "has" : "have"} no use recorded in months, and in ${concentrated} one person does most of the recorded taking. A shared thing is ruined when nobody can see it being used up; the record is the only defence, and it only works if people write in it.`,
+        : `Of ${sharedThings.length} shared thing${sharedThings.length === 1 ? "" : "s"}: ${quietStewards} ${quietStewards === 1 ? "has a steward who has" : "have stewards who have"} gone quiet, ${dormant} ${dormant === 1 ? "has" : "have"} had no use recorded in months, and ${concentrated} ${concentrated === 1 ? "has" : "have"} one person doing most of the recorded taking. A shared thing is ruined when nobody can see it being used up; the record is the only defense, and it only works if people write in it.`,
     sabul: untended
       ? "A well with no keeper. I need only start looking after it, and soon it is mine in everything but name."
       : drifting

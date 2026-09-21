@@ -118,8 +118,13 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
             <li><GraceMark size="1.6em" className="text-accent" /> is the symbol for Grace, the way $ marks a dollar: an olive sprig. In plain text write GRC.</li>
             <li>Paying someone lowers your balance and raises theirs by the same amount. There is no mint and no bank.</li>
             <li>A negative balance is not debt to any one person; it just means the community has given you more than you have given back so far. Standing sets how far below zero you can go; unverified accounts cannot go below zero.</li>
-            <li><InfoDot term="demurrage" /> Positive Grace shrinks {Math.round(DEMURRAGE_RATE_MONTHLY * 100)}% every {DEMURRAGE_INTERVAL_DAYS} days, and the amount is paid out equally to every verified member. This keeps credit circulating instead of piling up. {run && run.days > 0 ? `Last run ${fmtDate(run.ranAt)}: ${run.totalDecayed} GRC shared among ${run.members}.` : ""} {nextRun ? `Next: ${fmtDate(nextRun)}.` : ""}</li>
-            <li>Across all {totals._count} people, Grace balances sum to {totals._sum.graceBalance ?? 0}; add {run?.remainder ?? 0} carried from demurrage, {outstanding} reserved in unredeemed vouchers, and {outstandingCash} locked in unspent cash notes, and the total is zero, or something is wrong.</li>
+            <li><InfoDot term="demurrage" /> Positive Grace shrinks {Math.round(DEMURRAGE_RATE_MONTHLY * 100)}% every {DEMURRAGE_INTERVAL_DAYS} days, and the amount is paid out equally to every verified member. This keeps credit circulating instead of piling up.{" "}
+              {run && run.days > 0 && <>Last run {fmtDate(run.ranAt)}: <Grace n={run.totalDecayed} /> shared among {run.members} {run.members === 1 ? "person" : "people"}.{" "}</>}
+              {nextRun && <>Next run {fmtDate(nextRun)}.</>}</li>
+            <li>
+              Across all {totals._count} people, Grace balances sum to <Grace n={totals._sum.graceBalance ?? 0} />. Add the <Grace n={run?.remainder ?? 0} /> carried from demurrage, the{" "}
+              <Grace n={outstanding} /> reserved in unredeemed vouchers and the <Grace n={outstandingCash} /> locked in unspent cash notes, and the total should be exactly zero. If it is not, something is wrong.
+            </li>
             <li>Hours are for work that should not be haggled over: care, watch shifts, teaching. One hour counts the same for everyone.</li>
             <li>
               <InfoDot term="checkpoint" /> Every entry is hash-chained. The whole history fingerprints to one root, so any later edit is evident.

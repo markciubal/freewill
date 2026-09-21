@@ -10,6 +10,15 @@ function show(value: WorkedValue): string {
   return String(value);
 }
 
+// Inputs are named as the code names them ("vouchesFromVerifiedPeople"); a
+// person reads them as words ("vouches from verified people").
+function readable(name: string): string {
+  return name
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .replace(/\bidme\b/g, "ID.me");
+}
+
 export function WorkedSteps({ worked, tone = "neutral" }: { worked: Worked; tone?: "neutral" | "accent" | "danger" }) {
   return (
     <Card className="space-y-3">
@@ -25,13 +34,13 @@ export function WorkedSteps({ worked, tone = "neutral" }: { worked: Worked; tone
               <span className="font-medium">
                 {index + 1}. {step.label}
               </span>
-              <span className="ml-auto font-mono text-sm">= {show(step.result)}</span>
+              <span className="ml-auto font-mono text-sm">= {step.shown ?? show(step.result)}</span>
             </div>
             <div className="mt-1 font-mono text-xs text-muted">{step.rule}</div>
             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
               {Object.entries(step.inputs).map(([name, value]) => (
                 <span key={name}>
-                  {name}: <span className="font-mono text-foreground">{show(value)}</span>
+                  {readable(name)}: <span className="font-mono text-foreground">{show(value)}</span>
                 </span>
               ))}
             </div>

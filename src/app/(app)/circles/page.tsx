@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { readScope, scopeWhere } from "@/lib/form";
 import { applyNear, fmtDistance } from "@/lib/geo";
-import { keeperPoolSize } from "@/lib/keepers";
+import { keeperPoolSize, mediatorPoolSentence } from "@/lib/keepers";
 import { getStanding } from "@/lib/standing.all";
 import { raiseCircle } from "./actions";
 import { InfoDot } from "@/components/info-dot";
@@ -68,8 +68,8 @@ export default async function CirclesPage({ searchParams }: { searchParams: Prom
               <span className="text-muted"> of {standing.circleAllowance} available</span>
             </p>
             <p className="mt-1 text-xs text-muted">
-              Each open dispute you raise uses one slot until it closes. A dispute found to be unfounded costs you standing and a slot for good; higher standing earns more slots.
-              <InfoDot term="mediator" /> Mediators here are drawn from a pool of about {keeperPoolSize(standing.localityPopulation)} of {standing.localityPopulation} people.
+              Each open dispute you raise uses one slot until it closes. A dispute found to be unfounded costs you standing and a slot for good; higher standing earns more slots.{" "}
+              <InfoDot term="mediator" /> {mediatorPoolSentence(keeperPoolSize(standing.localityPopulation), standing.localityPopulation)}
             </p>
           </Card>
           <Card>

@@ -18,7 +18,7 @@ export default async function WindDownPage() {
 
       <Card className="grid gap-4 sm:grid-cols-3">
         <Stat label="Members" value={r.members} />
-        <Stat label="Grace debt forgiven" value={<Grace n={r.graceDebtForgiven} />} sub="what debtors owed the whole" />
+        <Stat label="Grace debt forgiven" value={<Grace n={r.graceDebtForgiven} />} sub="what debtors owed the community" />
         <Stat label="Grace claims released" value={<Grace n={r.gracePositiveReleased} />} sub="promises creditors held" />
       </Card>
 

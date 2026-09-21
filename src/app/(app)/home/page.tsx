@@ -52,7 +52,7 @@ export default async function HomePage() {
 
       {standing.verified ? (
         <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
-          You are verified in {user.locality} ({standing.vouchesReceived} of {standing.requiredVouches} needed vouch{standing.requiredVouches === 1 ? "" : "es"}). You can use credit, vouch for others, mediate disputes, and vote.
+          You are verified in {user.locality}: {standing.vouchesReceived} vouch{standing.vouchesReceived === 1 ? "" : "es"}, and {standing.requiredVouches} {standing.requiredVouches === 1 ? "is" : "are"} needed here. You can use credit, vouch for others, mediate disputes, and vote.
         </p>
       ) : (
         <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm">

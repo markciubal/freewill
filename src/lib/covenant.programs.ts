@@ -47,8 +47,8 @@ export const PROGRAMS: Program[] = [
     tier: 0,
     status: "live",
     route: "/people",
-    summary: "Who can set a bone, purify water, fix a generator, deliver a baby - self-listed skills plus optional ID.me-verified affiliations.",
-    why: "In an emergency the question is never what do we have, but who knows how. Skills are on every profile and searchable.",
+    summary: "Who can set a bone, purify water, fix a generator, deliver a baby: self-listed skills plus optional ID.me-verified affiliations.",
+    why: "In an emergency the question is never what we have, but who knows how. Skills are on every profile and searchable.",
     features: ["Skills on profile", "Search people by skill or verified affiliation", "Optional ID.me affiliation badges (nurse, first responder, teacher, government, military)", "Locality filter"],
   },
   {
@@ -79,7 +79,7 @@ export const PROGRAMS: Program[] = [
     route: "/ledger",
     summary: "Before you pay or extend credit, see what the other person already owes the commons, their standing, kept pledges, and any resolved harm.",
     why: "Credit without visibility is how a community gets drained by one bad actor. Everything here is already public; the preview just puts it in front of you at the moment of decision, so you can see that someone is already at their limit before you hand them more.",
-    features: ["Look up anyone before paying", "Balance, owe-limit, standing, kept pledges, vouches", "Plain-language risk flags", "No private data, only what the ledger already shows"],
+    features: ["Look up anyone before paying", "Balance, credit limit, standing, kept pledges, vouches", "Plain-language risk flags", "No private data, only what the ledger already shows"],
   },
   {
     key: "ledgerlog",
@@ -98,7 +98,7 @@ export const PROGRAMS: Program[] = [
     status: "live",
     route: "/cash",
     summary: "Bearer notes of any whole Grace value (1-100) locked by a secret only the holder keeps. Your device makes and hashes the secret; the commons stores only the hash, so it can never spend a note for you.",
-    why: "This is the most self-custodial money here and the closest to cash. Because the system holds only a commitment, not the secret, even a seized server cannot forge redemptions of notes in the wild. You mint (which burns the value into the commitment), write the note down, and whoever reveals the secret reclaims it. Lose the paper and it is gone, exactly like cash - and exactly the fail-safe of self-custody.",
+    why: "This is the most self-custodial money here and the closest to cash. Because the system holds only a commitment, not the secret, even a seized server cannot forge redemptions of notes in the wild. You mint (which burns the value into the commitment), write the note down, and whoever reveals the secret reclaims it. Lose the paper and it is gone, exactly like cash. That is the cost of holding it yourself, and also the protection: nobody else can lose it for you.",
     features: ["Secret generated and hashed in your browser, never sent until spent", "Any whole denomination 1-100 Grace, bound into the hash", "Mint burns value to a commitment; reveal reclaims it", "Single-use: a copy is caught on reclaim", "Printable note with QR"],
   },
   {
@@ -178,7 +178,7 @@ export const PROGRAMS: Program[] = [
     status: "live",
     route: "/wind-down",
     summary: "A mirror showing that dissolving the commons costs no one: debts forgiven, credits released, everyone back to zero together.",
-    why: "You asked for a fail-safe where failure is shared evenly. Mutual credit already has it: because balances net to zero, the cost of collapse is zero for each person, and there is no treasury for a hostile authority to seize. Making it visible is reassurance you can check any day.",
+    why: "A good fail-safe shares failure evenly. Mutual credit already does: because balances net to zero, the cost of collapse is zero for each person, and there is no treasury for a hostile authority to seize. Making it visible is reassurance you can check any day.",
     features: ["Live wind-down report", "Debt forgiven and claims released", "Proof the books net to zero", "A mirror, never a one-click switch"],
   },
   {
@@ -188,7 +188,7 @@ export const PROGRAMS: Program[] = [
     status: "live",
     route: "/ledger",
     summary: "One hour equals one hour, for everyone. Childcare and carpentry are worth the same.",
-    why: "Some things should not be priced. A second ledger where every hour is equal keeps dignity in the poorest and keeps care work visible.",
+    why: "Some things should not be priced. A second ledger where every hour is equal keeps the poorest person's time worth as much as anyone's, and keeps care work visible.",
     features: ["Hours ledger alongside Grace", "Minute-level precision", "Standing-based limits"],
   },
   {

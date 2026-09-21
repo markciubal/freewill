@@ -15,8 +15,12 @@ export type WorkedStep = {
   inputs: Record<string, WorkedValue>;
   // The rule, written as arithmetic or a sentence, with the real numbers in it.
   rule: string;
-  // What the step produced.
+  // What the step produced, exactly as the code holds it (Grace in hundredths).
   result: WorkedValue;
+  // The same result as a person should read it, when the stored form differs:
+  // "0.13 Grace" for a result held as 13 hundredths. The page shows this; the
+  // checks compare `result`.
+  shown?: string;
   // Optional: why the rule is shaped this way.
   why?: string;
 };
@@ -38,6 +42,13 @@ export class Work {
   step<T extends WorkedValue>(label: string, inputs: Record<string, WorkedValue>, rule: string, result: T, why?: string): T {
     this.steps.push({ label, inputs, rule, result, ...(why ? { why } : {}) });
     return result;
+  }
+
+  // A step whose result is an amount of Grace held in hundredths: recorded as
+  // the exact number, shown as Grace.
+  graceStep(label: string, inputs: Record<string, WorkedValue>, rule: string, cents: number, why?: string): number {
+    this.steps.push({ label, inputs, rule, result: cents, shown: `${fmtCentsForWork(cents)} Grace`, ...(why ? { why } : {}) });
+    return cents;
   }
 }
 

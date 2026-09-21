@@ -18,7 +18,7 @@ export default async function SabulPage() {
         subtitle="Sabul, from The Dispossessed, was the man who accreted power in a society that had abolished it — by controlling channels and taking credit for others' work. Here he is put to use: he reads the live data and asks where power could still creep in. Nothing here is a verdict; it is a mirror held up to the community's own ideals, and under each finding is one thing you can do about it."
       />
       <p className="text-sm text-muted">
-        {strained === 0 ? `Across ${members} members, Sabul finds nowhere to get a grip. The work that keeps it that way is below.` : `${strained} of ${findings.length} places are worth watching, across ${members} members. No one is coming to fix them; the work is below.`}
+        {strained === 0 ? `Across ${members} members, Sabul finds nowhere to get a grip. The work that keeps it that way is below.` : `${strained} of ${findings.length} places ${strained === 1 ? "is" : "are"} worth watching, across ${members} members. No one is coming to fix them; the work is below.`}
       </p>
 
       <div className="space-y-3">

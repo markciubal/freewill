@@ -95,7 +95,7 @@ export const TOKENS: TokenDef[] = [
   { name: "map-water", label: "Map water", kind: "color", hint: "Rivers, lakes, sea.", light: DEFAULT_MAP_PRESET.light["map-water"], dark: DEFAULT_MAP_PRESET.dark["map-water"] },
   { name: "map-road", label: "Map roads", kind: "color", hint: "Roads and paths, drawn as lines. Buildings are faint outlines in this color.", light: DEFAULT_MAP_PRESET.light["map-road"], dark: DEFAULT_MAP_PRESET.dark["map-road"] },
   { name: "map-label", label: "Map names", kind: "color", hint: "Place and street names on the map.", light: DEFAULT_MAP_PRESET.light["map-label"], dark: DEFAULT_MAP_PRESET.dark["map-label"] },
-  { name: "map-filter", label: "Map picture filter", kind: "filter", hint: "Applied to picture tiles when the map is not drawn from self-hosted data. invert, hue-rotate, brightness, contrast, saturate, grayscale, sepia, or none.", light: DEFAULT_MAP_PRESET.light["map-filter"], dark: DEFAULT_MAP_PRESET.dark["map-filter"] },
+  { name: "map-filter", label: "Map picture filter", kind: "filter", hint: "Applied to picture tiles when the map is not drawn from self-hosted data. Allowed: invert, hue-rotate, brightness, contrast, saturate, grayscale, sepia, or none.", light: DEFAULT_MAP_PRESET.light["map-filter"], dark: DEFAULT_MAP_PRESET.dark["map-filter"] },
 ];
 
 export const SHARED_TOKENS = TOKENS.filter((t) => t.value !== undefined);

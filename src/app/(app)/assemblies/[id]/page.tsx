@@ -96,7 +96,7 @@ export default async function ProposalPage({ params, searchParams }: { params: P
         <Card className="space-y-3">
           <SectionTitle>Result</SectionTitle>
           {tally.winner === null ? (
-            <p className="text-sm">No option reached a majority.</p>
+            <p className="text-sm">{tally.ballots === 0 ? "Nobody voted, so nothing was decided." : "No option reached a majority, so nothing was decided."}</p>
           ) : (
             <p className="text-sm"><span className="font-medium">{p.options[tally.winner]}</span> won after {tally.rounds.length} round{tally.rounds.length === 1 ? "" : "s"}. {tally.exhausted > 0 && `${tally.exhausted} ballot${tally.exhausted === 1 ? "" : "s"} ran out of ranked options.`}</p>
           )}

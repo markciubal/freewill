@@ -23,7 +23,7 @@ export const GLOSSARY = {
   standing: {
     label: "Standing",
     short: "Your reputation, earned rather than granted. It rises with vouches, kept promises, and service, and falls if a dispute finds you caused harm.",
-    more: "A computed score, never assignable by hand: vouches received, pledges kept, exchange activity, tenure, and disputes mediated, minus harm found and unfounded accusations, with diminishing returns. It gates exactly one thing — how far into Grace and Hours credit you may go — and nothing else. No admin, because there is no admin.",
+    more: "A computed score, never assignable by hand: vouches received, pledges kept, exchange activity, tenure, and disputes mediated, minus harm found and unfounded accusations, with diminishing returns. It gates exactly one thing — how far into Grace and Hours credit you may go — and nothing else. Nobody can change it by hand, because there is no admin to do it.",
   },
   verified: {
     label: "Verified",
@@ -67,7 +67,7 @@ export const GLOSSARY = {
   },
   cash: {
     label: "Cash",
-    short: "Bearer notes you carry as a secret and can spend with no network. You mint one, write it down, and whoever reveals the secret reclaims it, like cash.",
+    short: "Bearer notes you can hand over on paper, even with no network. You mint one and write it down; whoever holds it reclaims the value when they can reach the server, like cashing a check.",
     more: "Hash-commitment notes. Your browser makes a random secret and hashes it (SHA-256 of 'N1:denomination:secret'); only that hash reaches the server, which therefore can never spend the note for you. Minting burns the value to the commitment; revealing the secret reclaims it. Single-use, with the whole-Grace denomination (1–100) bound into the hash, so a photocopy is caught the second time.",
   },
   commitment: {
@@ -83,7 +83,7 @@ export const GLOSSARY = {
   locality: {
     label: "Locality",
     short: "Where you are: a neighborhood, valley, or block. You name it when you join and change it from your profile when you move; your map pin lives there too.",
-    more: "Chosen on an OpenStreetMap pin and rounded to about a hundred meters; no address is stored. It scopes the board, bulletins, commons, disputes, and assemblies. People are never drawn as a point, only shown as a distance. Honesty about it is what makes local vouches and votes mean something.",
+    more: "The name is yours to type. Your map pin, placed on OpenStreetMap, is rounded to about a hundred meters, and no address is stored. The locality scopes the board, bulletins, commons, disputes, and assemblies. People are never drawn as a point, only shown as a distance. Honesty about it is what makes local vouches and votes mean something.",
   },
   jubilee: {
     label: "Jubilee",

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { fmtGrace } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { fail, firstIssue, ok, str } from "@/lib/form";
@@ -35,5 +36,5 @@ export async function sendTransfer(formData: FormData) {
     throw e;
   }
   revalidatePath("/ledger");
-  ok("/ledger", `Sent ${d.ledger === "GRACE" ? `${amount} GRC` : `${d.amount} hours`} to @${d.to}.`);
+  ok("/ledger", `Sent ${d.ledger === "GRACE" ? fmtGrace(amount) : `${d.amount} hour${d.amount === 1 ? "" : "s"}`} to @${d.to}.`);
 }

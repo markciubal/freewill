@@ -60,7 +60,7 @@ export default async function Landing() {
                 {programsByTier(t).map((p) => (
                   <li key={p.key} className="rounded-md border border-border bg-card px-3 py-2 text-sm">
                     <span className="font-medium">{p.name}</span>
-                    {p.status === "planned" && <span className="ml-2 text-xs text-muted">planned</span>}
+                    {p.status === "planned" && <> <span className="ml-1 text-xs text-muted">(planned)</span></>}
                     <div className="text-xs text-muted">{p.summary}</div>
                   </li>
                 ))}

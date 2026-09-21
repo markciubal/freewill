@@ -120,8 +120,8 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
               <li key={l.id}>
                 <Link href={`/board/${l.id}`} className="block rounded-md border border-border bg-card px-3 py-2 hover:border-accent">
                   <Badge tone={l.kind === "NEED" ? "warn" : "accent"}>{l.kind}</Badge>{" "}
-                  <span className="font-medium">{l.title}</span>
-                  <span className="ml-2 text-xs text-muted">{CATEGORY_LABEL[l.category]}</span>
+                  <span className="font-medium">{l.title}</span>{" "}
+                  <span className="ml-1 text-xs text-muted">{CATEGORY_LABEL[l.category]}</span>
                 </Link>
               </li>
             ))}

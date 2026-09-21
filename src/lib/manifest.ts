@@ -391,7 +391,7 @@ const manifest: Manifest = {
       doesNot: [
         "The judgment half is not proof. It is a probability from a second reader about prose, and it can be wrong in both directions: it can miss a real evasion, and it can flag honest writing.",
         "The audit questions were written by the same author as the claims they audit. A different reader answers them, but the questions themselves carry that author's blind spots, which is the same limitation the testing section admits one level up.",
-        "It judges the text, not the running system. A capability could describe itself perfectly and still behave differently; only the deterministic checks speak to behaviour.",
+        "It judges the text, not the running system. A capability could describe itself perfectly and still behave differently; only the deterministic checks speak to behavior.",
         "The judgment half needs an external service and an API key, so it runs when a maintainer runs it, not continuously. The evidence-gathering half needs neither and runs offline.",
         "Nothing in the running app consults any of it. A model that could gate anything here would be the authority this design exists without.",
       ],
@@ -419,7 +419,7 @@ const manifest: Manifest = {
     summary:
       "Freewill was built in the open between August and September 2026 as a working answer to a question: what would it actually take to keep a neighborhood civil without a state? It is a Next.js application with a MongoDB database, about fifteen thousand lines, and it is meant to be read as much as run. The constitution it was built from is in BUILD_PROMPT.md, the conventions in AGENTS.md, and a guide to checking any rule against its code in docs/reading-guide.md.",
     authorship:
-      "The code was written by Claude, an AI assistant made by Anthropic, working from the direction, decisions and corrections of one person, Mark Ciubal. That is not a disclaimer, it is a fact a reader needs: nobody should extend more trust to this software because software is usually written by people. Extend it the trust the checks below earn, and no more. Every design decision that mattered was made by a person and is recorded with its date in BUILD_PROMPT.md.",
+      "The code was written by Claude, an AI assistant made by Anthropic, working from the direction, decisions and corrections of one person, Mark Ciubal. That is not a disclaimer; it is a fact a reader needs: nobody should extend more trust to this software because software is usually written by people. Extend it the trust the checks below earn, and no more. Every design decision that mattered was made by a person and is recorded with its date in BUILD_PROMPT.md.",
     reviewed:
       "No independent security audit has been done. No outside developer has reviewed the code. The cryptography uses well-regarded libraries rather than anything invented here, but the way it is assembled has not been reviewed by a cryptographer. Treat the money, the keys and the privacy properties as promising rather than proven.",
     testing:

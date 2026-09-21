@@ -60,7 +60,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
                   {p.skills.slice(0, 6).map((s) => <Badge key={s}>{s}</Badge>)}
                 </div>
                 <div className="mt-2 text-xs text-muted">
-                  {p._count.vouchesReceived} vouch{p._count.vouchesReceived === 1 ? "" : "es"}, {p._count.pledges} kept
+                  {p._count.vouchesReceived} vouch{p._count.vouchesReceived === 1 ? "" : "es"}, {p._count.pledges} pledge{p._count.pledges === 1 ? "" : "s"} kept
                 </div>
               </Link>
             </li>

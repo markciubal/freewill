@@ -25,6 +25,18 @@ export function keeperPoolSize(population: number) {
 
 export const KEEPERS_PER_CIRCLE = 3;
 
+// Where the mediators for a dispute here would come from, in a sentence. A
+// small locality cannot seat a panel from its own people, so keeperPool
+// widens to trusted people everywhere; a pool as big as the place itself is
+// simply everyone eligible.
+export function mediatorPoolSentence(poolSize: number, population: number): string {
+  if (population < KEEPERS_PER_CIRCLE) {
+    return `With only ${population} ${population === 1 ? "person" : "people"} here, mediators are also drawn from trusted people in other localities.`;
+  }
+  if (poolSize >= population) return `Mediators here are drawn from the verified, trusted people among the ${population} who live here.`;
+  return `Mediators here are drawn from the ${poolSize} most trusted of the ${population} people who live here.`;
+}
+
 // The eligible pool, deterministically ordered (score desc, then id) so a
 // logged draw can be recomputed exactly.
 export async function keeperPool(options: { locality: string; exclude: string[] }) {
