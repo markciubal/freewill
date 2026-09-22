@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
+import { readRanking } from "@/lib/ballot-seal";
+import { castSealedBallot, changeSealedBallot, type BallotOutcome } from "@/lib/ballots";
 import { db } from "@/lib/db";
-import { fail, firstIssue, isObjectId, ok, str } from "@/lib/form";
-import { eligibleVoterIds } from "@/lib/commons.data";
+import { fail, firstIssue, isObjectId, str } from "@/lib/form";
 import { getStanding } from "@/lib/standing.all";
 
 const proposalSchema = z.object({
@@ -35,42 +36,24 @@ export async function createProposal(formData: FormData) {
   redirect(`/assemblies/${p.id}`);
 }
 
-// A ballot ranks options: rank_<i> = 1..n, blank to leave an option unranked.
-export async function castBallot(proposalId: string, formData: FormData) {
+// A secret ballot (src/lib/ballot-seal.ts). The ballot form runs in the
+// browser: it ranks options as rank_<i> = 1..n (blank leaves one unranked),
+// and sends either `fingerprint` (a first ballot, sealed with a key the
+// browser just made) or `ballotKey` (changing a ballot it sealed before).
+// Returns what happened instead of redirecting, so the browser can keep or
+// forget the key accordingly.
+export async function castBallot(proposalId: string, formData: FormData): Promise<BallotOutcome> {
   const me = await requireUser();
-  if (!isObjectId(proposalId)) redirect("/assemblies");
-  const path = `/assemblies/${proposalId}`;
-  const p = await db.proposal.findUnique({ where: { id: proposalId }, include: { commons: { select: { id: true, stewardId: true } } } });
-  if (!p) redirect("/assemblies");
-  if (p.closesAt <= new Date()) fail(path, "Voting has closed.");
-  if (p.commons) {
-    // A question about one shared thing belongs to the people who use it, as
-    // of the moment it was asked, wherever they live.
-    const eligible = await eligibleVoterIds(p.commons, p.createdAt);
-    if (!eligible.has(me.id)) fail(path, "Only verified people who were already using it when this was asked vote on it.");
-  } else {
-    if (p.locality !== me.locality) fail(path, `Only people in ${p.locality} vote on this.`);
-    const standing = await getStanding(me.id);
-    if (!standing.verified) fail(path, `Only verified people vote. You need ${standing.requiredVouches} vouch${standing.requiredVouches === 1 ? "" : "es"} from people in ${me.locality}.`);
-  }
+  if (!isObjectId(proposalId)) return { error: "That question no longer exists." };
+  const question = await db.proposal.findUnique({ where: { id: proposalId }, select: { options: true } });
+  if (!question) return { error: "That question no longer exists." };
+  const read = readRanking(question.options.length, (option) => str(formData, `rank_${option}`));
+  if ("error" in read) return { error: read.error };
 
-  const ranked: { i: number; rank: number }[] = [];
-  for (let i = 0; i < p.options.length; i++) {
-    const v = str(formData, `rank_${i}`);
-    if (!v) continue;
-    const rank = Number(v);
-    if (!Number.isInteger(rank) || rank < 1 || rank > p.options.length) fail(path, "Ranks must be whole numbers.");
-    ranked.push({ i, rank });
-  }
-  if (ranked.length === 0) fail(path, "Rank at least one option.");
-  if (new Set(ranked.map((r) => r.rank)).size !== ranked.length) fail(path, "Each rank can be used once.");
-  const ranking = ranked.sort((a, b) => a.rank - b.rank).map((r) => r.i);
-
-  await db.ballot.upsert({
-    where: { proposalId_userId: { proposalId, userId: me.id } },
-    create: { proposalId, userId: me.id, ranking },
-    update: { ranking },
-  });
-  revalidatePath(path);
-  ok(path, "Your ballot is recorded. You can change it until voting closes.");
+  const ballotKey = str(formData, "ballotKey");
+  const outcome = ballotKey
+    ? await changeSealedBallot(proposalId, me, read.ranking, ballotKey)
+    : await castSealedBallot(proposalId, me, read.ranking, str(formData, "fingerprint") ?? "");
+  revalidatePath(`/assemblies/${proposalId}`);
+  return outcome;
 }

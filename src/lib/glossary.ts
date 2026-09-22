@@ -121,6 +121,12 @@ export const GLOSSARY = {
     more: "Each round, the option with the fewest first choices is dropped and its ballots move to their next choice, until one option has a majority of the ballots still counting. You can change your ballot until voting closes, and results stay hidden until then so early votes do not steer later ones. Only verified people in the locality vote.",
     see: { href: "/assemblies", label: "assemblies" },
   },
+  "secret-ballot": {
+    label: "Secret ballot",
+    short: "Nobody can see how you voted: not your neighbors, and not anyone reading the server's records. The records say only that you voted.",
+    more: "Your browser seals your ballot with a key that stays in this browser and sends only the key's fingerprint. The server keeps two separate lists: who voted, and the rankings with no names or times, shuffled every time a ballot comes in. To change your ballot before voting closes, your browser shows the key; without it, nobody can find which ballot is yours. The honest limit: the server handles your ballot while you are signed in, so an operator recording requests as they arrived could still see it. What is protected is the stored record, which is what a seized database would show. Save the key if you might change your ballot from another device.",
+    see: { href: "/assemblies", label: "assemblies" },
+  },
   affiliation: {
     label: "Affiliation",
     short: "An optional, verified credential, such as nurse, first responder, or teacher, that helps people find who can help.",

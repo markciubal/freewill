@@ -35,17 +35,18 @@ export async function eligibleVoterIds(commons: { id: string; stewardId: string 
 export async function settleCommonsDecisions(commonsId?: string): Promise<number> {
   const due = await db.proposal.findMany({
     where: { commonsId: commonsId ?? { isSet: true }, closesAt: { lte: new Date() }, ...NOT_YET_APPLIED },
-    include: { ballots: { select: { userId: true, ranking: true } }, commons: { select: { id: true, stewardId: true } } },
+    include: { commons: { select: { id: true, stewardId: true } } },
   });
 
   let settled = 0;
   for (const question of due) {
     if (!question.commons || (question.commonsAction !== "RULES" && question.commonsAction !== "STEWARD")) continue;
 
-    // Only ballots from people who were eligible count, in case someone's
-    // verification lapsed or a ballot predates a rule like this one.
+    // Ballots are secret (src/lib/ballots.ts), so none can be traced back to
+    // strike it out now. Who may vote was checked when each was cast: only
+    // verified people who used the thing when the question was asked.
     const eligible = await eligibleVoterIds(question.commons, question.createdAt);
-    const ballots = question.ballots.filter((ballot) => eligible.has(ballot.userId));
+    const ballots = question.sealedBallots;
     const tally = tallyIRV(question.options.length, ballots.map((ballot) => ballot.ranking));
     let outcome = decideOutcome({
       action: question.commonsAction,

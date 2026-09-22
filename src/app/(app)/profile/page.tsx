@@ -8,6 +8,7 @@ import { Badge, Button } from "@/components/ui";
 import { idmeEnabled, idmePolicies, knownAffiliations, policyLabel } from "@/lib/idme";
 import { fmtDate } from "@/components/ui";
 import { PASSWORD_MIN_LENGTH } from "@/lib/security";
+import { arrivedHereByOnion } from "@/lib/onion.server";
 import { PasswordKeeping } from "@/components/password-keeping";
 import { changePassword, logoutEverywhere, unlinkIdme, updateProfile } from "./actions";
 
@@ -16,6 +17,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   // Only badges the app still recognizes; a dropped one (military) is not shown.
   const badges = knownAffiliations(me.affiliations);
+  const viaOnion = await arrivedHereByOnion();
   return (
     <div className="mx-auto max-w-xl">
       <PageTitle
@@ -58,21 +60,25 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {idmePolicies().map((p) => {
-              const has = badges.includes(p.handle);
-              return (
-                <a
-                  key={p.handle}
-                  href={`/api/idme/start?policy=${p.handle}`}
-                  title={p.hint}
-                  className={`rounded-md border px-3 py-1.5 text-sm font-medium ${has ? "border-accent text-accent hover:bg-accent/10" : "border-border hover:bg-border/40"}`}
-                >
-                  {has ? `Re-verify ${p.label}` : `Verify ${p.label}`}
-                </a>
-              );
-            })}
-          </div>
+          {viaOnion ? (
+            <p className="text-sm text-muted">You are using the onion address. ID.me verification only works at the regular address, and ID.me checks your legal identity, so Tor cannot hide you from it anyway.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {idmePolicies().map((p) => {
+                const has = badges.includes(p.handle);
+                return (
+                  <a
+                    key={p.handle}
+                    href={`/api/idme/start?policy=${p.handle}`}
+                    title={p.hint}
+                    className={`rounded-md border px-3 py-1.5 text-sm font-medium ${has ? "border-accent text-accent hover:bg-accent/10" : "border-border hover:bg-border/40"}`}
+                  >
+                    {has ? `Re-verify ${p.label}` : `Verify ${p.label}`}
+                  </a>
+                );
+              })}
+            </div>
+          )}
 
           {(me.humanVerifiedAt || me.affiliations.length > 0) && (
             <form action={unlinkIdme}>

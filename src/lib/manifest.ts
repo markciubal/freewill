@@ -84,6 +84,11 @@ const SOURCES = {
     url: "https://www.openstreetmap.org/copyright",
     informs: "All map data, whether drawn from a self-hosted file or fetched as picture tiles.",
   },
+  tor: {
+    title: "Tor onion services (version 3)",
+    url: "https://community.torproject.org/onion-services/overview/",
+    informs: "The onion address: a service reached through rendezvous points, whose address is its own public key, so neither the visitor nor the server learns the other's network address.",
+  },
   protomaps: {
     title: "Protomaps and the PMTiles format",
     url: "https://protomaps.com/",
@@ -334,10 +339,35 @@ const manifest: Manifest = {
       name: "Deciding together",
       status: "live",
       route: "/assemblies",
-      does: "Locality questions decided by ranked-choice voting among verified members, with the rounds shown.",
-      doesNot: ["It does not make anyone abide by the result, and it has no quorum rule: a question decided by three people looks the same as one decided by three hundred, except for the count."],
-      verifiedBy: [{ kind: "script", ref: "smoke:rcv", what: "The instant-runoff tally, round by round, including ties." }],
+      does: "Locality questions decided by ranked-choice voting among verified members, with the rounds shown. Ballots are secret: the browser seals each one with a key it keeps, and the records hold who voted and, separately, the rankings with no names or times, reshuffled on every ballot. Only the key reopens a ballot to change it before voting closes.",
+      doesNot: [
+        "It does not make anyone abide by the result, and it has no quorum rule: a question decided by three people looks the same as one decided by three hundred, except for the count.",
+        "The secrecy protects the stored record, not the moment of voting. The server handles each ballot while the voter is signed in, so an operator who logged requests as they arrived, or watched the database change live, could still see which ballot was whose. Hiding that too would take blind signatures and casting from an unlinked connection, which are not built.",
+        "Because a sealed ballot cannot be traced to its voter, one cannot be struck out later. Who may vote is checked once, when the ballot is cast.",
+        "A voter who loses the key (a cleared browser, another device) cannot change their ballot. It still counts.",
+      ],
+      verifiedBy: [
+        { kind: "script", ref: "smoke:rcv", what: "The instant-runoff tally, round by round, including ties." },
+        { kind: "script", ref: "smoke:ballots", what: "Sealing, one ballot per person even when pressed twice at once, changing only with the key, and a stored ballot that names no one." },
+      ],
       sources: [SOURCES.sortition],
+    },
+    {
+      key: "onion",
+      name: "An onion address",
+      status: "partial",
+      does: "When a community runs Tor beside the app, members can reach it at an onion address. The server then never learns their network address, and a network watcher sees only that they use Tor. Tor Browser is offered the onion address from the regular site, and the app handles onion visits correctly: no forced https, a cookie for the onion address only, shared login limits that do not lock every Tor user out together, and no ID.me.",
+      doesNot: [
+        "This deployment does not run one: the hosted server cannot run Tor beside the app. A community has to run its own node for it (docs/onion.md).",
+        "It hides where members connect from, not who they are. Once logged in, the app knows the account and everything published is as public as ever.",
+        "While the regular address exists, the server's own location is not hidden.",
+        "Every Tor visitor shares one sign-up allowance, so someone flooding it could block sign-ups through Tor for an hour. The regular address keeps working.",
+      ],
+      verifiedBy: [
+        { kind: "script", ref: "smoke:onion", what: "Address checksums against real published onion addresses, telling onion visits apart, the policy without forced https, and the shared limits." },
+        { kind: "file", ref: "docs/onion.md", what: "How onion addresses work, what they hide and do not, and how to run one." },
+      ],
+      sources: [SOURCES.tor],
     },
     {
       key: "map",

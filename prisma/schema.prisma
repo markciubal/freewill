@@ -70,7 +70,7 @@ model User {
   cashSpent        CashNote[]         @relation("CashSpender")
   adjustments      LedgerAdjustment[]
   proposals        Proposal[]
-  ballots          Ballot[]
+  voterRolls       VoterRoll[]
 }
 
 // A failed login or a join attempt, kept briefly so the same address or the
@@ -392,20 +392,32 @@ model Proposal {
   appliedAt     DateTime?
   appliedNote   String? // what happened when it closed, in plain words
 
-  author  User     @relation(fields: [authorId], references: [id])
-  commons Commons? @relation(fields: [commonsId], references: [id])
-  ballots Ballot[]
+  // Secret ballots (src/lib/ballot-seal.ts): the rankings live here with no
+  // person and no time, reshuffled on every write; who voted lives apart in
+  // VoterRoll. Nothing stored links the two.
+  sealedBallots SealedBallot[]
+
+  author    User        @relation(fields: [authorId], references: [id])
+  commons   Commons?    @relation(fields: [commonsId], references: [id])
+  voterRoll VoterRoll[]
 
   @@index([locality, closesAt])
   @@index([commonsId])
 }
 
-model Ballot {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  proposalId String   @db.ObjectId
-  userId     String   @db.ObjectId
-  ranking    Int[] // option indices, most preferred first; may omit options
-  createdAt  DateTime @default(now())
+// One secret ballot: a ranking and the fingerprint of a key only the voter's
+// browser holds. No user id and no timestamp, on purpose.
+type SealedBallot {
+  fingerprint String // sha256 of the voter's ballot key, hex
+  ranking     Int[] // option indices, most preferred first; may omit options
+}
+
+// That a person voted on a question, and nothing about how. It stops anyone
+// voting twice and lets the page say "you have voted".
+model VoterRoll {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  proposalId String @db.ObjectId
+  userId     String @db.ObjectId
 
   proposal Proposal @relation(fields: [proposalId], references: [id])
   user     User     @relation(fields: [userId], references: [id])

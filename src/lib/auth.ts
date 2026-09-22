@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "./db";
+import { arrivedHereByOnion } from "./onion.server";
 import { SESSION_SECRET_MIN_LENGTH, SESSION_SECRET_RECOMMENDED_LENGTH, sessionIsCurrent } from "./security";
 
 // Sessions are a signed, httpOnly cookie. There is no email, no reset flow, no
@@ -41,7 +42,10 @@ export async function createSession(userId: string, sessionVersion: number) {
   jar.set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    // Secure (https only) everywhere in production except through the onion
+    // service, which is plain http because Tor already encrypts the whole way
+    // to this server. A cookie set there belongs to the onion address only.
+    secure: process.env.NODE_ENV === "production" && !(await arrivedHereByOnion()),
     path: "/",
     maxAge: MAX_AGE_SECONDS,
   });

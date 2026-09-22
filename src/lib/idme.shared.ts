@@ -61,6 +61,9 @@ export function publicOrigin(request: Request): string {
   const h = request.headers;
   const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim();
   const host = h.get("x-forwarded-host")?.split(",")[0]?.trim() || h.get("host")?.trim();
+  // A visit through the onion service (plain http inside Tor) stays there. No
+  // web host serves an onion address, so the Host alone is enough here.
+  if (host && /^[a-z2-7]{56}\.onion(:\d+)?$/i.test(host)) return `http://${host.toLowerCase()}`;
   if (host && proto) return `${proto}://${host}`;
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
   if (configured) return configured;

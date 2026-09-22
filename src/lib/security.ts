@@ -54,6 +54,25 @@ export const RATE_LIMITS = {
 
 export type RateLimit = { max: number; windowMinutes: number };
 
+// Visitors through the onion service all reach the app from Tor on the same
+// machine, with no address of their own (hiding it is the point). Counted per
+// address, one person's allowance would be shared by everyone on Tor and a
+// few failed logins would lock them all out. So onion visits share one bucket
+// with wider limits instead. The per-username login limit still applies in
+// full, so no single account can be guessed at any faster. Tor's own
+// proof-of-work defence (docs/onion.md) is what makes flooding it costly.
+export const ONION_ADDRESS_KEY = "onion";
+export const ONION_RATE_LIMITS: Partial<Record<keyof typeof RATE_LIMITS, RateLimit>> = {
+  loginPerAddress: { max: 200, windowMinutes: 15 },
+  joinPerAddress: { max: 30, windowMinutes: 60 },
+};
+
+// The per-address limit for this address key: the onion bucket's own where it
+// has one, the ordinary limit otherwise.
+export function addressLimit(addressKey: string, which: Exclude<keyof typeof RATE_LIMITS, "loginPerUsername">): RateLimit {
+  return (addressKey === ONION_ADDRESS_KEY ? ONION_RATE_LIMITS[which] : undefined) ?? RATE_LIMITS[which];
+}
+
 // The decision, separated from the counting so it can be tested: given how
 // many attempts happened inside the window, may one more proceed?
 export function rateLimitAllows(attemptsInWindow: number, limit: RateLimit): boolean {
@@ -96,7 +115,12 @@ export const SESSION_SECRET_RECOMMENDED_LENGTH = 32;
 //
 // `tileOrigin` and `mapDataOrigin` are the hosts the map may load from, taken
 // from NEXT_PUBLIC_TILE_URL / NEXT_PUBLIC_PMTILES_URL when those are remote.
-export function buildContentSecurityPolicy(opts: { nonce: string; isDevelopment: boolean; tileOrigin: string | null; mapDataOrigin: string | null }): string {
+//
+// `plainHttp` is set for visits through the onion service, which run over
+// http:// because Tor already encrypts end to end. There, telling the browser
+// to upgrade insecure requests would send every script to https://...onion,
+// where nothing answers, so that one directive is left out.
+export function buildContentSecurityPolicy(opts: { nonce: string; isDevelopment: boolean; tileOrigin: string | null; mapDataOrigin: string | null; plainHttp?: boolean }): string {
   const imageSources = ["'self'", "blob:", "data:", opts.tileOrigin].filter(Boolean).join(" ");
   const connectSources = ["'self'", opts.mapDataOrigin].filter(Boolean).join(" ");
   const directives = [
@@ -112,7 +136,7 @@ export function buildContentSecurityPolicy(opts: { nonce: string; isDevelopment:
     `form-action 'self'`,
     `frame-ancestors 'none'`,
   ];
-  if (!opts.isDevelopment) directives.push("upgrade-insecure-requests");
+  if (!opts.isDevelopment && !opts.plainHttp) directives.push("upgrade-insecure-requests");
   return directives.join("; ");
 }
 

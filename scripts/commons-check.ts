@@ -23,6 +23,8 @@ import {
   type Entry,
   type EntryKind,
 } from "../src/lib/commons";
+import { ballotFingerprint, newBallotKey } from "../src/lib/ballot-seal";
+import { castSealedBallot } from "../src/lib/ballots";
 import { NOT_YET_APPLIED, settleCommonsDecisions } from "../src/lib/commons.data";
 import { db } from "../src/lib/db";
 import { getStandingAll } from "../src/lib/standing.all";
@@ -142,14 +144,22 @@ async function endToEnd() {
       made.entries.push(written.id);
     }
 
+    // Ask a question, cast each ballot through the same sealed path the page
+    // uses (so eligibility is checked as it is for a person), close voting,
+    // and let the software settle it.
     const ask = async (data: { commonsAction: "STEWARD" | "RULES"; options: string[]; candidateIds?: string[]; proposedRules?: string }, voters: { userId: string; ranking: number[] }[]) => {
       const question = await db.proposal.create({
-        data: { title: "smoke question", body: "made by the smoke test", locality: thing.locality ?? "", authorId: neighbour.id, createdAt: ago(8), closesAt: ago(1), commonsId: thing.id, candidateIds: [], ...data },
+        data: { title: "smoke question", body: "made by the smoke test", locality: thing.locality ?? "", authorId: neighbour.id, createdAt: ago(8), closesAt: new Date(Date.now() + DAY), commonsId: thing.id, candidateIds: [], ...data },
       });
       made.questions.push(question.id);
-      for (const voter of voters) await db.ballot.create({ data: { proposalId: question.id, userId: voter.userId, ranking: voter.ranking } });
+      const refused: string[] = [];
+      for (const voter of voters) {
+        const outcome = await castSealedBallot(question.id, { id: voter.userId, locality: thing.locality ?? "" }, voter.ranking, ballotFingerprint(newBallotKey()));
+        if ("error" in outcome) refused.push(outcome.error);
+      }
+      await db.proposal.update({ where: { id: question.id }, data: { closesAt: ago(1) } });
       await settleCommonsDecisions(thing.id);
-      return db.proposal.findUniqueOrThrow({ where: { id: question.id }, select: { appliedAt: true, appliedNote: true } });
+      return { refused, ...(await db.proposal.findUniqueOrThrow({ where: { id: question.id }, select: { appliedAt: true, appliedNote: true } })) };
     };
     const stewardOf = async () => (await db.commons.findUniqueOrThrow({ where: { id: thing.id }, select: { stewardId: true, rules: true } }));
 
@@ -165,16 +175,28 @@ async function endToEnd() {
     const rules = await ask({ commonsAction: "RULES", options: [KEEP_RULES, ADOPT_RULES], proposedRules: "Twenty litres a household a day while the river is low." }, [{ userId: neighbour.id, ranking: [1] }, { userId: goneSteward.id, ranking: [1] }]);
     assert(!!rules.appliedAt && (await stewardOf()).rules === "Twenty litres a household a day while the river is low.", "its users adopt new rules and the rules change");
 
-    // A ballot from someone who was not using it when the question was asked does not count.
+    // Someone who was not using it when the question was asked cannot cast a
+    // ballot on it at all, so an outsider cannot swing its rules.
     const outsider = [...standings.values()].find((standing) => standing.verified && standing.user.id !== goneSteward.id && standing.user.id !== neighbour.id)?.user;
     if (outsider) {
-      const swung = await ask({ commonsAction: "RULES", options: [KEEP_RULES, ADOPT_RULES], proposedRules: "Everything for me." }, [{ userId: outsider.id, ranking: [1] }, { userId: outsider.id === neighbour.id ? goneSteward.id : neighbour.id, ranking: [0] }]);
-      assert((await stewardOf()).rules !== "Everything for me." && !!swung.appliedAt, "a ballot from someone who was not using it is not counted, so an outsider cannot swing its rules");
+      const swung = await ask({ commonsAction: "RULES", options: [KEEP_RULES, ADOPT_RULES], proposedRules: "Everything for me." }, [{ userId: outsider.id, ranking: [1] }, { userId: neighbour.id, ranking: [0] }]);
+      assert(swung.refused.length === 1 && swung.refused[0].includes("already using it"), `an outsider's ballot is refused when cast: "${swung.refused[0]}"`);
+      assert((await stewardOf()).rules !== "Everything for me." && !!swung.appliedAt, "so an outsider cannot swing its rules");
     }
+
+    // Secret: what was stored says who voted and, apart from that, what was
+    // chosen, with nothing joining the two.
+    const stored = await db.proposal.findUniqueOrThrow({ where: { id: made.questions[1] }, select: { sealedBallots: true } });
+    const roll = await db.voterRoll.findMany({ where: { proposalId: made.questions[1] }, select: { userId: true } });
+    const storedText = JSON.stringify(stored.sealedBallots);
+    assert(
+      roll.length === 2 && stored.sealedBallots.length === 2 && stored.sealedBallots.every((ballot) => Object.keys(ballot).sort().join() === "fingerprint,ranking") && !roll.some((entry) => storedText.includes(entry.userId)),
+      "the voter roll names two voters, and the two sealed ballots carry only a fingerprint and a ranking, never a person",
+    );
   } finally {
     // Remove exactly what this test made, by id. Nothing else is touched.
     if (made.questions.length) {
-      await db.ballot.deleteMany({ where: { proposalId: { in: made.questions } } });
+      await db.voterRoll.deleteMany({ where: { proposalId: { in: made.questions } } });
       await db.proposal.deleteMany({ where: { id: { in: made.questions } } });
     }
     if (made.entries.length) await db.commonsEntry.deleteMany({ where: { id: { in: made.entries } } });

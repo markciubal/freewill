@@ -1,7 +1,8 @@
 import "server-only";
 import { headers } from "next/headers";
 import { db } from "./db";
-import { RATE_LIMITS, rateLimitAllows, type RateLimit } from "./security";
+import { arrivedHereByOnion } from "./onion.server";
+import { ONION_ADDRESS_KEY, RATE_LIMITS, rateLimitAllows, type RateLimit } from "./security";
 
 // Counting attempts in the database rather than in memory, because on a
 // serverless host every request may land on a fresh process. The rows are
@@ -12,8 +13,11 @@ type AttemptKind = "login" | "join";
 // The address the request came from, as the platform reports it. Behind a
 // proxy or a serverless host the real address is the first entry of
 // x-forwarded-for. When nothing is known, every unknown caller shares one
-// bucket, which is strict rather than lenient.
+// bucket, which is strict rather than lenient. Visits through the onion
+// service have no address by design; they share the onion bucket, which has
+// its own limits (ONION_RATE_LIMITS, read through addressLimit).
 export async function clientAddressKey(): Promise<string> {
+  if (await arrivedHereByOnion()) return ONION_ADDRESS_KEY;
   const requestHeaders = await headers();
   const forwardedFor = requestHeaders.get("x-forwarded-for");
   const firstHop = forwardedFor?.split(",")[0]?.trim();

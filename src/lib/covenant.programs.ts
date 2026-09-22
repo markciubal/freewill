@@ -238,7 +238,7 @@ export const PROGRAMS: Program[] = [
     route: "/assemblies",
     summary: "Questions put to a locality, decided by ranked-choice (instant runoff) voting among verified people.",
     why: "Some things a locality must decide together. Ranked choice lets people say what they can live with, not only what they want most, and the runoff finds the option a majority can accept.",
-    features: ["Locality-scoped proposals", "Ranked ballots, changeable until close", "Instant-runoff tally with rounds shown", "Results hidden until close", "Verified voters only"],
+    features: ["Locality-scoped proposals", "Secret ballots: sealed in your browser, changeable with your ballot key until close", "Instant-runoff tally with rounds shown", "Results hidden until close", "Verified voters only"],
   },
   {
     key: "library",

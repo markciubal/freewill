@@ -9,7 +9,7 @@ import { firstIssue, normalizeLocality } from "@/lib/form";
 import { isValidLatLng, roundPin } from "@/lib/geo";
 import { DUMMY_HASH, hashPassword, verifyPassword } from "@/lib/password";
 import { RATE_LIMITS, clientAddressKey, rateLimitPermits, recordAttempt, usernameKey } from "@/lib/ratelimit";
-import { PASSWORD_MAX_LENGTH, passwordProblem, rateLimitMessage } from "@/lib/security";
+import { PASSWORD_MAX_LENGTH, addressLimit, passwordProblem, rateLimitMessage } from "@/lib/security";
 
 export type AuthState = { error?: string };
 
@@ -29,7 +29,7 @@ export async function join(_prev: AuthState, formData: FormData): Promise<AuthSt
   // Each join creates an account, so the address is throttled before anything
   // else is looked at.
   const addressKey = await clientAddressKey();
-  const permitted = await rateLimitPermits("join", [{ key: addressKey, limit: RATE_LIMITS.joinPerAddress }]);
+  const permitted = await rateLimitPermits("join", [{ key: addressKey, limit: addressLimit(addressKey, "joinPerAddress") }]);
   if (!permitted.allowed) return { error: rateLimitMessage(permitted.limit) };
 
   const parsed = z
@@ -97,7 +97,7 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
   const addressKey = await clientAddressKey();
   const nameKey = usernameKey(parsed.data.username);
   const permitted = await rateLimitPermits("login", [
-    { key: addressKey, limit: RATE_LIMITS.loginPerAddress },
+    { key: addressKey, limit: addressLimit(addressKey, "loginPerAddress") },
     { key: nameKey, limit: RATE_LIMITS.loginPerUsername },
   ]);
   if (!permitted.allowed) return { error: rateLimitMessage(permitted.limit) };
