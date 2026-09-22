@@ -175,8 +175,10 @@ export function BallotForm({ questionId, options, hasVoted }: { questionId: stri
         </>
       )}
 
-      {message.error && <p className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">{message.error}</p>}
-      {message.ok && <p className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">{message.ok}</p>}
+      {/* Said aloud as well as shown, like every other form's notice: a
+          refusal interrupts, a sealed ballot is announced politely. */}
+      {message.error && <p role="alert" className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">{message.error}</p>}
+      {message.ok && <p role="status" className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">{message.ok}</p>}
 
       {changing && (
         <details className="text-xs text-muted">
