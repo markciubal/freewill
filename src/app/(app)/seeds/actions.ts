@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fail, firstIssue, isObjectId, str } from "@/lib/form";
+import { fail, failIssue, isObjectId, str } from "@/lib/form";
 import { SEED_CATEGORIES, SEED_FORMS, parseSowMonths } from "@/lib/seeds";
 
 const shareSchema = z.object({
@@ -34,7 +34,7 @@ export async function createSeedShare(formData: FormData) {
     daysToMaturity: str(formData, "daysToMaturity"),
     sowMonths: str(formData, "sowMonths"),
   });
-  if (!parsed.success) fail("/seeds", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/seeds", parsed.error);
   const d = parsed.data;
   const share = await db.seedShare.create({
     data: {

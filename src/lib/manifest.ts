@@ -94,6 +94,13 @@ const SOURCES = {
     url: "https://protomaps.com/",
     informs: "A whole region's map in one file that a community can host itself and that the browser draws, so the map works with no internet beyond this server.",
   },
+  wcag: {
+    title: "Web Content Accessibility Guidelines (WCAG) 2.2",
+    author: "W3C",
+    year: 2023,
+    url: "https://www.w3.org/TR/WCAG22/",
+    informs: "The 4.5 to 1 contrast minimum for text, a name and a description for every field, errors identified in words and tied to the field they are about, messages announced without moving the page, and a way past a menu that repeats on every page.",
+  },
 } as const;
 
 const manifest: Manifest = {
@@ -425,6 +432,24 @@ const manifest: Manifest = {
       ],
       verifiedBy: [{ kind: "script", ref: "smoke:glossary", what: "Every term is shown on a page, every link goes to a real page, each explanation reads as a sentence, and every number in them matches the rule it describes." }],
       sources: [],
+    },
+    {
+      key: "accessible",
+      name: "Usable without sight, a mouse or perfect eyes",
+      status: "partial",
+      does: "Every field has a real name, and its hint is read as a description rather than run into the name. After a form, the message is announced to a screen reader and focus goes to the field that needs fixing. A link past the menu is the first thing a keyboard reaches. The built-in colors keep all text at 4.5 to 1 or better against what it sits on, and the theme editor says where your own colors would be hard to read. An empty list shows a few made-up examples, marked as not real, so a first visitor can see what to write.",
+      doesNot: [
+        "Nobody has used it with a screen reader, voice control or a switch. The checks read the code and render the parts; they do not use the app the way a person does.",
+        "The maps are pictures and say nothing to a screen reader. What they show is also on the board, the notices and the shared-things lists.",
+        "Your own theme can still be hard to read. The editor warns but never stops you, because nobody sets another person's look.",
+        "Keeping what you typed when a form comes back with an error is still on the to-do list, and losing it costs most for anyone who types slowly.",
+        "It is in English only.",
+      ],
+      verifiedBy: [
+        { kind: "script", ref: "smoke:a11y", what: "The default colors meet 4.5 to 1 everywhere text sits, hints are linked as descriptions and kept out of labels, every textarea has one, errors are announced and name their field, the skip link comes first, and examples are marked and shown only under an empty list." },
+        { kind: "page", ref: "/theme", what: "Whether your own colors are easy to read, in both schemes, as you change them." },
+      ],
+      sources: [SOURCES.wcag],
     },
     {
       key: "accounts",

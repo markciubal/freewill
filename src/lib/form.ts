@@ -9,9 +9,11 @@ export function str(fd: FormData, key: string): string | undefined {
   return t.length ? t : undefined;
 }
 
-export function fail(path: string, message: string): never {
+// `field` names the form field the message is about, so the page can mark it
+// invalid and move focus to it (ErrorFocus, src/components/error-focus.tsx).
+export function fail(path: string, message: string, field?: string): never {
   const sep = path.includes("?") ? "&" : "?";
-  redirect(`${path}${sep}error=${encodeURIComponent(message)}`);
+  redirect(`${path}${sep}error=${encodeURIComponent(message)}${field ? `&field=${encodeURIComponent(field)}` : ""}`);
 }
 
 export function ok(path: string, message: string): never {
@@ -109,6 +111,19 @@ export function firstIssue(error: { issues: Issue[] }): string {
     default:
       return `${label} is not valid.`;
   }
+}
+
+// A failed validation, sent back with its message and the field it is about.
+// Use this, not fail(path, firstIssue(...)), so the page can take the person
+// to the field (smoke:a11y checks every action does).
+export function failIssue(path: string, error: { issues: Issue[] }): never {
+  fail(path, firstIssue(error), issueField(error));
+}
+
+// The form field the first issue is about, when it names one.
+export function issueField(error: { issues: Issue[] }): string | undefined {
+  const field = error.issues[0]?.path[0];
+  return typeof field === "string" ? field : undefined;
 }
 
 export const isObjectId = (s: string | undefined): s is string => !!s && /^[0-9a-fA-F]{24}$/.test(s);

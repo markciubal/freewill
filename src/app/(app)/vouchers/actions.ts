@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fail, firstIssue, isObjectId, ok, str } from "@/lib/form";
+import { fail, failIssue, isObjectId, ok, str } from "@/lib/form";
 import { appendLog } from "@/lib/hashlog";
 import { getStanding } from "@/lib/standing.all";
 import { commonsPublicKeyHex, decodeNote, newNonce, signVoucherFields, verifyVoucherSig, voucherToken } from "@/lib/voucher";
@@ -27,7 +27,7 @@ export async function issueVoucher(formData: FormData) {
     amount: str(formData, "amount"),
     memo: str(formData, "memo"),
   });
-  if (!parsed.success) fail("/vouchers", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/vouchers", parsed.error);
   const d = parsed.data;
   const amount = d.ledger === "GRACE" ? Math.round(d.amount * 100) : Math.round(d.amount * 60);
   const standing = await getStanding(me.id);

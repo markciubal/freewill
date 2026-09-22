@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Category } from "@prisma/client";
 import { Badge, Card, Empty, Grace, LinkButton, Notice, PageTitle, ScopeToggle, SectionTitle, fmtHours } from "@/components/ui";
+import { Examples } from "@/components/examples";
+import { EXAMPLES } from "@/lib/examples";
 import { requireUser } from "@/lib/auth";
 import { readScope, scopeWhere } from "@/lib/form";
 import { applyNear, fmtDistance } from "@/lib/geo";
@@ -100,7 +102,10 @@ export default async function BoardPage({ searchParams }: { searchParams: Promis
       </div>
 
       {sorted.length === 0 ? (
-        <Empty>Nothing here yet. Post the first need or offer.</Empty>
+        <>
+          <Empty>Nothing here yet. Post the first need or offer.</Empty>
+          <Examples set={EXAMPLES.board} />
+        </>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {sorted.map((l) => (

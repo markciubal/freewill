@@ -5,7 +5,7 @@ import { z } from "zod";
 import { fmtGrace } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fail, firstIssue, ok, str } from "@/lib/form";
+import { fail, failIssue, ok, str } from "@/lib/form";
 import { LedgerError, transfer } from "@/lib/ledger";
 
 const schema = z.object({
@@ -23,7 +23,7 @@ export async function sendTransfer(formData: FormData) {
     amount: str(formData, "amount"),
     memo: str(formData, "memo"),
   });
-  if (!parsed.success) fail("/ledger", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/ledger", parsed.error);
   const d = parsed.data;
   const to = await db.user.findUnique({ where: { username: d.to }, select: { id: true } });
   if (!to) fail("/ledger", `No one here is called @${d.to}.`);

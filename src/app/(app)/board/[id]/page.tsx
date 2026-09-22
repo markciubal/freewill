@@ -86,8 +86,8 @@ export default async function ListingPage({ params, searchParams }: { params: Pr
         <Card>
           <SectionTitle>{l.kind === "NEED" ? "Offer to help with this" : "Ask to take this offer"}</SectionTitle>
           <form action={pledge.bind(null, l.id)} className="space-y-3">
-            <Field label="Add a note (optional)">
-              <Textarea name="message" rows={2} maxLength={500} placeholder="When, how much, any conditions." />
+            <Field label="Add a note (optional)" hint="When you can do it, how much, and anything they should know first.">
+              <Textarea name="message" rows={2} maxLength={500} />
             </Field>
             <SubmitButton pendingText="Pledging...">Pledge</SubmitButton>
           </form>

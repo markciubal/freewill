@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fail, firstIssue, ok, str } from "@/lib/form";
+import { failIssue, ok, str } from "@/lib/form";
 
 const schema = z.object({
   title: z.string().trim().min(3).max(120),
@@ -23,7 +23,7 @@ export async function postBulletin(formData: FormData) {
     everywhere: formData.get("everywhere") === "on",
     expiresInDays: str(formData, "expiresInDays"),
   });
-  if (!parsed.success) fail("/bulletins", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/bulletins", parsed.error);
   const d = parsed.data;
   const expiresAt = d.expiresInDays ? new Date(Date.now() + d.expiresInDays * 86_400_000) : null;
   await db.bulletin.create({ data: { title: d.title, body: d.body, level: d.level, locality: d.everywhere ? null : me.locality, lat: d.everywhere ? null : me.lat, lng: d.everywhere ? null : me.lng, expiresAt, authorId: me.id } });

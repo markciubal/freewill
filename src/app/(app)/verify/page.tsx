@@ -16,7 +16,7 @@ export default function VerifyPage() {
       />
       <Card>
         <form action={action} className="space-y-3">
-          <Field label="Paste an exported ledger bundle (JSON)">
+          <Field label="Paste an exported ledger bundle (JSON)" hint="The whole file from Download signed ledger on the Ledger page, pasted as it is.">
             <Textarea name="bundle" rows={8} required placeholder='{ "version": 1, "checkpoint": { ... }, "entries": [ ... ] }' className="font-mono text-xs" />
           </Field>
           <Button type="submit" disabled={pending}>{pending ? "Checking..." : "Verify"}</Button>

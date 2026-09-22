@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Badge, Card, Empty, Field, Input, Notice, PageTitle, ScopeToggle, SectionTitle, Select, Textarea, fmtDateTime } from "@/components/ui";
+import { Examples } from "@/components/examples";
+import { EXAMPLES } from "@/lib/examples";
 import { readScope } from "@/lib/form";
 import { applyNear, fmtDistance } from "@/lib/geo";
 import { SubmitButton } from "@/components/submit-button";
@@ -38,7 +40,10 @@ export default async function BulletinsPage({ searchParams }: { searchParams: Pr
       <div className="grid gap-8 md:grid-cols-[1fr_340px]">
         <section>
           {sorted.length === 0 ? (
-            <Empty>Nothing posted.</Empty>
+            <>
+              <Empty>Nothing posted.</Empty>
+              <Examples set={EXAMPLES.bulletins} />
+            </>
           ) : (
             <ul className="space-y-2">
               {sorted.map((b) => (
@@ -71,7 +76,7 @@ export default async function BulletinsPage({ searchParams }: { searchParams: Pr
               </Select>
             </Field>
             <Field label="Title"><Input name="title" required minLength={3} maxLength={120} /></Field>
-            <Field label="Details"><Textarea name="body" required minLength={3} maxLength={3000} rows={4} /></Field>
+            <Field label="Details" hint="What is happening, exactly where, and what people should do. Say how you know."><Textarea name="body" required minLength={3} maxLength={3000} rows={4} /></Field>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="everywhere" /> Show everywhere, not just {me.locality}</label>
             <Field label="Expires in (days)" hint="0 or blank: never."><Input name="expiresInDays" type="number" min={0} max={365} defaultValue={7} /></Field>
             <SubmitButton pendingText="Posting...">Post</SubmitButton>

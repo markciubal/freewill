@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { resetTheme, saveTheme } from "@/app/(app)/theme/actions";
 import {
   COLOR_TOKENS,
@@ -17,8 +17,9 @@ import {
   type TokenDef,
 } from "@/lib/theme";
 import { cssToTheme, themeToCss } from "@/lib/theme.css";
+import { MIN_TEXT_CONTRAST, contrastProblems, fmtRatio, parseColor, type ContrastProblem, type RGB } from "@/lib/contrast";
 import { MapView } from "./map-view";
-import { Badge, Button, Card, Field, Grace, Input, SectionTitle } from "./ui";
+import { Badge, Button, Card, Field, Grace, Input, SectionTitle, fmtHours } from "./ui";
 
 // Two views of one theme: controls and CSS. Either edits the other, and both
 // restyle the whole app as you type by writing a <style> after the saved one.
@@ -30,6 +31,26 @@ const MAP_COLOR_TOKENS = COLOR_TOKENS.filter((t) => t.name.startsWith("map-"));
 const MAP_FILTER_TOKEN = TOKENS.find((t) => t.name === "map-filter")!;
 const MAP_GLOW_TOKEN = SHARED_TOKENS.find((t) => t.name === "map-glow")!;
 const PAGE_SHARED_TOKENS = SHARED_TOKENS.filter((t) => t.name !== "map-glow");
+
+const noSubscription = () => () => {};
+
+// Any CSS color, as the browser draws it: paint one pixel and read it back.
+// Hex and rgb() are read directly; hsl, oklch and names go through the canvas.
+function canvasColorResolver(): (value: string) => RGB | null {
+  const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  return (value) => {
+    const direct = parseColor(value);
+    if (direct || !ctx) return direct;
+    const sentinel = "#010203";
+    ctx.fillStyle = sentinel;
+    ctx.fillStyle = value;
+    if (ctx.fillStyle === sentinel) return null; // not a color the browser knows
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+    return a === 255 ? [r, g, b] : null;
+  };
+}
 
 export function ThemeEditor({ initial, mapCenter }: { initial: Theme; mapCenter: { lat: number; lng: number } }) {
   const [theme, setTheme] = useState<Theme>(initial);
@@ -60,6 +81,17 @@ export function ThemeEditor({ initial, mapCenter }: { initial: Theme; mapCenter:
   };
 
   const json = useMemo(() => JSON.stringify(theme), [theme]);
+
+  // Where text would be hard to read, per scheme. Measured in the browser so
+  // every color format counts; the rule itself is src/lib/contrast.ts.
+  // The server has no canvas, so the check waits for the browser.
+  const inBrowser = useSyncExternalStore(noSubscription, () => true, () => false);
+  const hardToRead = useMemo<{ light: ContrastProblem[]; dark: ContrastProblem[] } | null>(() => {
+    if (!inBrowser) return null;
+    const resolve = canvasColorResolver();
+    return { light: contrastProblems(theme.light, resolve), dark: contrastProblems(theme.dark, resolve) };
+  }, [inBrowser, theme]);
+  const problemCount = hardToRead ? hardToRead.light.length + hardToRead.dark.length : 0;
   const isHex = (v: string) => /^#[0-9a-f]{6}$/i.test(v);
 
   // The preview map is rebuilt when a map token changes, a moment after the
@@ -75,12 +107,13 @@ export function ThemeEditor({ initial, mapCenter }: { initial: Theme; mapCenter:
   }, [mapSignature]);
   const activePreset = matchingMapPreset(theme);
 
+  // Two inputs per color, each with its own name: a <label> can only name one.
   const colorRow = (part: "light" | "dark", d: TokenDef) => (
-    <label key={`${part}-${d.name}`} className="flex items-center gap-2 text-sm">
-      <input type="color" value={isHex(theme[part][d.name]) ? theme[part][d.name] : "#888888"} onChange={(e) => update(part, d.name, e.target.value)} className="h-8 w-10 shrink-0 cursor-pointer rounded-md border border-border bg-transparent" title={d.hint} />
-      <span className="w-28 shrink-0">{d.label}</span>
-      <input value={theme[part][d.name]} onChange={(e) => update(part, d.name, e.target.value)} className="w-full rounded-md border border-border bg-background px-2 py-1 font-mono text-xs" />
-    </label>
+    <div key={`${part}-${d.name}`} className="flex items-center gap-2 text-sm">
+      <input type="color" value={isHex(theme[part][d.name]) ? theme[part][d.name] : "#888888"} onChange={(e) => update(part, d.name, e.target.value)} className="h-8 w-10 shrink-0 cursor-pointer rounded-md border border-border bg-transparent" title={d.hint} aria-label={`${d.label}, ${part} scheme: pick a color`} />
+      <label htmlFor={`color-${part}-${d.name}`} className="w-28 shrink-0">{d.label}</label>
+      <input id={`color-${part}-${d.name}`} value={theme[part][d.name]} onChange={(e) => update(part, d.name, e.target.value)} aria-label={`${d.label}, ${part} scheme`} className="w-full rounded-md border border-border bg-background px-2 py-1 font-mono text-xs" />
+    </div>
   );
 
   return (
@@ -108,6 +141,28 @@ export function ThemeEditor({ initial, mapCenter }: { initial: Theme; mapCenter:
           <Card className="space-y-2"><SectionTitle>Light colors</SectionTitle>{PAGE_COLOR_TOKENS.map((d) => colorRow("light", d))}</Card>
           <Card className="space-y-2"><SectionTitle>Dark colors</SectionTitle>{PAGE_COLOR_TOKENS.map((d) => colorRow("dark", d))}</Card>
         </div>
+        <Card className="space-y-2">
+          <SectionTitle>Easy to read?</SectionTitle>
+          <p className="text-sm" aria-live="polite">
+            {!hardToRead
+              ? "Checking your colors."
+              : problemCount === 0
+                ? `Every kind of text is at least ${MIN_TEXT_CONTRAST} to 1 against what it sits on, in both schemes. That is the usual minimum for small text.`
+                : `${problemCount} ${problemCount === 1 ? "place" : "places"} where text would be hard to read. ${MIN_TEXT_CONTRAST} to 1 is the usual minimum for small text.`}
+          </p>
+          {hardToRead && problemCount > 0 && (
+            <ul className="space-y-1 text-sm">
+              {(["light", "dark"] as const).flatMap((scheme) =>
+                hardToRead[scheme].map((p) => (
+                  <li key={`${scheme}-${p.where}`}>
+                    {p.where}, {scheme} scheme: {fmtRatio(p.ratio)}.
+                  </li>
+                )),
+              )}
+            </ul>
+          )}
+          {problemCount > 0 && <p className="text-xs text-muted">Move the text color and the color behind it further apart, lighter against darker. It is your own look, so you can still save it as it is.</p>}
+        </Card>
 
         <Card className="space-y-3">
           <SectionTitle>Map</SectionTitle>
@@ -160,13 +215,13 @@ export function ThemeEditor({ initial, mapCenter }: { initial: Theme; mapCenter:
           <Input placeholder="@neighbor" readOnly />
           <table className="w-full text-sm"><tbody>
             <tr className="border-t border-border"><td className="p-2 text-muted">example</td><td className="p-2">@a-neighbor</td><td className="p-2 text-right font-mono text-accent">+<Grace n={2000} /></td></tr>
-            <tr className="border-t border-border"><td className="p-2 text-muted">example</td><td className="p-2">@another-neighbor</td><td className="p-2 text-right font-mono text-danger">-1h 30m</td></tr>
+            <tr className="border-t border-border"><td className="p-2 text-muted">example</td><td className="p-2">@another-neighbor</td><td className="p-2 text-right font-mono text-danger">{fmtHours(-90)}</td></tr>
           </tbody></table>
         </Card>
         <Card className="space-y-2">
           <SectionTitle>The CSS, live</SectionTitle>
-          <textarea value={css} onChange={(e) => onCss(e.target.value)} spellCheck={false} rows={28} className="w-full rounded-md border border-border bg-background p-3 font-mono text-xs leading-relaxed outline-none focus:border-accent" />
-          <p className="text-xs text-muted">Lines that are not valid colors, fonts, lengths, or filters are ignored; the last good value stays.</p>
+          <textarea value={css} onChange={(e) => onCss(e.target.value)} spellCheck={false} rows={28} aria-label="Your theme as CSS" aria-describedby="theme-css-note" className="w-full rounded-md border border-border bg-background p-3 font-mono text-xs leading-relaxed outline-none focus:border-accent" />
+          <p id="theme-css-note" className="text-xs text-muted">Lines that are not valid colors, fonts, lengths, or filters are ignored; the last good value stays.</p>
           <div className="flex flex-wrap gap-2">
             <form action={saveTheme}><input type="hidden" name="theme" value={json} /><Button type="submit">Save</Button></form>
             <Button type="button" variant="ghost" onClick={() => setTheme(DEFAULT_THEME)}>Defaults (unsaved)</Button>

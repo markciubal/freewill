@@ -65,7 +65,7 @@ export default async function AssembliesPage({ searchParams }: { searchParams: P
           ) : (
             <form action={createProposal} className="space-y-3">
               <Field label="Question"><Input name="title" required minLength={3} maxLength={120} placeholder="Where should the second well go?" /></Field>
-              <Field label="Context"><Textarea name="body" required minLength={10} maxLength={5000} rows={4} /></Field>
+              <Field label="Context" hint="What needs deciding, why now, and what each option would mean."><Textarea name="body" required minLength={10} maxLength={5000} rows={4} /></Field>
               <Field label="Options, one per line" hint="Two to ten."><Textarea name="options" required rows={4} placeholder={"Behind the mill\nNorth field\nDo not dig a second well"} /></Field>
               <Field label="Open for (days)"><Input name="closesInDays" type="number" min={1} max={30} defaultValue={7} /></Field>
               <SubmitButton pendingText="Posting...">Put it to the assembly</SubmitButton>

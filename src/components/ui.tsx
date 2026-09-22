@@ -1,7 +1,8 @@
 import { GraceMark } from "./grace-mark";
 import { InfoDot } from "./info-dot";
 import Link from "next/link";
-import type { ComponentProps, ReactNode } from "react";
+import { Children, cloneElement, isValidElement, useId, type ComponentProps, type ReactNode } from "react";
+import { ErrorFocus } from "./error-focus";
 import type { Term } from "@/lib/glossary";
 
 // `info` puts an (i) beside the title, explaining the word the page is about.
@@ -11,7 +12,7 @@ export function PageTitle({ title, subtitle, action, info }: { title: string; su
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
           {title}
-          {info && <> <InfoDot term={info} className="align-middle" /></>}
+          {info && <> <InfoDot term={info} /></>}
         </h1>
         {subtitle && <p className="mt-1 max-w-2xl text-sm text-muted">{subtitle}</p>}
       </div>
@@ -71,6 +72,14 @@ export function LinkButton({ href, children, variant = "primary", className = ""
 }
 
 export function Field({ label, children, hint, info }: { label: string; children: ReactNode; hint?: string; info?: Term }) {
+  // The hint sits after the label, not inside it: everything inside a <label>
+  // becomes the field's name, so a screen reader would read the whole hint as
+  // the name. Linked with aria-describedby instead, it is read after the name,
+  // as a description. That needs one control to link, which is how every form
+  // here is written (smoke:a11y holds the textareas to it).
+  const hintId = useId();
+  const control = hint ? describedBy(children, hintId) : children;
+  const hintText = hint && <span id={hintId} className="mt-1 block text-xs text-muted">{hint}</span>;
   // An (i) cannot sit inside a <label>: a label hands its clicks and its name
   // to the first control inside it, which would be the (i) instead of the
   // input. So with an (i), the visible name and its (i) sit just above, and
@@ -84,19 +93,31 @@ export function Field({ label, children, hint, info }: { label: string; children
         </div>
         <label className="block">
           <span className="sr-only">{label}</span>
-          {children}
-          {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
+          {control}
         </label>
+        {hintText}
       </div>
     );
   }
   return (
-    <label className="block text-sm">
-      <span className="mb-1 block font-medium">{label}</span>
-      {children}
-      {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
-    </label>
+    <div className="text-sm">
+      <label className="block">
+        <span className="mb-1 block font-medium">{label}</span>
+        {control}
+      </label>
+      {hintText}
+    </div>
   );
+}
+
+// Give the one control inside a Field the id of its hint, keeping any
+// description it already has. Anything other than a single element is left
+// as it is: the hint still shows, just without the link.
+function describedBy(children: ReactNode, id: string): ReactNode {
+  const items = Children.toArray(children);
+  if (items.length !== 1 || !isValidElement<{ "aria-describedby"?: string }>(items[0])) return children;
+  const own = items[0].props["aria-describedby"];
+  return cloneElement(items[0], { "aria-describedby": own ? `${own} ${id}` : id });
 }
 
 const inputCls = "w-full rounded-md border border-border bg-background px-3 py-2 text-sm shadow-inset outline-none transition duration-150 focus:border-accent focus:ring-2 focus:ring-accent/25";
@@ -111,9 +132,22 @@ export function Select(props: ComponentProps<"select">) {
   return <select className={inputCls} {...props} />;
 }
 
-export function Notice({ error, ok }: { error?: string; ok?: string }) {
-  if (error) return <p className="mb-4 rounded-md border border-danger/30 border-l-4 border-l-danger bg-danger/10 px-3 py-2 text-sm text-danger shadow-card">{error}</p>;
-  if (ok) return <p className="mb-4 rounded-md border border-accent/30 border-l-4 border-l-accent bg-accent/10 px-3 py-2 text-sm text-accent shadow-card">{ok}</p>;
+const NOTICE_ID = "form-notice";
+
+// What happened after a form, said aloud as well as shown: an error is an
+// alert, and focus goes to the field it is about (or to the message itself);
+// good news is a polite status that does not interrupt. `field` is for forms
+// whose state comes back from useActionState rather than in the address.
+export function Notice({ error, ok, field }: { error?: string; ok?: string; field?: string }) {
+  if (error) {
+    return (
+      <p id={NOTICE_ID} role="alert" tabIndex={-1} className="mb-4 rounded-md border border-danger/30 border-l-4 border-l-danger bg-danger/10 px-3 py-2 text-sm text-danger shadow-card outline-none focus-visible:ring-2 focus-visible:ring-danger/40">
+        {error}
+        <ErrorFocus noticeId={NOTICE_ID} message={error} field={field} />
+      </p>
+    );
+  }
+  if (ok) return <p role="status" className="mb-4 rounded-md border border-accent/30 border-l-4 border-l-accent bg-accent/10 px-3 py-2 text-sm text-accent shadow-card">{ok}</p>;
   return null;
 }
 
@@ -131,8 +165,12 @@ export function Stat({ label, value, sub }: { label: ReactNode; value: ReactNode
   );
 }
 
+// A real minus sign, not a hyphen: as wide as a plus, level with the digits,
+// and read aloud as "minus".
+export const MINUS = String.fromCharCode(0x2212);
+
 export function fmtHours(minutes: number) {
-  const sign = minutes < 0 ? "-" : "";
+  const sign = minutes < 0 ? MINUS : "";
   const m = Math.abs(minutes);
   const h = Math.floor(m / 60);
   const r = m % 60;
@@ -149,7 +187,7 @@ export function graceDigits(cents: number) {
 }
 
 export function fmtGrace(cents: number) {
-  return `${cents < 0 ? "-" : ""}${graceDigits(cents)} GRC`;
+  return `${cents < 0 ? MINUS : ""}${graceDigits(cents)} GRC`;
 }
 
 // How a person's name shows: "Display Name : username" when they have set a
@@ -184,9 +222,10 @@ export function ScopeToggle({ scope, base, locality, near = true }: { scope: "lo
 export function Grace({ n, className = "" }: { n: number; className?: string }) {
   // `n` is a cent amount (hundredths of a Grace).
   return (
-    <span className={`inline-flex items-center gap-0.5 whitespace-nowrap tabular-nums ${className}`}>
-      {n < 0 && "-"}
-      <GraceMark />
+    <span className={`whitespace-nowrap tabular-nums ${className}`}>
+      {n < 0 && MINUS}
+      {/* A tenth of an em each side reads like the space in "$20" or "−$20". */}
+      <GraceMark className={n < 0 ? "mx-[0.1em]" : "mr-[0.1em]"} />
       {graceDigits(n)}
     </span>
   );

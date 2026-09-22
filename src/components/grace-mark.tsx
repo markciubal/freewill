@@ -3,7 +3,7 @@ import { useId, type ComponentProps } from "react";
 // The Grace mark: an upright olive sprig, drawn to sit at text height like a
 // currency sign. Filled leaves on a stem; two outlined olives sit over them,
 // with a small gap knocked out of whatever is behind so the rings read as on
-// top on any background. Inherits the text color and size (1em).
+// top on any background. Inherits the text color and size (1em tall).
 //   <GraceMark /> 20        reads "20 Grace"
 
 export const GRACE_PATHS = {
@@ -20,17 +20,24 @@ export const GRACE_PATHS = {
   gap: 1,
 };
 
-export function GraceMark({ size = "1em", title = "Grace", className = "", ...props }: { size?: string | number; title?: string } & Omit<ComponentProps<"svg">, "children">) {
+// The drawing fills x 5.9 to 18.1 and y 1.7 to 22.9 of its 24-unit square,
+// so the box is cropped to x 5 to 19: no empty margin beside the sprig to
+// read as a space before the number. Its middle sits 0.4875 of its height up
+// from its bottom, and it is lifted so that middle meets the middle of the
+// digits beside it (this font's digits are 0.73em tall), at any size.
+const DIGIT_MIDDLE = "0.365em";
+
+export function GraceMark({ size = "1em", title = "Grace", className = "", style, ...props }: { size?: string | number; title?: string } & Omit<ComponentProps<"svg">, "children">) {
   const maskId = `grace-mask-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const { stem, leaves, olives, gap } = GRACE_PATHS;
+  const height = typeof size === "number" ? `${size}px` : size;
   return (
     <svg
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
+      viewBox="5 0 14 24"
       role="img"
       aria-label={title}
-      className={`inline-block align-[-0.15em] ${className}`}
+      style={{ width: `calc(${height} * 14 / 24)`, height, verticalAlign: `calc(${DIGIT_MIDDLE} - ${height} * 0.4875)`, ...style }}
+      className={`inline-block ${className}`}
       fill="none"
       stroke="currentColor"
       strokeWidth={1.8}

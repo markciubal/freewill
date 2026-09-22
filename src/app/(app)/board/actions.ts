@@ -7,7 +7,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { CATEGORIES } from "@/lib/covenant";
 import { db } from "@/lib/db";
-import { fail, firstIssue, isObjectId, str } from "@/lib/form";
+import { fail, failIssue, isObjectId, str } from "@/lib/form";
 import { LedgerError, transfer } from "@/lib/ledger";
 import { canReflect } from "@/lib/pulse";
 
@@ -34,7 +34,7 @@ export async function createListing(formData: FormData) {
     priceGrace: str(formData, "priceGrace"),
     priceHours: str(formData, "priceHours"),
   });
-  if (!parsed.success) fail("/board/new", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/board/new", parsed.error);
   const d = parsed.data;
   const listing = await db.listing.create({
     data: {

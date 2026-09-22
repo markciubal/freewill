@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Badge, Card, Empty, Field, Input, Notice, PageTitle, ScopeToggle, SectionTitle, Select, Textarea } from "@/components/ui";
+import { Examples } from "@/components/examples";
+import { EXAMPLES } from "@/lib/examples";
 import { readScope, scopeWhere } from "@/lib/form";
 import { applyNear, fmtDistance } from "@/lib/geo";
 import { SubmitButton } from "@/components/submit-button";
@@ -29,7 +31,10 @@ export default async function CommonsPage({ searchParams }: { searchParams: Prom
       <div className="grid gap-8 md:grid-cols-[1fr_320px]">
         <section>
           {commons.length === 0 ? (
-            <Empty>No shared resources yet. Add the first one.</Empty>
+            <>
+              <Empty>No shared resources yet. Add the first one.</Empty>
+              <Examples set={EXAMPLES.commons} />
+            </>
           ) : (
             <ul className="space-y-3">
               {commons.map((c) => (
@@ -71,7 +76,7 @@ export default async function CommonsPage({ searchParams }: { searchParams: Prom
                 {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>)}
               </Select>
             </Field>
-            <Field label="What it is"><Textarea name="description" required rows={3} maxLength={2000} /></Field>
+            <Field label="What it is" hint="What it is, where to find it, and how someone gets to use it."><Textarea name="description" required rows={3} maxLength={2000} /></Field>
             <Field label="Rules (optional)" hint="Agreed with the people who use it. Keep them short."><Textarea name="rules" rows={3} maxLength={2000} /></Field>
             <Field label="Locality"><Input value={me.locality} disabled /></Field>
             <SubmitButton pendingText="Adding...">Add it, with me as steward</SubmitButton>

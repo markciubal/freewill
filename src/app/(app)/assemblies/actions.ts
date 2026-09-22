@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { readRanking } from "@/lib/ballot-seal";
 import { castSealedBallot, changeSealedBallot, type BallotOutcome } from "@/lib/ballots";
 import { db } from "@/lib/db";
-import { fail, firstIssue, isObjectId, str } from "@/lib/form";
+import { fail, failIssue, isObjectId, str } from "@/lib/form";
 import { getStanding } from "@/lib/standing.all";
 
 const proposalSchema = z.object({
@@ -27,7 +27,7 @@ export async function createProposal(formData: FormData) {
     options: Array.from(new Set((str(formData, "options") ?? "").split("\n").map((s) => s.trim()).filter(Boolean))),
     closesInDays: str(formData, "closesInDays") ?? "7",
   });
-  if (!parsed.success) fail("/assemblies", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/assemblies", parsed.error);
   const d = parsed.data;
   const p = await db.proposal.create({
     data: { title: d.title, body: d.body, options: d.options, locality: me.locality, authorId: me.id, closesAt: new Date(Date.now() + d.closesInDays * 86_400_000) },

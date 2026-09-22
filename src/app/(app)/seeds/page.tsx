@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { SeedCategory } from "@prisma/client";
 import { Badge, Card, Empty, Field, Input, Notice, PageTitle, ScopeToggle, SectionTitle, Select, Textarea } from "@/components/ui";
+import { Examples } from "@/components/examples";
+import { EXAMPLES } from "@/lib/examples";
 import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -73,7 +75,10 @@ export default async function SeedsPage({ searchParams }: { searchParams: Promis
           </div>
 
           {shares.length === 0 ? (
-            <Empty>{sowNow ? "Nothing to sow this month here. Widen the area or clear the filter." : "No varieties shared yet. Add the first from your own saved seed."}</Empty>
+            <>
+              <Empty>{sowNow ? "Nothing to sow this month here. Widen the area or clear the filter." : "No varieties shared yet. Add the first from your own saved seed."}</Empty>
+              {!sowNow && <Examples set={EXAMPLES.seeds} />}
+            </>
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2">
               {shares.map((s) => (

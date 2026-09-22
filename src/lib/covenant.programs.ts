@@ -9,7 +9,7 @@ export const PROGRAMS: Program[] = [
     route: "/board",
     summary: "A public board of who needs what and who has what, by category and locality.",
     why: "The first casualty of collapse is coordination; the second is trust. A shared list of needs and offers is the minimum viable society. Everything else builds on it.",
-    features: ["Post a need or an offer", "Pure barter: what would you take in return?", "Optional Grace or Hours ask", "Pledge to meet a need or take an offer", "Survival needs surfaced first", "Match finding: counterpart suggestions and direct two-way trades", "Usual price shown beside every Grace ask, from what neighbors actually paid", "A plain note on survival offers far above the usual; nobody sets prices", "Survival listings start as a gift, care listings in Hours"],
+    features: ["Post a need or an offer", "Pure barter: what would you take in return?", "Optional Grace or Hours ask", "Pledge to meet a need or take an offer", "Survival needs surfaced first", "Match finding: counterpart suggestions and direct two-way trades", "Usual price shown beside every Grace ask, from what neighbors actually paid", "A plain note on survival offers far above the usual; nobody sets prices", "Survival listings start as a gift, care listings in Hours", "Made-up examples, marked as not real, when the board is empty"],
   },
   {
     key: "map",

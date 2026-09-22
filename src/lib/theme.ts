@@ -87,7 +87,7 @@ export const TOKENS: TokenDef[] = [
   { name: "accent", label: "Accent", kind: "color", hint: "Buttons, links, offers, good news.", light: "#3f6b3a", dark: "#7fb377" },
   { name: "accent-foreground", label: "Text on accent", kind: "color", hint: "Text on accent buttons.", light: "#ffffff", dark: "#0f1a0e" },
   { name: "danger", label: "Danger", kind: "color", hint: "Needs, urgent alerts, errors, harm.", light: "#a33a2a", dark: "#e0715f" },
-  { name: "warn", label: "Warning", kind: "color", hint: "Hazards, matched listings, gathering circles.", light: "#b7791f", dark: "#e2b04a" },
+  { name: "warn", label: "Warning", kind: "color", hint: "Hazards, matched listings, gathering circles.", light: "#8f5c10", dark: "#e2b04a" },
 
   // Map colors. On a self-hosted map (docs/maps.md) the map is drawn line by
   // line in these colors; on picture tiles, the filter below approximates them.

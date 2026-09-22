@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fail, firstIssue, isObjectId, str } from "@/lib/form";
+import { fail, failIssue, isObjectId, str } from "@/lib/form";
 import { KEEPERS_PER_CIRCLE, fillKeepers } from "@/lib/keepers";
 import { getStanding } from "@/lib/standing.all";
 
@@ -26,7 +26,7 @@ export async function raiseCircle(formData: FormData) {
     account: str(formData, "account"),
     about: str(formData, "about")?.replace(/^@/, ""),
   });
-  if (!parsed.success) fail("/circles", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/circles", parsed.error);
   const d = parsed.data;
 
   const [standing, openRaised] = await Promise.all([

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createSession, requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { fail, firstIssue, normalizeLocality, ok, str } from "@/lib/form";
+import { fail, failIssue, normalizeLocality, ok, str } from "@/lib/form";
 import { isValidLatLng, roundPin } from "@/lib/geo";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { PASSWORD_MAX_LENGTH, passwordProblem } from "@/lib/security";
@@ -32,7 +32,7 @@ export async function updateProfile(formData: FormData) {
     lat: str(formData, "lat") || undefined,
     lng: str(formData, "lng") || undefined,
   });
-  if (!parsed.success) fail("/profile", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/profile", parsed.error);
   const d = parsed.data;
   if (!isValidLatLng(d)) fail("/profile", "Place your pin on the map.");
   const pin = roundPin(d);
@@ -64,7 +64,7 @@ export async function changePassword(formData: FormData) {
       newPassword: str(formData, "newPassword"),
       confirmPassword: str(formData, "confirmPassword"),
     });
-  if (!parsed.success) fail("/profile", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/profile", parsed.error);
   const { currentPassword, newPassword, confirmPassword } = parsed.data;
   if (newPassword !== confirmPassword) fail("/profile", "The two new passwords do not match.");
   const weakness = passwordProblem(newPassword, me.username);

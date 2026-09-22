@@ -17,7 +17,7 @@ export default function JoinPage() {
       <p className="text-sm text-muted">
         Just a username and a password. Everything else you enter here can be changed later from your profile; the username cannot.
       </p>
-      <Notice error={state.error} />
+      <Notice error={state.error} field={state.field} />
       <Field label="Username" hint="Lowercase letters, numbers, underscores. This is how people will find you.">
         <Input name="username" autoComplete="username" required autoFocus pattern="[a-z0-9_]{3,24}" />
       </Field>

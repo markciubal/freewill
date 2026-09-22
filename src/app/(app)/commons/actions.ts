@@ -21,7 +21,7 @@ import {
 import { NOT_YET_APPLIED, eligibleVoterIds } from "@/lib/commons.data";
 import { CATEGORIES } from "@/lib/covenant";
 import { db } from "@/lib/db";
-import { fail, firstIssue, isObjectId, ok, str } from "@/lib/form";
+import { fail, failIssue, isObjectId, ok, str } from "@/lib/form";
 import { getStanding } from "@/lib/standing.all";
 
 const DAY = 86_400_000;
@@ -41,7 +41,7 @@ export async function createCommons(formData: FormData) {
     category: str(formData, "category"),
     rules: str(formData, "rules"),
   });
-  if (!parsed.success) fail("/commons", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/commons", parsed.error);
   await db.commons.create({ data: { ...parsed.data, stewardId: me.id, locality: me.locality, lat: me.lat, lng: me.lng } });
   revalidatePath("/commons");
   ok("/commons", `${parsed.data.name} added, with you as steward.`);
@@ -73,7 +73,7 @@ export async function recordEntry(commonsId: string, formData: FormData) {
   if (!isObjectId(commonsId)) redirect("/commons");
   const path = `/commons/${commonsId}`;
   const parsed = entrySchema.safeParse({ kind: str(formData, "kind"), quantity: str(formData, "quantity"), note: str(formData, "note") });
-  if (!parsed.success) fail(path, firstIssue(parsed.error));
+  if (!parsed.success) failIssue(path, parsed.error);
   const commons = await db.commons.findUnique({ where: { id: commonsId }, select: { id: true } });
   if (!commons) redirect("/commons");
   await db.commonsEntry.create({ data: { commonsId, userId: me.id, kind: parsed.data.kind, quantity: parsed.data.quantity ?? null, note: parsed.data.note ?? null } });
@@ -89,7 +89,7 @@ export async function addNote(commonsId: string, aboutEntryId: string, formData:
   if (!isObjectId(commonsId) || !isObjectId(aboutEntryId)) redirect("/commons");
   const path = `/commons/${commonsId}`;
   const note = z.string().trim().min(3, "Say what you saw, in a sentence.").max(300).safeParse(str(formData, "note"));
-  if (!note.success) fail(path, firstIssue(note.error));
+  if (!note.success) failIssue(path, note.error);
 
   const about = await db.commonsEntry.findUnique({ where: { id: aboutEntryId }, select: { commonsId: true, userId: true } });
   if (!about || about.commonsId !== commonsId) fail(path, "That entry is not in this record.");
@@ -174,7 +174,7 @@ export async function proposeRules(commonsId: string, formData: FormData) {
   if (!isObjectId(commonsId)) redirect("/commons");
   const path = `/commons/${commonsId}`;
   const rules = z.string().trim().min(3, "Write the rules you are proposing.").max(2000).safeParse(str(formData, "rules"));
-  if (!rules.success) fail(path, firstIssue(rules.error));
+  if (!rules.success) failIssue(path, rules.error);
   const why = z.string().trim().max(1000).optional().safeParse(str(formData, "why"));
   const { commons, entries, open, isUser } = await loadForQuestion(commonsId, me.id);
   if (!isUser) fail(path, "Only people who use it can propose its rules. Write your use in the record first.");

@@ -22,8 +22,8 @@ export default async function NewListingPage({ searchParams }: { searchParams: P
           <Field label="Title">
             <Input name="title" required minLength={3} maxLength={80} placeholder="Insulin, 2 weeks / Firewood, split / Can fix small engines" />
           </Field>
-          <Field label="Details">
-            <Textarea name="description" required minLength={3} maxLength={2000} placeholder="What exactly, for whom, by when, where to meet." />
+          <Field label="Details" hint="What exactly, how much, for whom, by when, and where to meet.">
+            <Textarea name="description" required minLength={3} maxLength={2000} />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Quantity (optional)">

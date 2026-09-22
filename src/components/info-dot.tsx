@@ -14,9 +14,18 @@ import { GLOSSARY, type Term } from "@/lib/glossary";
 // card and menu so nothing can clip it, while the pop-up stays right after its
 // (i) in the page. That order is what lets Tab go from the (i) into the pop-up
 // and reach "More about ...". It opens below the (i) when there is room and
-// above it when there is not, and never runs off the screen. The dot is drawn
-// at 16px but answers a tap about 28px across, so a thumb can hit it.
+// above it when there is not, and never runs off the screen.
+//
+// The dot is drawn, not typed, so it is crisp at any size. It scales with the
+// words beside it (0.85em, a little taller than their capitals, never under
+// 13px) and sits centered on their capitals wherever it is: in a line of text
+// by the vertical-align below, and in a flex row by items-center, because this
+// font's line box is itself centered on its capitals. Whatever its size, it
+// answers a tap 28px across, so a thumb can hit it.
 
+const DOT = "max(13px, 0.85em)";
+// Half the capital height of the app's font (Geist capitals are 0.71em).
+const CAP_MIDDLE = "0.355em";
 const WIDTH = 300;
 const GAP = 6;
 const EDGE = 8;
@@ -163,9 +172,14 @@ export function InfoDot({ term, className = "" }: { term: Term; className?: stri
             show();
           }
         }}
-        className={`relative inline-flex h-4 w-4 shrink-0 select-none items-center justify-center rounded-full border before:absolute before:-inset-1.5 before:content-[''] border-muted/50 align-[0.05em] text-[10px] font-semibold leading-none text-muted outline-none transition hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent ${className}`}
+        style={{ width: DOT, height: DOT, verticalAlign: `calc(${CAP_MIDDLE} - ${DOT} / 2)` }}
+        className={`relative inline-flex shrink-0 select-none rounded-full text-muted outline-none transition before:absolute before:left-1/2 before:top-1/2 before:h-7 before:w-7 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:text-accent focus-visible:text-accent focus-visible:ring-2 focus-visible:ring-accent/40 ${className}`}
       >
-        i
+        <svg viewBox="0 0 16 16" aria-hidden="true" className="block h-full w-full" fill="currentColor">
+          <circle cx="8" cy="8" r="7.25" fill="none" stroke="currentColor" strokeOpacity="0.65" strokeWidth="1.4" />
+          <circle cx="8" cy="4.6" r="1.2" />
+          <rect x="7.1" y="6.7" width="1.8" height="5.3" rx="0.9" />
+        </svg>
       </button>
       {/* Only elements allowed inside a sentence (spans, a button, a link),
           because an (i) often sits inside a paragraph or a heading, where a
@@ -197,7 +211,8 @@ export function InfoDot({ term, className = "" }: { term: Term; className?: stri
           }}
           className="mt-2 rounded text-xs font-medium text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-accent/40"
         >
-          {expanded ? "Less ⌃" : `More about ${entry.label.toLowerCase()} ›`}
+          {/* The arrow is decoration; aria-expanded already says open or shut. */}
+          {expanded ? "Less" : <>More about {entry.label.toLowerCase()} <span aria-hidden="true">›</span></>}
         </button>
         <span id={`${popId}-more`} hidden={!expanded} className="mt-1 block border-t border-border pt-2 text-xs leading-relaxed text-muted">
           {entry.more}
@@ -205,7 +220,7 @@ export function InfoDot({ term, className = "" }: { term: Term; className?: stri
             <>
               {" "}
               <Link href={seeHere.href} onClick={hardClose} className="mt-2 block font-medium text-accent hover:underline">
-                See {seeHere.label} ›
+                See {seeHere.label} <span aria-hidden="true">›</span>
               </Link>
             </>
           )}

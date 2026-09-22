@@ -95,7 +95,15 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
               return (
                 <li key={v.id}>
                   <Link href={`/people/${v.from.username}`} className="font-medium hover:underline">@{v.from.username}</Link>
-                  {signed && <span title="Signed with their identity key" className="ml-1 text-accent">✓</span>}
+                  {signed && (
+                    <>
+                      {" "}
+                      <span title="Signed with their identity key" className="text-accent">
+                        <span aria-hidden="true">✓</span>
+                        <span className="sr-only">signed</span>
+                      </span>
+                    </>
+                  )}
                   {v.note && <span className="text-muted">: {v.note}</span>}
                 </li>
               );

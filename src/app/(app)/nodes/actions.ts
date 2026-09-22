@@ -6,7 +6,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { addressProblem, fetchFromPeer, isNodeKey, nodePublicKey, normalizePeerUrl, readCapped, sendToPeer } from "@/lib/federation";
-import { fail, firstIssue, isObjectId, ok, str } from "@/lib/form";
+import { fail, failIssue, isObjectId, ok, str } from "@/lib/form";
 import { keyFingerprint } from "@/lib/keys";
 import { getStanding } from "@/lib/standing.all";
 
@@ -39,11 +39,11 @@ async function keyAtAddress(url: string): Promise<string | null> {
 async function checkedAddress(raw: string | undefined, key: string, back: string): Promise<{ url: string | null; note: string }> {
   if (!raw) return { url: null, note: "" };
   const problem = await addressProblem(raw);
-  if (problem) fail(back, problem);
+  if (problem) fail(back, problem, "url");
   const url = normalizePeerUrl(raw);
   const answered = await keyAtAddress(url);
   if (answered && answered !== key) {
-    fail(back, `The node at that address has a different key (${keyFingerprint(answered)}). Check the key and the address with someone who lives there.`);
+    fail(back, `The node at that address has a different key (${keyFingerprint(answered)}). Check the key and the address with someone who lives there.`, "url");
   }
   return { url, note: answered ? " Its address answered with the same key." : " Its address could not be reached to check the key, so check it again when it is up." };
 }
@@ -55,9 +55,9 @@ export async function addPeer(formData: FormData) {
   const standing = await getStanding(me.id);
   if (!standing.verified) fail("/nodes", "Only verified members can add another node, as only they can vouch.");
   const parsed = peerSchema.safeParse({ name: str(formData, "name"), publicKey: str(formData, "publicKey"), url: str(formData, "url") });
-  if (!parsed.success) fail("/nodes", firstIssue(parsed.error));
+  if (!parsed.success) failIssue("/nodes", parsed.error);
   const d = parsed.data;
-  if (d.publicKey === nodePublicKey()) fail("/nodes", "That is this node's own key.");
+  if (d.publicKey === nodePublicKey()) fail("/nodes", "That is this node's own key.", "publicKey");
   const existing = await db.peer.findUnique({ where: { publicKey: d.publicKey }, select: { name: true } });
   if (existing) fail("/nodes", `Members here already added that node, as ${existing.name}. Trust it from its page.`);
   const { url, note } = await checkedAddress(d.url, d.publicKey, "/nodes");

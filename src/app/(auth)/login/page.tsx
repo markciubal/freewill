@@ -10,7 +10,7 @@ export default function LoginPage() {
   return (
     <form action={action} className="space-y-4">
       <h1 className="text-xl font-semibold">Log in</h1>
-      <Notice error={state.error} />
+      <Notice error={state.error} field={state.field} />
       <Field label="Username">
         <Input name="username" autoComplete="username" required autoFocus />
       </Field>

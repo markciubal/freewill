@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card, Empty, Field, Grace, Input, Notice, PageTitle, SectionTitle, Select, Stat, fmtDate, fmtDateTime, fmtHours } from "@/components/ui";
+import { Card, Empty, Field, Grace, Input, Notice, PageTitle, SectionTitle, Select, Stat, fmtDate, fmtDateTime, fmtHours, MINUS } from "@/components/ui";
 import { GraceMark } from "@/components/grace-mark";
 import { SubmitButton } from "@/components/submit-button";
 import { requireUser } from "@/lib/auth";
@@ -68,7 +68,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><Stat label={<>Grace <InfoDot term="grace" /></>} value={<Grace n={me.graceBalance} />} sub={<>limit <Grace n={-standing.graceLimit} /></>} /></Card>
-        <Card><Stat label={<>Hours <InfoDot term="hours" /></>} value={fmtHours(me.hoursBalance)} sub={`limit -${fmtHours(standing.hoursLimit)}`} /></Card>
+        <Card><Stat label={<>Hours <InfoDot term="hours" /></>} value={fmtHours(me.hoursBalance)} sub={`limit ${fmtHours(-standing.hoursLimit)}`} /></Card>
         <Card><Stat label={<>Standing <InfoDot term="standing" /></>} value={TIER_LABEL[standing.tier]} sub={standing.verified ? `${standing.score} pts, verified` : `not verified: ${standing.requiredVouches} vouches needed`} /></Card>
       </div>
 
@@ -182,7 +182,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
                     <td className="p-3 text-muted">{fmtDateTime(r.at)}</td>
                     <td className="p-3">{r.with ? <Link href={`/people/${r.with}`} className="hover:underline">@{r.with}</Link> : <span className="text-muted">everyone</span>}</td>
                     <td className="p-3 text-muted">{r.memo}</td>
-                    <td className={`p-3 text-right tabular-nums ${r.amount < 0 ? "text-danger" : "text-accent"}`}>{r.amount < 0 ? "-" : "+"}{r.ledger === "GRACE" ? <Grace n={Math.abs(r.amount)} /> : fmtHours(Math.abs(r.amount))}</td>
+                    <td className={`p-3 text-right tabular-nums ${r.amount < 0 ? "text-danger" : "text-accent"}`}>{r.amount < 0 ? MINUS : "+"}{r.ledger === "GRACE" ? <Grace n={Math.abs(r.amount)} /> : fmtHours(Math.abs(r.amount))}</td>
                   </tr>
                 ))}
               </tbody>

@@ -39,7 +39,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <Field label="Skills" hint="Separate them with commas: first aid, welding, water purification, midwifery, ham radio, carpentry.">
             <Textarea name="skills" rows={3} maxLength={500} defaultValue={me.skills.join(", ")} />
           </Field>
-          <Field label="About you"><Textarea name="bio" maxLength={1000} defaultValue={me.bio ?? ""} /></Field>
+          <Field label="About you" hint="Optional. A line or two your neighbors will see. Leave out anything you would not want everyone here to know."><Textarea name="bio" maxLength={1000} defaultValue={me.bio ?? ""} /></Field>
           <SubmitButton pendingText="Saving...">Save</SubmitButton>
         </form>
       </Card>
