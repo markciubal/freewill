@@ -95,6 +95,7 @@ const said: [Term, string, string][] = [
   ["demurrage", "the demurrage rate and how often it runs", `Every ${DEMURRAGE_INTERVAL_DAYS} days, ${Math.round(DEMURRAGE_RATE_MONTHLY * 100)}% of each positive Grace balance`],
   ["accusation-credit", "the dispute allowance", `You start with ${circles.base} open disputes at a time, plus one for every ${circles.pointsPerExtra} points of standing`],
   ["verified", "how many vouches verification needs", `divided by ${spelled(requiredVouches.divisor)}, at least ${requiredVouches.atLeast} and never more than ${requiredVouches.atMost}`],
+  ["node", "how much trust takes in another node", `divided by ${spelled(requiredVouches.divisor)}, at least ${requiredVouches.atLeast} and never more than ${requiredVouches.atMost}`],
   ["mediator", "the size of the mediator pool", `about ${spelled(keeperPoolSize(100))} per hundred residents`],
   ["dispute", "the number of mediators on a dispute", `${capitalized(spelled(KEEPERS_PER_CIRCLE))} mediators`],
   ["commons", "how long before a quiet steward can be replaced", `${spelled(STEWARD_SILENT_DAYS)} days`],

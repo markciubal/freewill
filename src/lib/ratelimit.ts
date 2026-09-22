@@ -8,7 +8,7 @@ import { ONION_ADDRESS_KEY, RATE_LIMITS, rateLimitAllows, type RateLimit } from 
 // serverless host every request may land on a fresh process. The rows are
 // small, short-lived, and never part of the ledger.
 
-type AttemptKind = "login" | "join";
+type AttemptKind = "login" | "join" | "ingest";
 
 // The address the request came from, as the platform reports it. Behind a
 // proxy or a serverless host the real address is the first entry of

@@ -30,6 +30,7 @@
     "smoke:jubilee": "tsx --env-file=.env scripts/jubilee-check.ts",
     "smoke:cash": "tsx --env-file=.env scripts/cash-check.ts",
     "smoke:checkpoint": "tsx --env-file=.env scripts/checkpoint-check.ts",
+    "smoke:federation": "tsx --env-file=.env scripts/federation-check.ts",
     "migrate:grace-cents": "tsx --env-file=.env scripts/migrate-grace-cents.ts",
     "smoke:locality": "tsx --env-file=.env scripts/locality-check.ts",
     "smoke:keys": "tsx --env-file=.env scripts/keys-check.ts",

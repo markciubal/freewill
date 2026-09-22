@@ -162,6 +162,7 @@ const manifest: Manifest = {
       enforcedBy: [
         { kind: "script", ref: "smoke:keys", what: "A trust bundle of public keys and signed vouches verifies with no server, and a forged vouch inside it is caught." },
         { kind: "script", ref: "smoke:checkpoint", what: "An exported ledger bundle re-derives and verifies with no database." },
+        { kind: "script", ref: "smoke:federation", what: "Another node checks this node's bundle with nothing but its key, and holds it to the ledger history it saw before." },
       ],
     },
     {
@@ -458,15 +459,26 @@ const manifest: Manifest = {
     },
     {
       key: "federation",
-      name: "Many nodes instead of one server",
-      status: "planned",
-      does: "A community runs its own copy and exchanges signed bundles with others, so trust and information cross between communities while each keeps its own ledger. The merge rules are written down; the code is not built.",
+      name: "Other nodes you choose to trust",
+      status: "partial",
+      route: "/nodes",
+      does: "A community runs its own copy, and copies trust each other the way you would trust a bank you had checked. A node is known by its key, which also signs its ledger. Once enough verified members here trust a node (the square-root rule used for vouches), this node takes in its signed bundle, fetched, sent, or carried as a file, and shows its needs, offers, notices, shared things and seeds under its name. Each bundle carries its ledger history as hashes; a later one must carry the history an earlier one did, and a changed history is shown. Nothing of ours goes to a node members here do not trust.",
       doesNot: [
-        "It does not exist yet. Today this is one server, and if it goes, the communities on it keep only what they exported.",
-        "Even when built, Grace will not cross localities as a currency. What federates is trust and information.",
+        "Grace and Hours do not cross between nodes. A price on another node's listing is in that node's own Grace. Transfers signed by the people on both sides, which would let members trade across nodes, are not built.",
+        "Trusting a node means believing what it signs. The signature proves a bundle came from the key members here checked and that its ledger history was not quietly rewritten between bundles. It cannot prove that the people it lists are real or that its records are honest: whoever runs that node can write anything and sign it.",
+        "Checking the key is left to the members who trust it. If people are given a false key and enough of them trust it without checking, this node will take in whatever that key signs.",
+        "Whether a node's books balance is its own word. Another node cannot check its balances from outside.",
+        "Nothing syncs on a schedule. A bundle moves when a member presses fetch or send, or brings a file. There is no sync over a local network or radio.",
+        "A bundle sent or carried by hand holds the whole ledger history as hashes, so a node past about a hundred thousand ledger entries cannot send one that way. A fetch carries only what is new.",
+        "Pins on published records are rounded to about a kilometer before they leave, but whoever runs a trusted node sees everything this node's members published, who wrote it, and the signed vouches for those people.",
+        "It protects the fetch against private network addresses by the address and by what it resolves to, but it does not pin the resolved address, so a name that changes what it points to between the check and the fetch can slip past.",
       ],
-      verifiedBy: [{ kind: "file", ref: "BUILD_PROMPT.md", what: "Phase D3: the per-record merge rules and what would count as done." }],
-      sources: [SOURCES.dispossessed],
+      verifiedBy: [
+        { kind: "script", ref: "smoke:federation", what: "A signed bundle is taken in once enough verified members trust its node; an edited, forged, future-dated or untrusted bundle is refused with its reason; a rewritten ledger history is caught; the same bundle twice changes nothing; no balance, password or exact pin leaves the node." },
+        { kind: "page", ref: "/nodes", what: "This node's key, every node members here have added, who trusts each one, and every bundle taken in or refused." },
+        { kind: "file", ref: "docs/federation.md", what: "The API, the bundle format, and exactly what is signed, for anyone building a node that talks to this one." },
+      ],
+      sources: [SOURCES.dispossessed, SOURCES.noble],
     },
   ],
 
@@ -584,7 +596,7 @@ const manifest: Manifest = {
         "Because every balance nets to zero, dissolving the commons costs nobody anything: debts are forgiven, credits release claims that were only ever promises, and everyone returns to zero together. There is no treasury to take. What is lost is the coordination and the record, which is why the ledger can be exported with a signature and verified anywhere, and why the web of trust can be exported as a bundle another community can check without trusting this server.",
       limits: [
         "Exports have to be made before the loss. Nothing is automatically backed up to you.",
-        "Federation, where communities run their own nodes and exchange signed bundles, is designed but not built. Today this is one server.",
+        "Another node that trusts this one holds a copy of what this one published and the fingerprint of its ledger history, not the ledger itself. Who owes whom lives only here, so a copy to rebuild from has to be exported before the loss.",
       ],
       liveState: ["booksBalance", "ledgerEntries"],
       seeAlso: [

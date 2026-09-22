@@ -145,6 +145,12 @@ export const GLOSSARY = {
     more: "The key has two halves. The private half never leaves your browser; the public half is stored on your account. A vouch signed with it can be checked by anyone, even on another community's server, without trusting this one. Back up the private half: if you lose it, your account keeps working, but you need the backup or a new key to sign again. It is optional.",
     see: { href: "/keys", label: "your identity key" },
   },
+  node: {
+    label: "Node",
+    short: "Another community's own copy of this app. Once enough verified members here trust one, what it publishes shows here, marked with its name.",
+    more: "A node is known by its key, the same key that signs its ledger, so check the whole key with someone who lives there, by voice or on paper, before you trust it. A node is taken in once enough verified members trust it: the square root of the number of verified members here, divided by three, at least 1 and never more than 7, the same rule as vouches. Until then nothing it sends is kept and nothing of ours goes to it. Its needs, offers, notices, shared things and seeds are shown as it sent them. Its Grace is its own and does not move here, and no one's balance, trades or exact pin leaves a node.",
+    see: { href: "/nodes", label: "other nodes" },
+  },
   "usual-price": {
     label: "Usual price",
     short: "What this kind of thing has recently sold for near you. Nobody sets it; it is the middle of what neighbors actually paid.",

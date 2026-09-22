@@ -50,6 +50,9 @@ export const RATE_LIMITS = {
   loginPerAddress: { max: 20, windowMinutes: 15 },
   loginPerUsername: { max: 8, windowMinutes: 15 },
   joinPerAddress: { max: 5, windowMinutes: 60 },
+  // Bundles pushed to /api/federation/ingest, accepted or not. Each one is
+  // parsed and checked, so a stranger may not make the server do it endlessly.
+  ingestPerAddress: { max: 30, windowMinutes: 15 },
 } as const;
 
 export type RateLimit = { max: number; windowMinutes: number };

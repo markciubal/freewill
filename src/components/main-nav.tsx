@@ -32,6 +32,7 @@ const GROUPS: Group[] = [
       { href: "/people", label: "People", hint: "Directory & vouching" },
       { href: "/circles", label: "Disputes", hint: "Repair harm together" },
       { href: "/assemblies", label: "Assemblies", hint: "Ranked-choice decisions" },
+      { href: "/nodes", label: "Other nodes", hint: "Communities you trust" },
     ],
   },
   {

@@ -71,6 +71,9 @@ model User {
   adjustments      LedgerAdjustment[]
   proposals        Proposal[]
   voterRolls       VoterRoll[]
+  peersAdded       Peer[]
+  peerTrust        PeerTrust[]
+  peerIngests      PeerIngest[]
 }
 
 // A failed login or a join attempt, kept briefly so the same address or the
@@ -78,7 +81,7 @@ model User {
 // after a day. `key` is "ip:<address>" or "user:<username>".
 model AuthAttempt {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  kind      String // "login" | "join"
+  kind      String // "login" | "join" | "ingest"
   key       String
   createdAt DateTime @default(now())
 
@@ -610,4 +613,129 @@ model Migration {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String   @unique
   appliedAt DateTime @default(now())
+}
+
+// --- Other nodes (federation) -----------------------------------------------
+
+// Another community's own copy of Freewill, known by its node key: the key
+// that signs its ledger checkpoints and its bundles. Members here name it in
+// their own words; there is no global registry of names. Nothing is taken in
+// from it until enough verified members here have trusted it (PeerTrust),
+// counted by the same rule as vouches. Peers are never deleted: a peer nobody
+// trusts any more simply stops counting.
+model Peer {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  name             String // what members here call it
+  publicKey        String    @unique // its node key (Ed25519, hex), pinned when added
+  url              String? // where its bundle is fetched from; none for a node met only by file
+  addedById        String    @db.ObjectId
+  createdAt        DateTime  @default(now())
+  // The last bundle taken in: its signed time, when it arrived, and the root of
+  // the ledger history it carried. A later bundle must carry the same history
+  // and more; if it does not, historyChangedAt records when that was seen.
+  lastBundleAt     DateTime?
+  lastIngestAt     DateTime?
+  checkpointRoot   String?
+  checkpointCount  Int?
+  checkpointAt     DateTime?
+  historyChangedAt DateTime?
+  // Their books as they reported them (aggregates only), for a person to read.
+  books            Json?
+
+  addedBy User         @relation(fields: [addedById], references: [id])
+  trust   PeerTrust[]
+  members PeerMember[]
+  records PeerRecord[]
+  ingests PeerIngest[]
+}
+
+// One member's trust in another node: "I have checked this node's key with
+// someone there, and I am willing to see what it publishes here." Public, like
+// a vouch, and withdrawn the same way.
+model PeerTrust {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  peerId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  peer Peer @relation(fields: [peerId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([peerId, userId])
+  @@index([userId])
+}
+
+// A member of another node who wrote something that travelled, or who holds a
+// key. Username, locality and public key only, as that node sent them.
+// signedVouches counts vouches for them whose signatures checked out here.
+model PeerMember {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  peerId        String    @db.ObjectId
+  remoteId      String
+  username      String
+  locality      String
+  publicKey     String?
+  signedVouches Int       @default(0)
+  seenAt        DateTime  @default(now())
+  goneAt        DateTime? // no longer in that node's latest bundle
+
+  peer Peer @relation(fields: [peerId], references: [id])
+
+  @@unique([peerId, remoteId])
+}
+
+enum PeerRecordKind {
+  LISTING
+  BULLETIN
+  COMMONS
+  SEED
+}
+
+// A copy of something another node published: a need or offer, a notice, a
+// shared thing, a seed. Read-only here and always shown with that node's name.
+// `data` is the record exactly as validated on the way in (federation.shared.ts);
+// `digest` detects a change. A record that drops out of a later bundle is
+// marked gone rather than deleted, so the page can say it was withdrawn.
+model PeerRecord {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  peerId         String         @db.ObjectId
+  kind           PeerRecordKind
+  remoteId       String
+  authorRemoteId String
+  category       String?
+  locality       String?
+  lat            Float? // rounded to about a kilometer before it left that node
+  lng            Float?
+  data           Json
+  digest         String
+  firstSeenAt    DateTime       @default(now())
+  changedAt      DateTime       @default(now())
+  goneAt         DateTime?
+
+  peer Peer @relation(fields: [peerId], references: [id])
+
+  @@unique([peerId, kind, remoteId])
+  @@index([kind, peerId])
+}
+
+// Every bundle a trusted node sent, and what happened to it: taken in, already
+// had it, or refused with the reason. Append-only. Bundles signed by a key no
+// member here has added are refused without a row, so strangers cannot fill it.
+model PeerIngest {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  peerId     String    @db.ObjectId
+  via        String // "push" | "pull" | "file"
+  byId       String?   @db.ObjectId // the member who fetched it or brought the file
+  bundleAt   DateTime?
+  outcome    String // "accepted" | "stale" | "refused"
+  note       String // plain words
+  counts     Json?
+  root       String?
+  entries    Int?
+  receivedAt DateTime  @default(now())
+
+  peer Peer  @relation(fields: [peerId], references: [id])
+  by   User? @relation(fields: [byId], references: [id])
+
+  @@index([peerId, receivedAt])
 }
